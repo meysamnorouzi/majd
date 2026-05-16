@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+:root {
+  --navy-950: #071428;
+  --navy-900: #0c1f3d;
+  --navy-800: #132d52;
+  --navy-700: #1a3d6b;
+  --gold-400: #d4af37;
+  --gold-500: #c9a227;
+  --gold-600: #a8861f;
+  --cream: #f8f6f1;
+  --cream-dark: #ebe6dc;
+  --foreground: #0f172a;
+  --muted: #64748b;
+}
+
+@theme inline {
+  --color-navy-950: var(--navy-950);
+  --color-navy-900: var(--navy-900);
+  --color-navy-800: var(--navy-800);
+  --color-navy-700: var(--navy-700);
+  --color-gold-400: var(--gold-400);
+  --color-gold-500: var(--gold-500);
+  --color-gold-600: var(--gold-600);
+  --color-cream: var(--cream);
+  --color-cream-dark: var(--cream-dark);
+  --font-sans: var(--font-vazirmatn);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--cream);
+  color: var(--foreground);
+  font-family: var(--font-vazirmatn), system-ui, sans-serif;
+}
+
+.prose-wp h2,
+.prose-wp h3 {
+  color: var(--navy-900);
+  font-weight: 700;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose-wp p {
+  line-height: 1.9;
+  margin-bottom: 1em;
+  color: #334155;
+}
+
+.prose-wp a {
+  color: var(--gold-600);
+  text-decoration: underline;
+}
+
+.gold-gradient {
+  background: linear-gradient(135deg, var(--gold-400) 0%, var(--gold-600) 100%);
+}
+
+.hero-pattern {
+  background-image:
+    linear-gradient(
+      135deg,
+      rgba(7, 20, 40, 0.92) 0%,
+      rgba(12, 31, 61, 0.88) 50%,
+      rgba(19, 45, 82, 0.85) 100%
+    ),
+    url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1920&q=80");
+  background-size: cover;
+  background-position: center;
+}
+
+.card-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-shine::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--gold-400), var(--gold-600));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card-shine:hover::before {
+  opacity: 1;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s ease-out forwards;
+}
