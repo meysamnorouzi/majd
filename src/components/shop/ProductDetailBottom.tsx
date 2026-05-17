@@ -42,7 +42,7 @@ function HighlightsBento({
   highlights: ProductDetailMeta["highlights"];
 }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid gap-4 sm:grid-cols-2 sm:grid-rows-2">
       {highlights.map((item, i) => (
         <div
           key={item.title}
@@ -81,7 +81,13 @@ function SpecsTable({ specs }: { specs: ProductDetailMeta["specs"] }) {
   );
 }
 
-function PurchaseSteps({ steps }: { steps: ProductDetailMeta["steps"] }) {
+function PurchaseSteps({
+  steps,
+  onDark = false,
+}: {
+  steps: ProductDetailMeta["steps"];
+  onDark?: boolean;
+}) {
   return (
     <ol className="relative space-y-0">
       {steps.map((step, i) => (
@@ -96,8 +102,16 @@ function PurchaseSteps({ steps }: { steps: ProductDetailMeta["steps"] }) {
             {i + 1}
           </span>
           <div className="pt-1">
-            <h3 className="font-bold text-navy-900">{step.title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-slate-600">
+            <h3
+              className={`font-bold ${onDark ? "text-white" : "text-navy-900"}`}
+            >
+              {step.title}
+            </h3>
+            <p
+              className={`mt-2 text-sm leading-relaxed ${
+                onDark ? "text-white/70" : "text-slate-600"
+              }`}
+            >
               {step.description}
             </p>
           </div>
@@ -232,7 +246,7 @@ export function ProductDetailBottom({
                 eyebrow="نحوه دریافت"
                 title="از خرید تا تحویل"
               />
-              <PurchaseSteps steps={meta.steps} />
+              <PurchaseSteps steps={meta.steps} onDark />
               <Link
                 href={wpPurchaseUrl ?? "/cart/"}
                 className="mt-10 inline-flex items-center justify-center rounded-lg gold-gradient px-8 py-4 font-semibold text-navy-950 shadow-lg shadow-gold-500/20 transition hover:opacity-95"
