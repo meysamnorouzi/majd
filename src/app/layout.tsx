@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { Vazirmatn } from "next/font/google";
+import "@fontsource-variable/vazirmatn";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { assets, siteConfig } from "@/data/site";
 import "./globals.css";
-
-const vazirmatn = Vazirmatn({
-  variable: "--font-vazirmatn",
-  subsets: ["arabic"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -36,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl" className={`${vazirmatn.variable} h-full`}>
+    <html lang="fa" dir="rtl" className="h-full">
       <body className="flex min-h-full flex-col antialiased">
         <SiteLayout>{children}</SiteLayout>
       </body>

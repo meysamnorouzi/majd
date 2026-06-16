@@ -12,6 +12,7 @@
   --cream-dark: #ebe6dc;
   --foreground: #0f172a;
   --muted: #64748b;
+  --font-vazirmatn: "Vazirmatn Variable", system-ui, sans-serif;
 }
 
 @theme inline {
@@ -24,7 +25,7 @@
   --color-gold-600: var(--gold-600);
   --color-cream: var(--cream);
   --color-cream-dark: var(--cream-dark);
-  --font-sans: var(--font-vazirmatn);
+  --font-sans: var(--font-vazirmatn), system-ui, sans-serif;
 }
 
 html {
@@ -34,7 +35,7 @@ html {
 body {
   background: var(--cream);
   color: var(--foreground);
-  font-family: var(--font-vazirmatn), system-ui, sans-serif;
+  font-family: var(--font-sans);
 }
 
 .prose-wp h2,
