@@ -172,3 +172,51 @@ export interface CourseFormat {
   accent: "gold" | "blue" | "emerald";
   ctaLabel: string;
 }
+
+export interface CustomerProfile {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+}
+
+export type LicenseStatus = "ready" | "license_pending" | "payment_pending";
+
+export interface OrderLineItem {
+  name: string;
+  product_slug: string;
+  quantity: number;
+  spotplayer_license: string | null;
+  license_status: LicenseStatus;
+}
+
+export interface CustomerOrder {
+  id: number;
+  status: string;
+  date: string;
+  total: string;
+  currency: string;
+  spotplayer_license: string | null;
+  spotplayer_notes: string | null;
+  license_status: LicenseStatus;
+  items: OrderLineItem[];
+}
+
+export interface AuthResponse {
+  token: string;
+  user: CustomerProfile;
+}
+
+export interface PurchasedCourse {
+  orderId: number;
+  orderDate: string;
+  orderStatus: string;
+  licenseStatus: LicenseStatus;
+  spotplayerLicense: string | null;
+  spotplayerNotes: string | null;
+  course: CourseItem | null;
+  format: CourseFormat | null;
+  productSlug: string;
+  productName: string;
+}

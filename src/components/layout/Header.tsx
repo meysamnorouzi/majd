@@ -7,6 +7,36 @@ import { navLinks, siteConfig } from "@/data/site";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
 import { CartLink } from "@/components/cart/CartLink";
+import { useAuth } from "@/components/providers/AuthProvider";
+
+function AccountLink() {
+  const { user, displayName, loading } = useAuth();
+  const pathname = usePathname();
+
+  if (loading) return null;
+
+  const href = user ? "/account/" : "/account/login/";
+  const isActive = pathname.startsWith("/account");
+  const label = user
+    ? displayName.split(" ")[0] || "حساب من"
+    : "حساب کاربری";
+
+  return (
+    <Link
+      href={href}
+      className={`hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:inline-flex ${
+        isActive
+          ? "bg-white/10 text-gold-400"
+          : "text-white/80 hover:bg-white/5 hover:text-white"
+      }`}
+    >
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+      {label}
+    </Link>
+  );
+}
 
 export function Header() {
   const pathname = usePathname();
@@ -39,6 +69,7 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
+          <AccountLink />
           <CartLink />
           <a
             href={`tel:${siteConfig.phonesTel[0]}`}
@@ -86,6 +117,13 @@ export function Header() {
             </Link>
           ))}
           <div className="mt-4 border-t border-white/10 pt-4">
+            <Link
+              href="/account/"
+              onClick={() => setOpen(false)}
+              className="mb-3 block rounded-lg bg-white/10 px-4 py-3 text-center text-sm font-semibold text-gold-400"
+            >
+              حساب کاربری
+            </Link>
             <Link
               href="/cart/"
               onClick={() => setOpen(false)}
