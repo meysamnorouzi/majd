@@ -4,8 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { getStaticLoginCredentials } from "@/lib/auth/static-login";
 import { AccountApiError } from "@/lib/woocommerce/account-client";
 import { Button } from "@/components/ui/Button";
+
+const staticCreds = getStaticLoginCredentials();
 
 export function LoginForm() {
   const { login } = useAuth();
@@ -13,8 +16,8 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/account/";
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(staticCreds?.email ?? "");
+  const [password, setPassword] = useState(staticCreds?.password ?? "");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -93,6 +96,15 @@ export function LoginForm() {
             {submitting ? "در حال ورود..." : "ورود"}
           </Button>
         </form>
+
+        {staticCreds && (
+          <p className="mt-4 rounded-xl bg-slate-50 px-4 py-3 text-center text-xs text-slate-500">
+            ورود آزمایشی:{" "}
+            <span dir="ltr" className="font-mono text-slate-700">
+              {staticCreds.email}
+            </span>
+          </p>
+        )}
 
         <p className="mt-6 text-center text-sm text-slate-500">
           حساب کاربری ندارید؟{" "}

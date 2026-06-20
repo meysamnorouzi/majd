@@ -24,7 +24,7 @@ function AccountLink() {
   return (
     <Link
       href={href}
-      className={`hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:inline-flex ${
+      className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
         isActive
           ? "bg-white/10 text-gold-400"
           : "text-white/80 hover:bg-white/5 hover:text-white"
@@ -49,15 +49,17 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-navy-950/95 backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <Logo size="sm" variant="dark" />
+      <div className="mx-auto flex max-w-[90rem] flex-nowrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="shrink-0">
+          <Logo size="sm" variant="dark" />
+        </div>
 
-        <nav className="hidden items-center gap-1 lg:flex">
+        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 lg:flex xl:gap-1">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              className={`shrink-0 whitespace-nowrap rounded-lg px-2.5 py-2 text-sm font-medium transition-colors xl:px-3 ${
                 isActive(link.href)
                   ? "bg-white/10 text-gold-400"
                   : "text-white/80 hover:bg-white/5 hover:text-white"
@@ -68,22 +70,22 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden shrink-0 items-center gap-2 lg:flex xl:gap-3">
           <AccountLink />
           <CartLink />
           <a
             href={`tel:${siteConfig.phonesTel[0]}`}
-            className="text-sm font-semibold text-gold-400 hover:text-gold-300"
+            className="hidden text-sm font-semibold text-gold-400 hover:text-gold-300 xl:inline"
             dir="ltr"
           >
             {siteConfig.phones[0]}
           </a>
-          <Button href="/contact/" size="sm">
+          <Button href="/contact/" size="sm" className="whitespace-nowrap">
             مشاوره رایگان
           </Button>
         </div>
 
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex shrink-0 items-center gap-2 lg:hidden">
           <CartLink />
           <button
           type="button"

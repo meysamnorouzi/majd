@@ -1,3 +1,10 @@
+import {
+  getStaticOrders,
+  getStaticUser,
+  isStaticAuthToken,
+  matchesStaticLogin,
+  STATIC_AUTH_TOKEN,
+} from "@/lib/auth/static-login";
 import type {
   AuthResponse,
   CustomerOrder,
@@ -71,6 +78,15 @@ export async function login(
   email: string,
   password: string,
 ): Promise<AuthResponse> {
+  if (matchesStaticLogin(email, password)) {
+    const result: AuthResponse = {
+      token: STATIC_AUTH_TOKEN,
+      user: getStaticUser(),
+    };
+    setAuthToken(result.token);
+    return result;
+  }
+
   const result = await accountFetch<AuthResponse>("/wp-json/majd/v1/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
@@ -98,10 +114,12 @@ export async function register(params: {
 }
 
 export async function fetchMe(): Promise<CustomerProfile> {
+  if (isStaticAuthToken(getAuthToken())) return getStaticUser();
   return accountFetch<CustomerProfile>("/wp-json/majd/v1/auth/me", {}, true);
 }
 
 export async function fetchOrders(): Promise<CustomerOrder[]> {
+  if (isStaticAuthToken(getAuthToken())) return getStaticOrders();
   const result = await accountFetch<{ orders: CustomerOrder[] }>(
     "/wp-json/majd/v1/me/orders",
     {},
@@ -111,6 +129,13 @@ export async function fetchOrders(): Promise<CustomerOrder[]> {
 }
 
 export async function fetchOrder(id: number): Promise<CustomerOrder> {
+  if (isStaticAuthToken(getAuthToken())) {
+    const order = getStaticOrders().find((item) => item.id === id);
+    if (!order) {
+      throw new AccountApiError("سفارش یافت نشد.", "not_found", 404);
+    }
+    return order;
+  }
   return accountFetch<CustomerOrder>(`/wp-json/majd/v1/me/orders/${id}`, {}, true);
 }
 
