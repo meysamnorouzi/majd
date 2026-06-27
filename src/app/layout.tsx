@@ -17,11 +17,6 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     images: [{ url: assets.logo, width: 512, height: 512, alt: siteConfig.name }],
   },
-  icons: {
-    icon: [{ url: assets.logo, type: "image/png" }],
-    shortcut: assets.logo,
-    apple: assets.logo,
-  },
 };
 
 export default function RootLayout({
