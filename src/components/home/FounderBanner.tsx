@@ -35,10 +35,10 @@ export function FounderBanner() {
             <div className="mt-8 flex flex-wrap gap-4">
               <Button href="/contact/">رزرو وقت مشاوره</Button>
               <Link
-                href="/team/"
+                href="/team/masoud-jokar-darzi/"
                 className="inline-flex items-center justify-center rounded-lg border-2 border-white/30 px-6 py-3 font-semibold text-white transition hover:bg-white/10"
               >
-                اعضای تیم
+                پروفایل وکیل
               </Link>
             </div>
           </div>

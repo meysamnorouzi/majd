@@ -47,12 +47,17 @@ export interface WpProduct {
 
 export interface TeamMember {
   id: string;
+  slug: string;
   name: string;
   role: string;
   specialty: string;
   bio: string;
+  fullBio: string[];
   image: string;
-  slug?: string;
+  education: string;
+  experienceYears: string;
+  areasOfPractice: string[];
+  achievements: string[];
 }
 
 export interface Service {

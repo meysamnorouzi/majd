@@ -191,3 +191,7 @@ export function getServiceBySlug(slug: string) {
 export function getTeam() {
   return teamMembers;
 }
+
+export function getTeamMemberBySlug(slug: string) {
+  return teamMembers.find((m) => m.slug === slug) ?? null;
+}
