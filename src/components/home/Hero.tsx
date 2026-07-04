@@ -30,7 +30,7 @@ export function Hero() {
               همراه شما از مشاوره تا اجرای حکم.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
-              <Button href="/contact/" size="lg">
+              <Button href="#consultation" size="lg">
                 درخواست مشاوره
               </Button>
               <Button href="/services/" variant="secondary" size="lg">

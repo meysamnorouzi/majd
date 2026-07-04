@@ -70,7 +70,12 @@ export interface Service {
   image?: string;
 }
 
-export type CourseFormatSlug = "hozoori" | "offline-spotplayer" | "online-webinar";
+export type CourseFormatSlug =
+  | "online-webinar"
+  | "online-offline"
+  | "hybrid-full"
+  | "session-hybrid"
+  | "session-inperson";
 
 export interface CourseItem {
   id: string;
@@ -174,7 +179,7 @@ export interface CourseFormat {
   benefits: string[];
   courses: CourseItem[];
   image: string;
-  accent: "gold" | "blue" | "emerald";
+  accent: "gold" | "blue" | "emerald" | "violet" | "amber";
   ctaLabel: string;
 }
 

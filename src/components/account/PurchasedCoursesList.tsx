@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { PurchasedCourse } from "@/types";
+import { hasSpotPlayerLicense } from "@/lib/courses/format-utils";
 import { licenseStatusLabels } from "@/lib/courses/purchased";
 import { formatIcon } from "@/components/courses/FormatIcons";
 
@@ -15,7 +16,7 @@ export function PurchasedCourseCard({ item }: { item: PurchasedCourse }) {
   const title = item.course?.title ?? item.productName;
   const formatSlug = item.format?.slug;
   const Icon = formatSlug ? formatIcon(formatSlug) : null;
-  const isSpotPlayer = formatSlug === "offline-spotplayer";
+  const isSpotPlayer = hasSpotPlayerLicense(formatSlug);
 
   return (
     <div className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
@@ -67,14 +68,12 @@ export function PurchasedCourseCard({ item }: { item: PurchasedCourse }) {
             >
               جزئیات سفارش ←
             </Link>
-            {item.course && item.format && (
-              <Link
-                href={`/courses/${item.format.slug}/${item.course.slug}/`}
-                className="text-xs font-semibold text-slate-500 hover:text-navy-900"
-              >
-                صفحه دوره
-              </Link>
-            )}
+            <Link
+              href={`/courses/view/${item.productSlug}/`}
+              className="text-xs font-semibold text-slate-500 hover:text-navy-900"
+            >
+              صفحه دوره
+            </Link>
           </div>
         </div>
       </div>

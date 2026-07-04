@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
 import { CoursesHero } from "@/components/courses/CoursesHero";
 import { FormatOverviewCards } from "@/components/courses/FormatOverviewCards";
-import { CourseFormatSection } from "@/components/courses/CourseFormatSection";
+import { CoursesCatalog } from "@/components/courses/CoursesCatalog";
 import { EnrollmentSteps } from "@/components/courses/EnrollmentSteps";
 import { CoursesFAQ } from "@/components/courses/CoursesFAQ";
 import { CoursesCTA } from "@/components/courses/CoursesCTA";
-import { courseFormats } from "@/data/courses";
 
 export const metadata: Metadata = {
   title: "دوره‌های آموزشی",
   description:
-    "دوره‌های حقوقی حضوری، آفلاین (اسپات پلیر) و آنلاین (وبینار) — موسسه حقوقی مجد وکیل الرعایا",
+    "دوره‌های حقوقی در پنج قالب — وبینار آنلاین، آنلاین + آفلاین، حضوری + آنلاین + آفلاین، نشست ترکیبی و نشست حضوری — موسسه حقوقی مجد",
 };
 
 export default function CoursesPage() {
@@ -18,13 +17,11 @@ export default function CoursesPage() {
     <>
       <CoursesHero />
       <FormatOverviewCards />
-      {courseFormats.map((format, i) => (
-        <CourseFormatSection
-          key={format.slug}
-          format={format}
-          reversed={i % 2 === 1}
-        />
-      ))}
+      <CoursesCatalog
+        sectionId="courses-catalog"
+        heading="جستجو و فیلتر دوره‌ها"
+        description="تمام دوره‌های موسسه را جستجو کنید یا با فیلتر نوع، سطح و قیمت، دوره مناسب خود را بیابید."
+      />
       <EnrollmentSteps />
       <CoursesFAQ />
       <CoursesCTA />

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { CustomerOrder } from "@/types";
 import { findCourseByProductSlug, orderStatusLabels } from "@/lib/courses/purchased";
+import { hasSpotPlayerLicense } from "@/lib/courses/format-utils";
 import { LicenseCard } from "./LicenseCard";
 import { SpotPlayerGuide } from "./SpotPlayerGuide";
 
@@ -27,9 +28,10 @@ function formatPrice(total: string, currency: string) {
 }
 
 export function OrderDetail({ order }: { order: CustomerOrder }) {
-  const hasSpotPlayer = order.items.some(
-    (item) => findCourseByProductSlug(item.product_slug)?.format.slug === "offline-spotplayer",
-  );
+  const hasSpotPlayer = order.items.some((item) => {
+    const match = findCourseByProductSlug(item.product_slug);
+    return match ? hasSpotPlayerLicense(match.format.slug) : false;
+  });
 
   return (
     <div className="space-y-6">

@@ -7,7 +7,10 @@ import { navLinks, siteConfig } from "@/data/site";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
 import { CartLink } from "@/components/cart/CartLink";
+import { NavCoursesDropdown } from "@/components/layout/NavCoursesDropdown";
 import { useAuth } from "@/components/providers/AuthProvider";
+
+const COURSES_NAV_HREF = "/courses/";
 
 function AccountLink() {
   const { user, displayName, loading } = useAuth();
@@ -44,6 +47,9 @@ export function Header() {
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/" || pathname === "";
+    if (href === COURSES_NAV_HREF) {
+      return pathname === COURSES_NAV_HREF || pathname.startsWith("/courses");
+    }
     return pathname.startsWith(href.replace(/\/$/, ""));
   };
 
@@ -55,19 +61,23 @@ export function Header() {
         </div>
 
         <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 lg:flex xl:gap-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`shrink-0 whitespace-nowrap rounded-lg px-2.5 py-2 text-sm font-medium transition-colors xl:px-3 ${
-                isActive(link.href)
-                  ? "bg-white/10 text-gold-400"
-                  : "text-white/80 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) =>
+            link.href === COURSES_NAV_HREF ? (
+              <NavCoursesDropdown key={link.href} />
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`shrink-0 whitespace-nowrap rounded-lg px-2.5 py-2 text-sm font-medium transition-colors xl:px-3 ${
+                  isActive(link.href)
+                    ? "bg-white/10 text-gold-400"
+                    : "text-white/80 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ),
+          )}
         </nav>
 
         <div className="hidden shrink-0 items-center gap-2 lg:flex xl:gap-3">
@@ -88,36 +98,48 @@ export function Header() {
         <div className="flex shrink-0 items-center gap-2 lg:hidden">
           <CartLink />
           <button
-          type="button"
-          className="rounded-lg p-2 text-white"
-          onClick={() => setOpen(!open)}
-          aria-label="منو"
-        >
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            {open ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
+            type="button"
+            className="rounded-lg p-2 text-white"
+            onClick={() => setOpen(!open)}
+            aria-label="منو"
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {open ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
       </div>
 
       {open && (
         <nav className="border-t border-white/10 bg-navy-900 px-4 py-4 lg:hidden">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setOpen(false)}
-              className={`block rounded-lg px-4 py-3 text-sm font-medium ${
-                isActive(link.href) ? "bg-white/10 text-gold-400" : "text-white/80"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) =>
+            link.href === COURSES_NAV_HREF ? (
+              <div key={link.href} className="mb-2">
+                <p className="px-4 py-2 text-xs font-semibold text-white/50">
+                  دوره‌های آموزشی
+                </p>
+                <NavCoursesDropdown
+                  variant="mobile"
+                  onNavigate={() => setOpen(false)}
+                />
+              </div>
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className={`block rounded-lg px-4 py-3 text-sm font-medium ${
+                  isActive(link.href) ? "bg-white/10 text-gold-400" : "text-white/80"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ),
+          )}
           <div className="mt-4 border-t border-white/10 pt-4">
             <Link
               href="/account/"

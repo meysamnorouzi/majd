@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Majd Account API
- * Description: Customer auth (JWT) and order/license endpoints for headless Next.js frontend.
+ * Description: Customer auth (JWT), orders/licenses, course product meta, and Store API extensions for headless Next.js.
  * Install: copy to wp-content/mu-plugins/wordpress-majd-account-api.php
  * Requires: WooCommerce
  */
@@ -12,13 +12,22 @@ if (!defined('ABSPATH')) {
 
 define('MAJD_LICENSE_META_KEY', '_majd_spotplayer_license');
 define('MAJD_LICENSE_NOTES_META_KEY', '_majd_spotplayer_notes');
+define('MAJD_DURATION_META_KEY', '_majd_duration');
+define('MAJD_LEVEL_META_KEY', '_majd_level');
+define('MAJD_SYLLABUS_META_KEY', '_majd_syllabus');
+define('MAJD_HIGHLIGHTS_META_KEY', '_majd_highlights');
 define('MAJD_JWT_EXPIRY', 7 * DAY_IN_SECONDS);
+define('MAJD_COURSE_CATEGORY_SLUGS', ['online-webinar', 'online-offline', 'hybrid-full', 'session-hybrid', 'session-inperson']);
 
 class Majd_Account_API {
     public static function init() {
         add_action('rest_api_init', [__CLASS__, 'register_routes']);
         add_action('add_meta_boxes', [__CLASS__, 'add_order_meta_box']);
         add_action('woocommerce_process_shop_order_meta', [__CLASS__, 'save_order_meta_box'], 10, 2);
+        add_action('add_meta_boxes', [__CLASS__, 'add_product_meta_box']);
+        add_action('woocommerce_process_product_meta', [__CLASS__, 'save_product_meta_box']);
+        add_action('woocommerce_init', [__CLASS__, 'register_store_api_extensions']);
+        add_filter('woocommerce_get_return_url', [__CLASS__, 'filter_return_url'], 10, 2);
     }
 
     public static function register_routes() {
@@ -51,6 +60,92 @@ class Majd_Account_API {
             'callback' => [__CLASS__, 'get_order'],
             'permission_callback' => '__return_true',
         ]);
+    }
+
+    public static function register_store_api_extensions() {
+        if (!function_exists('woocommerce_store_api_register_endpoint_data')) {
+            return;
+        }
+
+        $endpoint = class_exists(\Automattic\WooCommerce\StoreApi\Schemas\V1\ProductSchema::class)
+            ? \Automattic\WooCommerce\StoreApi\Schemas\V1\ProductSchema::IDENTIFIER
+            : 'product';
+
+        woocommerce_store_api_register_endpoint_data([
+            'endpoint' => $endpoint,
+            'namespace' => 'majd',
+            'schema_callback' => [__CLASS__, 'product_extension_schema'],
+            'data_callback' => [__CLASS__, 'product_extension_data'],
+            'schema_type' => ARRAY_A,
+        ]);
+    }
+
+    public static function product_extension_schema() {
+        return [
+            'duration' => [
+                'description' => 'Course duration',
+                'type' => 'string',
+                'context' => ['view'],
+                'readonly' => true,
+            ],
+            'level' => [
+                'description' => 'Course level',
+                'type' => 'string',
+                'context' => ['view'],
+                'readonly' => true,
+            ],
+            'syllabus' => [
+                'description' => 'Course syllabus items',
+                'type' => 'array',
+                'context' => ['view'],
+                'readonly' => true,
+            ],
+            'highlights' => [
+                'description' => 'Course highlights',
+                'type' => 'array',
+                'context' => ['view'],
+                'readonly' => true,
+            ],
+            'format_slug' => [
+                'description' => 'Course format category slug',
+                'type' => 'string',
+                'context' => ['view'],
+                'readonly' => true,
+            ],
+            'is_course' => [
+                'description' => 'Whether product is a course',
+                'type' => 'boolean',
+                'context' => ['view'],
+                'readonly' => true,
+            ],
+        ];
+    }
+
+    public static function product_extension_data($product) {
+        if (!$product instanceof WC_Product) {
+            return [];
+        }
+
+        return [
+            'duration' => (string) $product->get_meta(MAJD_DURATION_META_KEY, true),
+            'level' => (string) $product->get_meta(MAJD_LEVEL_META_KEY, true),
+            'syllabus' => self::decode_json_list($product->get_meta(MAJD_SYLLABUS_META_KEY, true)),
+            'highlights' => self::decode_json_list($product->get_meta(MAJD_HIGHLIGHTS_META_KEY, true)),
+            'format_slug' => self::get_product_format_slug($product),
+            'is_course' => self::is_course_product($product),
+        ];
+    }
+
+    public static function filter_return_url($return_url, $order) {
+        if (!$order instanceof WC_Order) {
+            return $return_url;
+        }
+
+        $frontend = getenv('MAJD_FRONTEND_ORIGIN') ?: 'https://vakilmajd.com';
+        $frontend = rtrim($frontend, '/');
+        $status = $order->has_status(['processing', 'completed']) ? 'processing' : $order->get_status();
+
+        return $frontend . '/checkout/success/?order_id=' . $order->get_id() . '&status=' . rawurlencode($status);
     }
 
     public static function login(WP_REST_Request $request) {
@@ -121,6 +216,8 @@ class Majd_Account_API {
             update_user_meta($user_id, 'billing_phone', $phone);
         }
 
+        self::attach_guest_orders_to_customer($user_id, $email);
+
         $token = self::create_jwt($user_id);
         $user = get_user_by('id', $user_id);
 
@@ -154,15 +251,8 @@ class Majd_Account_API {
             return $user_id;
         }
 
-        $orders = wc_get_orders([
-            'customer_id' => $user_id,
-            'limit' => 50,
-            'orderby' => 'date',
-            'order' => 'DESC',
-            'status' => ['pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed'],
-        ]);
-
-        $formatted = array_map([__CLASS__, 'format_order'], $orders);
+        $orders = self::get_orders_for_user($user_id);
+        $formatted = array_values(array_filter(array_map([__CLASS__, 'format_order'], $orders)));
 
         return rest_ensure_response(['orders' => $formatted]);
     }
@@ -180,7 +270,7 @@ class Majd_Account_API {
         $order_id = absint($request->get_param('id'));
         $order = wc_get_order($order_id);
 
-        if (!$order || (int) $order->get_customer_id() !== (int) $user_id) {
+        if (!$order || !self::user_owns_order($user_id, $order)) {
             return new WP_Error('not_found', 'سفارش یافت نشد.', ['status' => 404]);
         }
 
@@ -207,6 +297,17 @@ class Majd_Account_API {
                 'high'
             );
         }
+    }
+
+    public static function add_product_meta_box() {
+        add_meta_box(
+            'majd_course_meta',
+            'اطلاعات دوره (موسسه مجد)',
+            [__CLASS__, 'render_product_meta_box'],
+            'product',
+            'normal',
+            'high'
+        );
     }
 
     public static function render_order_meta_box($post_or_order) {
@@ -247,6 +348,39 @@ class Majd_Account_API {
         <?php
     }
 
+    public static function render_product_meta_box($post) {
+        $product = wc_get_product($post->ID);
+        if (!$product) {
+            echo '<p>محصول یافت نشد.</p>';
+            return;
+        }
+
+        $duration = $product->get_meta(MAJD_DURATION_META_KEY, true);
+        $level = $product->get_meta(MAJD_LEVEL_META_KEY, true);
+        $syllabus = $product->get_meta(MAJD_SYLLABUS_META_KEY, true);
+        $highlights = $product->get_meta(MAJD_HIGHLIGHTS_META_KEY, true);
+        wp_nonce_field('majd_save_product_meta', 'majd_product_meta_nonce');
+        ?>
+        <p class="description">برای دوره‌ها، یکی از دسته‌های <code>online-webinar</code>، <code>online-offline</code>، <code>hybrid-full</code>، <code>session-hybrid</code> یا <code>session-inperson</code> را در تب «دسته‌ها» انتخاب کنید.</p>
+        <p>
+            <label for="majd_duration"><strong>مدت دوره</strong></label>
+            <input type="text" id="majd_duration" name="majd_duration" value="<?php echo esc_attr($duration); ?>" class="widefat" placeholder="مثال: ۱۲ جلسه × ۲ ساعت" />
+        </p>
+        <p>
+            <label for="majd_level"><strong>سطح</strong></label>
+            <input type="text" id="majd_level" name="majd_level" value="<?php echo esc_attr($level); ?>" class="widefat" placeholder="مثال: مقدماتی" />
+        </p>
+        <p>
+            <label for="majd_syllabus"><strong>سرفصل‌ها (هر خط یک مورد)</strong></label>
+            <textarea id="majd_syllabus" name="majd_syllabus" class="widefat" rows="6" placeholder="جلسه ۱: ..."><?php echo esc_textarea(self::meta_lines_for_textarea($syllabus)); ?></textarea>
+        </p>
+        <p>
+            <label for="majd_highlights"><strong>نکات برجسته (هر خط یک مورد)</strong></label>
+            <textarea id="majd_highlights" name="majd_highlights" class="widefat" rows="4" placeholder="ویژگی ۱"><?php echo esc_textarea(self::meta_lines_for_textarea($highlights)); ?></textarea>
+        </p>
+        <?php
+    }
+
     public static function save_order_meta_box($order_id, $order = null) {
         if (!isset($_POST['majd_order_meta_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['majd_order_meta_nonce'])), 'majd_save_order_meta')) {
             return;
@@ -272,6 +406,159 @@ class Majd_Account_API {
         }
 
         $order->save();
+    }
+
+    public static function save_product_meta_box($post_id) {
+        if (!isset($_POST['majd_product_meta_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['majd_product_meta_nonce'])), 'majd_save_product_meta')) {
+            return;
+        }
+
+        if (!current_user_can('edit_post', $post_id)) {
+            return;
+        }
+
+        $product = wc_get_product($post_id);
+        if (!$product) {
+            return;
+        }
+
+        if (isset($_POST['majd_duration'])) {
+            $product->update_meta_data(MAJD_DURATION_META_KEY, sanitize_text_field(wp_unslash($_POST['majd_duration'])));
+        }
+
+        if (isset($_POST['majd_level'])) {
+            $product->update_meta_data(MAJD_LEVEL_META_KEY, sanitize_text_field(wp_unslash($_POST['majd_level'])));
+        }
+
+        if (isset($_POST['majd_syllabus'])) {
+            $product->update_meta_data(MAJD_SYLLABUS_META_KEY, self::encode_lines_to_json(wp_unslash($_POST['majd_syllabus'])));
+        }
+
+        if (isset($_POST['majd_highlights'])) {
+            $product->update_meta_data(MAJD_HIGHLIGHTS_META_KEY, self::encode_lines_to_json(wp_unslash($_POST['majd_highlights'])));
+        }
+
+        $product->save();
+    }
+
+    private static function get_orders_for_user($user_id) {
+        $user = get_user_by('id', $user_id);
+        if (!$user) {
+            return [];
+        }
+
+        $by_customer = wc_get_orders([
+            'customer_id' => $user_id,
+            'limit' => 50,
+            'orderby' => 'date',
+            'order' => 'DESC',
+            'status' => self::visible_order_statuses(),
+        ]);
+
+        $by_email = wc_get_orders([
+            'billing_email' => $user->user_email,
+            'limit' => 50,
+            'orderby' => 'date',
+            'order' => 'DESC',
+            'status' => self::visible_order_statuses(),
+        ]);
+
+        $merged = [];
+        foreach (array_merge($by_customer, $by_email) as $order) {
+            if ($order instanceof WC_Order) {
+                $merged[$order->get_id()] = $order;
+            }
+        }
+
+        usort($merged, function ($a, $b) {
+            return $b->get_date_created()->getTimestamp() - $a->get_date_created()->getTimestamp();
+        });
+
+        return array_slice($merged, 0, 50);
+    }
+
+    private static function attach_guest_orders_to_customer($user_id, $email) {
+        if (!class_exists('WooCommerce') || !is_email($email)) {
+            return;
+        }
+
+        $orders = wc_get_orders([
+            'billing_email' => $email,
+            'customer_id' => 0,
+            'limit' => 100,
+            'status' => self::visible_order_statuses(),
+        ]);
+
+        foreach ($orders as $order) {
+            if (!$order instanceof WC_Order) {
+                continue;
+            }
+            $order->set_customer_id($user_id);
+            $order->save();
+        }
+    }
+
+    private static function user_owns_order($user_id, WC_Order $order) {
+        if ((int) $order->get_customer_id() === (int) $user_id) {
+            return true;
+        }
+
+        $user = get_user_by('id', $user_id);
+        if (!$user) {
+            return false;
+        }
+
+        return strtolower($order->get_billing_email()) === strtolower($user->user_email);
+    }
+
+    private static function visible_order_statuses() {
+        return ['pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed'];
+    }
+
+    private static function is_course_product(WC_Product $product) {
+        return self::get_product_format_slug($product) !== '';
+    }
+
+    private static function get_product_format_slug(WC_Product $product) {
+        $terms = get_the_terms($product->get_id(), 'product_cat');
+        if (!$terms || is_wp_error($terms)) {
+            return '';
+        }
+
+        foreach ($terms as $term) {
+            if (in_array($term->slug, MAJD_COURSE_CATEGORY_SLUGS, true)) {
+                return $term->slug;
+            }
+        }
+
+        return '';
+    }
+
+    private static function decode_json_list($value) {
+        if (empty($value)) {
+            return [];
+        }
+
+        if (is_array($value)) {
+            return array_values(array_filter(array_map('strval', $value)));
+        }
+
+        $decoded = json_decode((string) $value, true);
+        if (!is_array($decoded)) {
+            return array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) $value))));
+        }
+
+        return array_values(array_filter(array_map('strval', $decoded)));
+    }
+
+    private static function encode_lines_to_json($text) {
+        $lines = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) $text))));
+        return wp_json_encode($lines, JSON_UNESCAPED_UNICODE);
+    }
+
+    private static function meta_lines_for_textarea($value) {
+        $items = self::decode_json_list($value);
+        return implode("\n", $items);
     }
 
     private static function user_can_access_account($user_id) {

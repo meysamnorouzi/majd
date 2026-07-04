@@ -22,6 +22,20 @@ export const accentMap = {
     gradient: "from-emerald-500/20 to-transparent",
     dot: "bg-emerald-400",
   },
+  violet: {
+    badge: "bg-violet-500/20 text-violet-300 border-violet-500/30",
+    icon: "bg-violet-500 text-white",
+    ring: "ring-violet-500/30",
+    gradient: "from-violet-500/20 to-transparent",
+    dot: "bg-violet-400",
+  },
+  amber: {
+    badge: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+    icon: "bg-amber-500 text-navy-950",
+    ring: "ring-amber-500/30",
+    gradient: "from-amber-500/20 to-transparent",
+    dot: "bg-amber-400",
+  },
 } as const;
 
 export function getAccent(format: CourseFormat) {

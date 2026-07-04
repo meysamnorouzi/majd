@@ -56,14 +56,14 @@ export function CoursesHero() {
                 const Icon = formatIcon(format.slug);
                 const accent = getAccent(format);
                 return (
-                  <a
+                  <Link
                     key={format.slug}
-                    href={`#${format.slug}`}
+                    href={`/courses/${format.slug}/`}
                     className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition hover:scale-105 ${accent.badge}`}
                   >
                     <Icon className="h-4 w-4" />
                     {format.badge}
-                  </a>
+                  </Link>
                 );
               })}
             </div>

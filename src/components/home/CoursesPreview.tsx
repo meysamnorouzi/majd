@@ -12,16 +12,16 @@ export function CoursesPreview() {
         <SectionTitle
           eyebrow="آموزش حقوقی"
           title="دوره‌های آموزشی موسسه مجد"
-          description="حضوری، آفلاین با اسپات پلیر، و وبینار آنلاین — با اساتید وکیل پایه یک"
+          description="وبینار، دوره ترکیبی، نشست حضوری — با اساتید وکیل پایه یک"
         />
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {courseFormats.map((format) => {
             const Icon = formatIcon(format.slug);
             const accent = getAccent(format);
             return (
               <Link
                 key={format.slug}
-                href={`/courses/#${format.slug}`}
+                href={`/courses/${format.slug}/`}
                 className="flex items-center gap-4 rounded-xl border border-slate-100 bg-cream/30 p-5 transition hover:border-gold-500/30 hover:shadow-md"
               >
                 <div

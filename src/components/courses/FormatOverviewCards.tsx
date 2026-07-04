@@ -11,10 +11,10 @@ export function FormatOverviewCards() {
       <Container>
         <SectionTitle
           eyebrow="فرمت‌های آموزشی"
-          title="سه روش یادگیری — یک هدف: تسلط حقوقی"
-          description="بر اساس زمان، مکان و سبک یادگیری خود، یکی از قالب‌های زیر را انتخاب کنید."
+          title="پنج نوع دوره — یک هدف: تسلط حقوقی"
+          description="بر اساس زمان، مکان و سبک یادگیری خود، یکی از پنج قالب زیر را انتخاب کنید."
         />
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {courseFormats.map((format) => {
             const Icon = formatIcon(format.slug);
             const accent = getAccent(format);

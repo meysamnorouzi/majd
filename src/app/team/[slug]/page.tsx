@@ -4,8 +4,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { PageHero } from "@/components/layout/PageHero";
 import { Container } from "@/components/ui/Container";
-import { Button } from "@/components/ui/Button";
-import { CTASection } from "@/components/home/CTASection";
+import { ContactForm } from "@/components/contact/ContactForm";
 import { TeamMemberCard } from "@/components/team/TeamMemberCard";
 import { siteConfig } from "@/data/site";
 import { getTeam, getTeamMemberBySlug } from "@/lib/wordpress";
@@ -59,9 +58,9 @@ export default async function TeamMemberPage({
         ]}
       />
 
-      <section className="relative -mt-1 bg-cream pb-20 pt-0">
+      <section className="relative bg-cream pb-20 pt-12 lg:pt-16">
         <Container>
-          <div className="relative z-10 -mt-16 grid gap-10 lg:grid-cols-12 lg:gap-12">
+          <div className="relative z-10 grid gap-10 lg:grid-cols-12 lg:gap-12">
             <div className="lg:col-span-5">
               <div className="overflow-hidden rounded-2xl shadow-2xl shadow-navy-900/20">
                 <div className="relative aspect-[3/4]">
@@ -220,10 +219,14 @@ export default async function TeamMemberPage({
                   </a>
                 </p>
               </div>
-              <div className="mt-8">
-                <Button href="/contact/" className="w-full">
-                  رزرو وقت مشاوره
-                </Button>
+              <div className="mt-8 border-t border-white/10 pt-8">
+                <ContactForm
+                  variant="dark"
+                  title="رزرو وقت مشاوره"
+                  description=""
+                  defaultSubject="مشاوره حقوقی"
+                  defaultMessage={`درخواست مشاوره با ${member.name} — ${member.specialty}`}
+                />
               </div>
             </aside>
 
@@ -249,8 +252,6 @@ export default async function TeamMemberPage({
           </div>
         </Container>
       </section>
-
-      <CTASection />
     </>
   );
 }

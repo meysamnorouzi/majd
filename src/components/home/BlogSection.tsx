@@ -27,7 +27,7 @@ export function BlogSection({ posts }: { posts: BlogPost[] }) {
               key={post.id}
               className="group overflow-hidden rounded-2xl bg-white shadow-md transition hover:shadow-xl"
             >
-              <Link href={`/blog/${post.slug}/`}>
+              <Link href={`/blog/post/${post.slug}/`}>
                 <div className="relative h-48 overflow-hidden">
                   {post.image && (
                     <Image

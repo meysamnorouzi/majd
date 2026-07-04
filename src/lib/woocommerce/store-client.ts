@@ -153,7 +153,7 @@ export function clearCartSession() {
 }
 
 export function getDefaultPaymentMethod(): string {
-  return process.env.NEXT_PUBLIC_WC_PAYMENT_METHOD ?? "cod";
+  return process.env.NEXT_PUBLIC_WC_PAYMENT_METHOD ?? "zarinpal";
 }
 
 export function buildCheckoutPayload(

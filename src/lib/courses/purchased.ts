@@ -1,4 +1,5 @@
 import { courseFormats } from "@/data/courses";
+import { hasSpotPlayerLicense } from "@/lib/courses/format-utils";
 import type {
   CourseFormat,
   CourseItem,
@@ -18,7 +19,7 @@ export function findCourseByProductSlug(
 
 export function isSpotPlayerCourse(productSlug: string): boolean {
   const match = findCourseByProductSlug(productSlug);
-  return match?.format.slug === "offline-spotplayer";
+  return match ? hasSpotPlayerLicense(match.format.slug) : false;
 }
 
 export function ordersToPurchasedCourses(
@@ -49,11 +50,20 @@ export function ordersToPurchasedCourses(
   );
 }
 
+export function isSpotPlayerProduct(
+  productSlug: string,
+  formatSlug?: string | null,
+): boolean {
+  if (hasSpotPlayerLicense(formatSlug)) return true;
+  return isSpotPlayerCourse(productSlug);
+}
+
 export function getSpotPlayerCourses(
   purchased: PurchasedCourse[],
 ): PurchasedCourse[] {
   return purchased.filter(
-    (p) => p.format?.slug === "offline-spotplayer" || isSpotPlayerCourse(p.productSlug),
+    (p) =>
+      hasSpotPlayerLicense(p.format?.slug) || isSpotPlayerCourse(p.productSlug),
   );
 }
 

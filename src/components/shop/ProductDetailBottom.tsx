@@ -284,12 +284,12 @@ export function ProductDetailBottom({
                 >
                   {siteConfig.phones[0]}
                 </a>
-                <Link
-                  href="/contact/"
+                <a
+                  href="#consultation"
                   className="mt-4 inline-block text-sm font-semibold text-white underline decoration-gold-500/50 underline-offset-4 hover:text-gold-400"
                 >
-                  فرم تماس
-                </Link>
+                  فرم درخواست مشاوره
+                </a>
               </div>
             </div>
           </div>

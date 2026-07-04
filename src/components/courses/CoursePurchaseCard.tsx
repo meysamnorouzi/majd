@@ -57,12 +57,12 @@ export function CoursePurchaseCard({
         >
           سایر دوره‌های {format.badge}
         </Link>
-        <Link
-          href="/contact/"
+        <a
+          href="#consultation"
           className="block text-center text-sm text-gold-600 hover:text-gold-700"
         >
           نیاز به مشاوره دارید؟
-        </Link>
+        </a>
       </div>
       <ul className="mt-6 space-y-2 border-t border-slate-100 pt-6 text-sm text-slate-600">
         <li className="flex gap-2">

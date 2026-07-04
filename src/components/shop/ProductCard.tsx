@@ -25,7 +25,7 @@ export function ProductCard({
 }) {
   return (
     <article className="group overflow-hidden rounded-2xl bg-white shadow-md transition hover:shadow-xl">
-      <Link href={`/shop/${slug}/`}>
+      <Link href={`/shop/product/${slug}/`}>
         <div className="relative aspect-square overflow-hidden bg-cream">
           {image ? (
             <Image

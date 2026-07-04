@@ -17,7 +17,7 @@ export function PostCard({
 }) {
   return (
     <article className="group overflow-hidden rounded-2xl bg-white shadow-md transition hover:shadow-xl">
-      <Link href={`/blog/${slug}/`}>
+      <Link href={`/blog/post/${slug}/`}>
         <div className="relative h-52 overflow-hidden">
           {image ? (
             <Image

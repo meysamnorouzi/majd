@@ -14,7 +14,11 @@ export function CourseCard({
   course: CourseItem;
   isDark?: boolean;
 }) {
-  const href = getCourseDetailPath(format.slug, course.slug);
+  const href = getCourseDetailPath(
+    format.slug,
+    course.slug,
+    course.productSlug,
+  );
 
   return (
     <article

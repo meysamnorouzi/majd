@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { CourseFormat } from "@/types";
+import { hasSpotPlayerLicense, usesSkyroom } from "@/lib/courses/format-utils";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { CourseCard } from "@/components/courses/CourseCard";
@@ -16,7 +17,7 @@ export function CourseFormatSection({
 }) {
   const Icon = formatIcon(format.slug);
   const accent = getAccent(format);
-  const isDark = format.slug === "offline-spotplayer";
+  const isDark = hasSpotPlayerLicense(format.slug);
   return (
     <section
       id={format.slug}
@@ -106,9 +107,7 @@ export function CourseFormatSection({
               </ul>
             </div>
             <div className="flex flex-wrap gap-3 pt-2">
-              <Button href={`/contact/?subject=دوره-${format.badge}`}>
-                {format.ctaLabel}
-              </Button>
+              <Button href="#consultation">{format.ctaLabel}</Button>
               <Link
                 href={`/courses/${format.slug}/`}
                 className={`inline-flex items-center rounded-lg border-2 px-6 py-3 text-sm font-semibold transition ${
@@ -141,7 +140,7 @@ export function CourseFormatSection({
           </div>
         </div>
 
-        {format.slug === "offline-spotplayer" && (
+        {hasSpotPlayerLicense(format.slug) && (
           <div className="mt-12 rounded-2xl border border-sky-500/30 bg-sky-500/10 p-6 md:flex md:items-center md:gap-8">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-sky-500 text-white">
               <Icon className="h-8 w-8" />
@@ -157,17 +156,17 @@ export function CourseFormatSection({
           </div>
         )}
 
-        {format.slug === "online-webinar" && (
+        {usesSkyroom(format.slug) && !hasSpotPlayerLicense(format.slug) && (
           <div className="mt-12 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 md:flex md:items-center md:gap-8">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-emerald-500 text-white">
               <Icon className="h-8 w-8" />
             </div>
             <div>
-              <h4 className="text-lg font-bold text-navy-900">نحوه شرکت در وبینار</h4>
+              <h4 className="text-lg font-bold text-navy-900">نحوه شرکت در کلاس آنلاین</h4>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                یک روز قبل از برگزاری، لینک ورود به اتاق وبینار و راهنمای فنی ارسال
-                می‌شود. پیشنهاد می‌شود ۱۰ دقیقه زودتر وارد شوید. در صورت قطع اینترنت،
-                ضبط جلسه در اختیار شما قرار می‌گیرد.
+                یک روز قبل از برگزاری، لینک ورود به اتاق اسکای‌روم و راهنمای فنی ارسال
+                می‌شود. پیشنهاد می‌شود ۱۰ دقیقه زودتر وارد شوید. این فرمت شامل لایسنس
+                اسپات‌پلیر یا دسترسی آفلاین نمی‌شود.
               </p>
             </div>
           </div>

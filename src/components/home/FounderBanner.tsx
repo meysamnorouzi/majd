@@ -33,7 +33,7 @@ export function FounderBanner() {
               کیفری. همراهی شما از اولین جلسه مشاوره تا نتیجه نهایی پرونده.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
-              <Button href="/contact/">رزرو وقت مشاوره</Button>
+              <Button href="#consultation">رزرو وقت مشاوره</Button>
               <Link
                 href="/team/masoud-jokar-darzi/"
                 className="inline-flex items-center justify-center rounded-lg border-2 border-white/30 px-6 py-3 font-semibold text-white transition hover:bg-white/10"
