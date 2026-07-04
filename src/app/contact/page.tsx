@@ -1,8 +1,13 @@
 import { PageHero } from "@/components/layout/PageHero";
 import { Container } from "@/components/ui/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
-import { siteConfig } from "@/data/site";
+import { siteConfig, teamMembers } from "@/data/site";
 import type { Metadata } from "next";
+
+const lawyerOptions = teamMembers.map((m) => ({
+  slug: m.slug,
+  name: m.name,
+}));
 
 export const metadata: Metadata = {
   title: "تماس با ما",
@@ -77,7 +82,10 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <ContactForm />
+            <ContactForm
+              lawyerOptions={lawyerOptions}
+              showLawyerPicker
+            />
           </div>
         </Container>
       </section>

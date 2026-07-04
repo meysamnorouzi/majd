@@ -7,7 +7,15 @@ import { usePathname } from "next/navigation";
 import { PageHero } from "@/components/layout/PageHero";
 import { Container } from "@/components/ui/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
+import { BlogSidebar } from "@/components/blog/BlogSidebar";
 import { fetchPostBySlugClient, type BlogPost } from "@/lib/wordpress/client";
+import { teamMembers } from "@/data/site";
+import type { LawyerOption } from "@/components/contact/ContactForm";
+
+const lawyerOptions: LawyerOption[] = teamMembers.map((m) => ({
+  slug: m.slug,
+  name: m.name,
+}));
 
 function slugFromPathname(pathname: string): string {
   const base = "/blog/post";
@@ -85,38 +93,46 @@ export function BlogPostContent() {
       />
       <article className="py-16">
         <Container>
-          <div className="mx-auto max-w-3xl">
-            <time className="text-sm text-gold-600">
-              {new Date(post.date).toLocaleDateString("fa-IR", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </time>
-            {post.image && (
-              <div className="relative my-8 aspect-video overflow-hidden rounded-2xl">
-                <Image
-                  src={post.image}
-                  alt={post.title}
-                  fill
-                  className="object-cover"
-                  sizes="768px"
-                  priority
+          <div className="grid gap-12 lg:grid-cols-12">
+            <div className="lg:col-span-8">
+              <time className="text-sm text-gold-600">
+                {new Date(post.date).toLocaleDateString("fa-IR", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </time>
+              {post.image && (
+                <div className="relative my-8 aspect-video overflow-hidden rounded-2xl">
+                  <Image
+                    src={post.image}
+                    alt={post.title}
+                    fill
+                    className="object-cover"
+                    sizes="768px"
+                    priority
+                  />
+                </div>
+              )}
+              <div
+                className="prose-wp"
+                dangerouslySetInnerHTML={{ __html: post.content }}
+              />
+              <div className="mt-12 rounded-2xl border border-gold-400/30 bg-navy-900 p-6 sm:p-8">
+                <ContactForm
+                  variant="dark"
+                  title="نیاز به مشاوره تخصصی دارید؟"
+                  description="وکلای موسسه مجد آماده پاسخگویی به سوالات حقوقی شما هستند."
+                  defaultSubject="مشاوره حقوقی"
+                  defaultMessage={`پس از مطالعه مقاله «${post.title}»`}
+                  lawyerOptions={lawyerOptions}
+                  showLawyerPicker
                 />
               </div>
-            )}
-            <div
-              className="prose-wp"
-              dangerouslySetInnerHTML={{ __html: post.content }}
-            />
-            <div className="mt-12 rounded-2xl border border-gold-400/30 bg-navy-900 p-6 sm:p-8">
-              <ContactForm
-                variant="dark"
-                title="نیاز به مشاوره تخصصی دارید؟"
-                description="وکلای موسسه مجد آماده پاسخگویی به سوالات حقوقی شما هستند."
-                defaultSubject="مشاوره حقوقی"
-                defaultMessage={`پس از مطالعه مقاله «${post.title}»`}
-              />
+            </div>
+
+            <div className="lg:col-span-4">
+              <BlogSidebar lawyerOptions={lawyerOptions} />
             </div>
           </div>
         </Container>

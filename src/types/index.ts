@@ -45,6 +45,12 @@ export interface WpProduct {
   permalink: string;
 }
 
+export interface TeamMemberSocial {
+  instagram?: string;
+  telegram?: string;
+  linkedin?: string;
+}
+
 export interface TeamMember {
   id: string;
   slug: string;
@@ -58,6 +64,26 @@ export interface TeamMember {
   experienceYears: string;
   areasOfPractice: string[];
   achievements: string[];
+  phone?: string;
+  email?: string;
+  location?: string;
+  social?: TeamMemberSocial;
+}
+
+export interface ServiceFAQ {
+  q: string;
+  a: string;
+}
+
+export interface ServiceFeature {
+  title: string;
+  description: string;
+}
+
+export interface ServiceProcessStep {
+  step: number;
+  title: string;
+  description: string;
 }
 
 export interface Service {
@@ -68,6 +94,13 @@ export interface Service {
   description: string;
   icon: string;
   image?: string;
+  longDescription?: string[];
+  whyNeed?: { title: string; paragraphs: string[] };
+  highlights?: string[];
+  features?: ServiceFeature[];
+  processSteps?: ServiceProcessStep[];
+  cases?: string[];
+  faqs?: ServiceFAQ[];
 }
 
 export type CourseFormatSlug =

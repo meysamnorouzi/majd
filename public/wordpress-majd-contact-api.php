@@ -14,6 +14,8 @@ define('MAJD_CONTACT_META_NAME', '_majd_contact_name');
 define('MAJD_CONTACT_META_PHONE', '_majd_contact_phone');
 define('MAJD_CONTACT_META_SUBJECT', '_majd_contact_subject');
 define('MAJD_CONTACT_META_MESSAGE', '_majd_contact_message');
+define('MAJD_CONTACT_META_CONSULTATION_AREA', '_majd_contact_consultation_area');
+define('MAJD_CONTACT_META_LAWYER', '_majd_contact_lawyer');
 define('MAJD_CONTACT_META_STATUS', '_majd_contact_status');
 define('MAJD_CONTACT_META_IP', '_majd_contact_ip');
 
@@ -75,6 +77,12 @@ class Majd_Contact_API {
         $phone = sanitize_text_field($request->get_param('phone') ?? '');
         $subject = sanitize_text_field($request->get_param('subject') ?? '');
         $message = sanitize_textarea_field($request->get_param('message') ?? '');
+        $consultation_area = sanitize_text_field($request->get_param('consultation_area') ?? '');
+        $lawyer = sanitize_text_field($request->get_param('lawyer') ?? '');
+
+        if (empty($consultation_area) && !empty($subject)) {
+            $consultation_area = $subject;
+        }
 
         if (empty($name)) {
             return new WP_Error('missing_name', 'نام را وارد کنید.', ['status' => 400]);
@@ -111,6 +119,12 @@ class Majd_Contact_API {
         update_post_meta($post_id, MAJD_CONTACT_META_PHONE, $phone);
         update_post_meta($post_id, MAJD_CONTACT_META_SUBJECT, $subject);
         update_post_meta($post_id, MAJD_CONTACT_META_MESSAGE, $message);
+        if ($consultation_area) {
+            update_post_meta($post_id, MAJD_CONTACT_META_CONSULTATION_AREA, $consultation_area);
+        }
+        if ($lawyer) {
+            update_post_meta($post_id, MAJD_CONTACT_META_LAWYER, $lawyer);
+        }
         update_post_meta($post_id, MAJD_CONTACT_META_STATUS, 'new');
         update_post_meta($post_id, MAJD_CONTACT_META_IP, self::get_client_ip());
 
@@ -120,10 +134,12 @@ class Majd_Contact_API {
                 $admin_email,
                 sprintf('[موسسه مجد] پیام تماس جدید: %s', $subject),
                 sprintf(
-                    "نام: %s\nتلفن: %s\nموضوع: %s\n\n%s\n\n---\nمشاهده در پنل: %s",
+                    "نام: %s\nتلفن: %s\nموضوع: %s%s%s\n\n%s\n\n---\nمشاهده در پنل: %s",
                     $name,
                     $phone,
                     $subject,
+                    $consultation_area ? "\nزمینه مشاوره: " . $consultation_area : '',
+                    $lawyer ? "\nوکیل درخواستی: " . $lawyer : '',
                     $message,
                     admin_url('edit.php?post_type=' . MAJD_CONTACT_POST_TYPE)
                 )
@@ -144,6 +160,8 @@ class Majd_Contact_API {
         $new['majd_name'] = 'نام';
         $new['majd_phone'] = 'تلفن';
         $new['majd_subject'] = 'موضوع';
+        $new['majd_consultation_area'] = 'زمینه مشاوره';
+        $new['majd_lawyer'] = 'وکیل';
         $new['majd_status'] = 'وضعیت';
         $new['date'] = $columns['date'] ?? 'تاریخ';
         return $new;
@@ -159,6 +177,12 @@ class Majd_Contact_API {
                 break;
             case 'majd_subject':
                 echo esc_html(get_post_meta($post_id, MAJD_CONTACT_META_SUBJECT, true));
+                break;
+            case 'majd_consultation_area':
+                echo esc_html(get_post_meta($post_id, MAJD_CONTACT_META_CONSULTATION_AREA, true));
+                break;
+            case 'majd_lawyer':
+                echo esc_html(get_post_meta($post_id, MAJD_CONTACT_META_LAWYER, true));
                 break;
             case 'majd_status':
                 $status = get_post_meta($post_id, MAJD_CONTACT_META_STATUS, true) ?: 'new';
@@ -189,6 +213,8 @@ class Majd_Contact_API {
         $name = get_post_meta($post->ID, MAJD_CONTACT_META_NAME, true);
         $phone = get_post_meta($post->ID, MAJD_CONTACT_META_PHONE, true);
         $subject = get_post_meta($post->ID, MAJD_CONTACT_META_SUBJECT, true);
+        $consultation_area = get_post_meta($post->ID, MAJD_CONTACT_META_CONSULTATION_AREA, true);
+        $lawyer = get_post_meta($post->ID, MAJD_CONTACT_META_LAWYER, true);
         $message = get_post_meta($post->ID, MAJD_CONTACT_META_MESSAGE, true);
         $status = get_post_meta($post->ID, MAJD_CONTACT_META_STATUS, true) ?: 'new';
         $ip = get_post_meta($post->ID, MAJD_CONTACT_META_IP, true);
@@ -208,6 +234,18 @@ class Majd_Contact_API {
                 <th scope="row">موضوع</th>
                 <td><?php echo esc_html($subject); ?></td>
             </tr>
+            <?php if ($consultation_area) : ?>
+            <tr>
+                <th scope="row">زمینه مشاوره</th>
+                <td><?php echo esc_html($consultation_area); ?></td>
+            </tr>
+            <?php endif; ?>
+            <?php if ($lawyer) : ?>
+            <tr>
+                <th scope="row">وکیل درخواستی</th>
+                <td><?php echo esc_html($lawyer); ?></td>
+            </tr>
+            <?php endif; ?>
             <tr>
                 <th scope="row">وضعیت</th>
                 <td>

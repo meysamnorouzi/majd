@@ -5,6 +5,8 @@ export interface ContactFormPayload {
   phone: string;
   subject: string;
   message: string;
+  consultation_area?: string;
+  lawyer?: string;
   company?: string;
 }
 

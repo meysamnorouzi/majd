@@ -1,6 +1,11 @@
-import { siteConfig } from "@/data/site";
+import { siteConfig, teamMembers } from "@/data/site";
 import { Container } from "@/components/ui/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
+
+const lawyerOptions = teamMembers.map((m) => ({
+  slug: m.slug,
+  name: m.name,
+}));
 
 export function CTASection() {
   return (
@@ -41,6 +46,8 @@ export function CTASection() {
             title="درخواست مشاوره"
             description="فرم را تکمیل کنید تا با شما تماس بگیریم."
             defaultSubject="مشاوره حقوقی"
+            lawyerOptions={lawyerOptions}
+            showLawyerPicker
           />
         </div>
       </Container>

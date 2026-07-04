@@ -145,6 +145,14 @@ export const teamMembers: TeamMember[] = [
       "دفاع موفق در صدها پرونده کیفری و حقوقی",
       "مدرس دوره‌های تخصصی وکالت کیفری",
     ],
+    phone: siteConfig.phones[0],
+    email: siteConfig.email,
+    location: siteConfig.address,
+    social: {
+      instagram: siteConfig.social.instagram,
+      telegram: siteConfig.social.telegram,
+      linkedin: siteConfig.social.linkedin,
+    },
   },
   {
     id: "2",
@@ -174,6 +182,9 @@ export const teamMembers: TeamMember[] = [
       "پیروزی در دعاوی تجاری با ارزش میلیاردی",
       "عضو هیئت داوری اتاق بازرگانی",
     ],
+    phone: siteConfig.phones[1],
+    email: siteConfig.email,
+    location: siteConfig.address,
   },
   {
     id: "3",
@@ -203,6 +214,9 @@ export const teamMembers: TeamMember[] = [
       "مشاور حقوقی مراکز مشاوره خانواده",
       "نویسنده مقالات تخصصی حقوق زنان",
     ],
+    phone: siteConfig.phones[2],
+    email: siteConfig.email,
+    location: siteConfig.address,
   },
   {
     id: "4",
@@ -232,6 +246,9 @@ export const teamMembers: TeamMember[] = [
       "تخصص در پرونده‌های ثبتی پیچیده",
       "همکاری با کارشناسان رسمی دادگستری",
     ],
+    phone: siteConfig.phones[0],
+    email: siteConfig.email,
+    location: siteConfig.address,
   },
 ];
 

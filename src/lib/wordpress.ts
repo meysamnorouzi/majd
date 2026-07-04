@@ -4,6 +4,7 @@ import {
   services,
   teamMembers,
 } from "@/data/site";
+import { enrichService } from "@/data/services-detail";
 import type { WpPost, WpProduct } from "@/types";
 
 const WP_URL = process.env.NEXT_PUBLIC_WP_URL ?? "https://vakilmajd.com";
@@ -185,7 +186,9 @@ export function getServices() {
 }
 
 export function getServiceBySlug(slug: string) {
-  return services.find((s) => s.slug === slug) ?? null;
+  const service = services.find((s) => s.slug === slug);
+  if (!service) return null;
+  return enrichService(service);
 }
 
 export function getTeam() {

@@ -6,16 +6,18 @@ import {
   submitContactForm,
 } from "@/lib/wordpress/contact-client";
 import { Toast, type ToastVariant } from "@/components/ui/Toast";
+import {
+  CONSULTATION_AREAS,
+  CONSULTATION_AREA_LABEL,
+  LAWYER_ANY_OPTION,
+  LAWYER_PICKER_LABEL,
+  type ConsultationArea,
+} from "@/data/consultation";
 
-const SUBJECT_OPTIONS = [
-  "مشاوره حقوقی",
-  "وکالت",
-  "حقوق خانواده",
-  "حقوق ملکی",
-  "حقوق کیفری",
-  "دوره آموزشی",
-  "سایر",
-] as const;
+export interface LawyerOption {
+  slug: string;
+  name: string;
+}
 
 export interface ContactFormProps {
   id?: string;
@@ -23,13 +25,16 @@ export interface ContactFormProps {
   description?: string;
   defaultSubject?: string;
   defaultMessage?: string;
+  defaultLawyer?: string;
+  lawyerOptions?: LawyerOption[];
+  showLawyerPicker?: boolean;
   variant?: "default" | "compact" | "dark";
   className?: string;
 }
 
-function resolveSubject(defaultSubject?: string): string {
+function resolveArea(defaultSubject?: string): string {
   if (!defaultSubject) return "";
-  if (SUBJECT_OPTIONS.includes(defaultSubject as (typeof SUBJECT_OPTIONS)[number])) {
+  if (CONSULTATION_AREAS.includes(defaultSubject as ConsultationArea)) {
     return defaultSubject;
   }
   return "سایر";
@@ -41,6 +46,9 @@ export function ContactForm({
   description = "پیام خود را ارسال کنید؛ در اسرع وقت با شما تماس می‌گیریم.",
   defaultSubject,
   defaultMessage = "",
+  defaultLawyer,
+  lawyerOptions,
+  showLawyerPicker = false,
   variant = "default",
   className = "",
 }: ContactFormProps) {
@@ -53,13 +61,15 @@ export function ContactForm({
 
   const isDark = variant === "dark";
   const isCompact = variant === "compact" || variant === "dark";
-  const resolvedSubject = resolveSubject(defaultSubject);
-  const subjectNote =
-    defaultSubject && resolvedSubject === "سایر" ? defaultSubject : undefined;
+  const resolvedArea = resolveArea(defaultSubject);
+  const areaNote =
+    defaultSubject && resolvedArea === "سایر" ? defaultSubject : undefined;
+  const showLawyers =
+    showLawyerPicker && lawyerOptions && lawyerOptions.length > 0;
 
   const inputClass = isDark
     ? "w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/40 focus:border-gold-400 focus:ring-2 focus:ring-gold-400/20 disabled:opacity-60"
-    : "w-full rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 disabled:opacity-60";
+    : "w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 disabled:opacity-60";
 
   const labelClass = isDark
     ? "mb-1 block text-sm font-medium text-white"
@@ -74,18 +84,26 @@ export function ContactForm({
 
     const form = e.currentTarget;
     const data = new FormData(form);
-    const subject = (data.get("subject") as string).trim();
-    const subjectDetail = (data.get("subject_detail") as string)?.trim();
-    const fullSubject = subjectDetail
-      ? `${subject} — ${subjectDetail}`
-      : subject;
+    const consultationArea = (data.get("consultation_area") as string).trim();
+    const areaDetail = (data.get("area_detail") as string)?.trim();
+    const lawyer = (data.get("lawyer") as string)?.trim();
+    const fullArea = areaDetail
+      ? `${consultationArea} — ${areaDetail}`
+      : consultationArea;
+
+    let subject = fullArea;
+    if (lawyer && lawyer !== LAWYER_ANY_OPTION) {
+      subject = `${fullArea} | وکیل: ${lawyer}`;
+    }
 
     try {
       const result = await submitContactForm({
         name: (data.get("name") as string).trim(),
         phone: (data.get("phone") as string).trim(),
-        subject: fullSubject,
+        subject,
         message: (data.get("message") as string).trim(),
+        consultation_area: fullArea,
+        lawyer: lawyer && lawyer !== LAWYER_ANY_OPTION ? lawyer : undefined,
         company: (data.get("company") as string) || undefined,
       });
 
@@ -176,30 +194,58 @@ export function ContactForm({
           </div>
 
           <div>
-            <label htmlFor={`subject-${id ?? "contact"}`} className={labelClass}>
-              موضوع *
+            <label
+              htmlFor={`area-${id ?? "contact"}`}
+              className={labelClass}
+            >
+              {CONSULTATION_AREA_LABEL} *
             </label>
             <select
-              id={`subject-${id ?? "contact"}`}
-              name="subject"
+              id={`area-${id ?? "contact"}`}
+              name="consultation_area"
               required
               disabled={loading}
               className={inputClass}
-              defaultValue={resolvedSubject}
+              defaultValue={resolvedArea}
             >
               <option value="" disabled>
                 انتخاب کنید
               </option>
-              {SUBJECT_OPTIONS.map((option) => (
+              {CONSULTATION_AREAS.map((option) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
               ))}
             </select>
-            {subjectNote && (
-              <input type="hidden" name="subject_detail" value={subjectNote} />
+            {areaNote && (
+              <input type="hidden" name="area_detail" value={areaNote} />
             )}
           </div>
+
+          {showLawyers && (
+            <div>
+              <label
+                htmlFor={`lawyer-${id ?? "contact"}`}
+                className={labelClass}
+              >
+                {LAWYER_PICKER_LABEL}
+              </label>
+              <select
+                id={`lawyer-${id ?? "contact"}`}
+                name="lawyer"
+                disabled={loading}
+                className={inputClass}
+                defaultValue={defaultLawyer ?? LAWYER_ANY_OPTION}
+              >
+                <option value={LAWYER_ANY_OPTION}>{LAWYER_ANY_OPTION}</option>
+                {lawyerOptions.map((lawyer) => (
+                  <option key={lawyer.slug} value={lawyer.name}>
+                    {lawyer.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div>
             <label htmlFor={`message-${id ?? "contact"}`} className={labelClass}>
