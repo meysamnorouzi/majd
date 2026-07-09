@@ -97,7 +97,7 @@ export function AccountMobileNav() {
   };
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-navy-900/10 bg-white px-2 py-2 shadow-lg lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-navy-900/10 bg-white px-2 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-lg lg:hidden">
       {navItems.map((item) => (
         <Link
           key={item.href}

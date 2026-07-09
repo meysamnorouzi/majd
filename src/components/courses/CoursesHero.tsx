@@ -21,7 +21,7 @@ export function CoursesHero() {
         <div className="absolute inset-0 bg-gradient-to-l from-navy-950 via-navy-950/90 to-navy-900/70" />
       </div>
 
-      <Container className="relative py-20 lg:py-28">
+      <Container className="relative py-12 sm:py-16 lg:py-28">
         <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm text-white/60">
           <Link href="/" className="hover:text-gold-400">
             خانه
@@ -38,7 +38,7 @@ export function CoursesHero() {
             <h1 className="mt-5 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
               {coursesIntro.title}
             </h1>
-            <p className="mt-5 text-lg leading-relaxed text-white/75">
+            <p className="mt-5 text-base leading-relaxed text-white/75 sm:text-lg">
               {coursesIntro.description}
             </p>
             <ul className="mt-8 grid gap-3 sm:grid-cols-2">

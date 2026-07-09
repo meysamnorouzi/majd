@@ -85,7 +85,7 @@ export function DashboardOverview() {
                   <span className="text-sm text-white/80">
                     {c.course?.title ?? c.productName}
                   </span>
-                  <code className="font-mono text-sm font-bold text-gold-400" dir="ltr">
+                  <code className="break-all font-mono text-sm font-bold text-gold-400" dir="ltr">
                     {c.spotplayerLicense}
                   </code>
                 </div>

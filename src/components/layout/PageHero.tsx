@@ -10,7 +10,7 @@ export function PageHero({
   breadcrumb?: { label: string; href?: string }[];
 }) {
   return (
-    <section className="relative overflow-hidden bg-navy-900 py-20 text-white">
+    <section className="relative overflow-hidden bg-navy-900 py-12 text-white sm:py-16 lg:py-20">
       <div
         className="absolute inset-0 opacity-20 bg-cover bg-center"
         style={{
@@ -33,7 +33,7 @@ export function PageHero({
                     {item.label}
                   </a>
                 ) : (
-                  <span className="text-gold-400">{item.label}</span>
+                  <span className="line-clamp-1 text-gold-400">{item.label}</span>
                 )}
               </span>
             ))}
@@ -41,7 +41,7 @@ export function PageHero({
         )}
         <h1 className="text-3xl font-bold sm:text-4xl lg:text-5xl">{title}</h1>
         {description && (
-          <p className="mt-4 max-w-2xl text-lg text-white/75">{description}</p>
+          <p className="mt-4 max-w-2xl text-base text-white/75 sm:text-lg">{description}</p>
         )}
       </Container>
     </section>

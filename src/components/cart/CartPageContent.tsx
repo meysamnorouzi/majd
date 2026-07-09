@@ -39,7 +39,7 @@ export function CartPageContent() {
           <EmptyCart />
         ) : (
           <div className="grid gap-10 lg:grid-cols-3">
-            <div className="space-y-4 lg:col-span-2">
+            <div className="order-2 space-y-4 lg:order-none lg:col-span-2">
               {items.map((item) => (
                 <CartLineItem key={item.key} item={item} />
               ))}
@@ -50,7 +50,9 @@ export function CartPageContent() {
                 ← افزودن دوره دیگر
               </Link>
             </div>
-            <OrderSummary />
+            <div className="order-first lg:order-none">
+              <OrderSummary />
+            </div>
           </div>
         )}
       </Container>

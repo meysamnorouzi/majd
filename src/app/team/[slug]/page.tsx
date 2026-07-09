@@ -62,7 +62,7 @@ export default async function TeamMemberPage({
         ]}
       />
 
-      <section className="relative bg-cream pb-20 pt-12 lg:pt-16">
+      <section className="relative bg-cream pt-12 lg:pt-16">
         <Container>
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
             <div className="order-2 lg:order-1 lg:col-span-7">
@@ -84,7 +84,7 @@ export default async function TeamMemberPage({
                   </span>
                 </div>
 
-                <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                <div className="mt-8 grid gap-3 md:grid-cols-3">
                   <StatCard label="سال تجربه" value={member.experienceYears} />
                   <StatCard
                     label="حوزه تخصصی"

@@ -50,7 +50,7 @@ function HighlightsBento({
             i === 0 ? "sm:row-span-2 sm:flex sm:flex-col sm:justify-center" : ""
           }`}
         >
-          <span className="absolute -left-4 -top-4 text-7xl font-black text-gold-500/10">
+          <span className="absolute -start-4 -top-4 text-7xl font-black text-gold-500/10">
             {String(i + 1).padStart(2, "0")}
           </span>
           <h3 className="relative text-lg font-bold text-navy-900">
@@ -279,7 +279,7 @@ export function ProductDetailBottom({
                 </p>
                 <a
                   href={`tel:${siteConfig.phonesTel[0]}`}
-                  className="mt-2 block text-xl font-bold text-gold-400 hover:text-gold-300"
+                  className="mt-2 block text-lg font-bold text-gold-400 hover:text-gold-300 sm:text-xl"
                   dir="ltr"
                 >
                   {siteConfig.phones[0]}

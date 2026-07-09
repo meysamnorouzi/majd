@@ -1,10 +1,22 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { siteConfig } from "@/data/site";
 
 export function FloatingCTA() {
+  const pathname = usePathname();
+  const normalized = pathname.replace(/\/$/, "");
+  const isAccountArea =
+    normalized.startsWith("/account") &&
+    normalized !== "/account/login" &&
+    normalized !== "/account/register";
+
+  if (isAccountArea) return null;
+
   return (
     <a
       href={`tel:${siteConfig.phonesTel[0]}`}
-      className="fixed bottom-6 left-6 z-40 flex items-center gap-2 rounded-full bg-gold-500 px-5 py-3 text-sm font-bold text-navy-950 shadow-xl shadow-gold-500/40 transition hover:scale-105 hover:bg-gold-400"
+      className="fixed start-6 bottom-[calc(1.5rem+env(safe-area-inset-bottom))] z-40 flex items-center gap-2 rounded-full bg-gold-500 px-5 py-3 text-sm font-bold text-navy-950 shadow-xl shadow-gold-500/40 transition hover:scale-105 hover:bg-gold-400"
       dir="ltr"
     >
       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

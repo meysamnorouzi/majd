@@ -34,13 +34,15 @@ export function CheckoutPageContent() {
           </p>
         ) : (
           <div className="grid gap-10 lg:grid-cols-3">
-            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm lg:col-span-2">
+            <div className="order-2 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm lg:order-none lg:col-span-2">
               <h2 className="mb-6 text-lg font-bold text-navy-900">
                 اطلاعات صورتحساب
               </h2>
               <CheckoutForm />
             </div>
-            <OrderSummary showCheckoutButton={false} />
+            <div className="order-first lg:order-none">
+              <OrderSummary showCheckoutButton={false} />
+            </div>
           </div>
         )}
       </Container>

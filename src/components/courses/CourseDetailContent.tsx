@@ -141,7 +141,7 @@ export function CourseDetailContent() {
           </div>
 
           <div className="grid gap-12 lg:grid-cols-3">
-            <div className="lg:col-span-2">
+            <div className="order-2 lg:order-none lg:col-span-2">
               <p className="text-lg leading-relaxed text-slate-600">
                 {description}
               </p>
@@ -199,7 +199,7 @@ export function CourseDetailContent() {
               </Link>
             </div>
 
-            <div>
+            <div className="order-first lg:order-none">
               <CoursePurchaseCardWp format={format} product={product} />
             </div>
           </div>

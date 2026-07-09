@@ -14,7 +14,7 @@ export function FormatOverviewCards() {
           title="پنج نوع دوره — یک هدف: تسلط حقوقی"
           description="بر اساس زمان، مکان و سبک یادگیری خود، یکی از پنج قالب زیر را انتخاب کنید."
         />
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
           {courseFormats.map((format) => {
             const Icon = formatIcon(format.slug);
             const accent = getAccent(format);
@@ -22,7 +22,7 @@ export function FormatOverviewCards() {
               <Link
                 key={format.slug}
                 href={`/courses/${format.slug}/`}
-                className={`group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-8 shadow-md transition hover:-translate-y-1 hover:shadow-xl ring-1 ${accent.ring}`}
+                className={`group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-6 shadow-md transition hover:-translate-y-1 hover:shadow-xl ring-1 sm:p-8 ${accent.ring}`}
               >
                 <div
                   className={`absolute left-0 top-0 h-full w-1 bg-gradient-to-b ${accent.gradient}`}

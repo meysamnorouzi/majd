@@ -73,9 +73,9 @@ export function OrderDetail({ order }: { order: CustomerOrder }) {
           {order.items.map((item, i) => {
             const match = findCourseByProductSlug(item.product_slug);
             return (
-              <li key={i} className="flex items-center justify-between py-3">
-                <div>
-                  <p className="font-medium text-navy-900">
+              <li key={i} className="flex items-center justify-between gap-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <p className="break-words font-medium text-navy-900">
                     {match?.course.title ?? item.name}
                   </p>
                   {match?.format && (

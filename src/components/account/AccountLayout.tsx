@@ -32,7 +32,7 @@ export function AccountLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-cream pb-20 lg:pb-12">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[90rem] px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
           <div className="hidden lg:block">
             <div className="sticky top-24">

@@ -30,12 +30,19 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
   background: var(--cream);
   color: var(--foreground);
   font-family: var(--font-sans);
+  overflow-x: clip;
+}
+
+.prose-wp {
+  overflow-wrap: anywhere;
+  max-width: 100%;
 }
 
 .prose-wp h2,
@@ -55,6 +62,19 @@ body {
 .prose-wp a {
   color: var(--gold-600);
   text-decoration: underline;
+}
+
+.prose-wp img,
+.prose-wp iframe,
+.prose-wp video {
+  max-width: 100%;
+  height: auto;
+}
+
+.prose-wp table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .gold-gradient {

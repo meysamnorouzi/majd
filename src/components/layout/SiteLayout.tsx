@@ -7,7 +7,9 @@ export function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClientProviders>
       <Header />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
+        {children}
+      </main>
       <Footer />
       <FloatingCTA />
     </ClientProviders>

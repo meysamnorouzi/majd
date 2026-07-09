@@ -17,7 +17,7 @@ export function OrderSummary({
   const currency = totals?.currency_symbol ?? "تومان";
 
   return (
-    <aside className="rounded-2xl border border-slate-100 bg-white p-6 shadow-lg">
+    <aside className="rounded-2xl border border-slate-100 bg-white p-6 shadow-lg lg:sticky lg:top-28">
       <h2 className="text-lg font-bold text-navy-900">خلاصه سفارش</h2>
       <dl className="mt-4 space-y-3 text-sm">
         <div className="flex justify-between text-slate-600">

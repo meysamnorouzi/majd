@@ -94,7 +94,7 @@ export function WpCourseCard({
         >
           مشاهده جزئیات
         </Link>
-        <div className="min-w-[140px] flex-1">
+        <div className="w-full sm:min-w-0 sm:flex-1">
           <AddToCartButton
             productSlug={product.slug}
             productId={product.id}

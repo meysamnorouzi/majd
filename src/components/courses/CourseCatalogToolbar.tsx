@@ -29,7 +29,7 @@ export function CourseCatalogToolbar({
 }: CourseCatalogToolbarProps) {
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
         <div className="relative min-w-0 flex-1">
           <label htmlFor="course-search" className="sr-only">
             جستجوی دوره
@@ -59,7 +59,7 @@ export function CourseCatalogToolbar({
           />
         </div>
 
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {showMobileFilterButton && onOpenFilters && (
             <button
               type="button"
@@ -83,7 +83,7 @@ export function CourseCatalogToolbar({
             </button>
           )}
 
-          <div className="min-w-[10rem]">
+          <div className="min-w-0 w-full sm:w-auto sm:min-w-[8rem]">
             <label htmlFor="course-sort" className="sr-only">
               مرتب‌سازی
             </label>

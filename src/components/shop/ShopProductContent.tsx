@@ -127,7 +127,7 @@ export function ShopProductContent() {
       <section className="py-16">
         <Container>
           <div className="grid gap-12 lg:grid-cols-2">
-            <div className="relative aspect-square overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-slate-200/60">
+            <div className="relative order-2 aspect-square overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-slate-200/60 lg:order-none">
               {product.image ? (
                 <Image
                   src={product.image}
@@ -144,7 +144,7 @@ export function ShopProductContent() {
               )}
             </div>
 
-            <div>
+            <div className="order-first lg:order-none">
               <div className="flex flex-wrap gap-2 text-sm">
                 <span className="rounded-full bg-navy-900/5 px-3 py-1 font-medium text-navy-800">
                   {detailMeta.category}
@@ -154,7 +154,7 @@ export function ShopProductContent() {
                 </span>
               </div>
 
-              <p className="mt-6 text-3xl font-bold text-gold-600">
+              <p className="mt-6 text-2xl font-bold text-gold-600 sm:text-3xl">
                 {formatPrice(product.price)} {product.currency}
               </p>
               <p className="mt-6 leading-relaxed text-slate-600">
@@ -162,7 +162,7 @@ export function ShopProductContent() {
               </p>
 
               <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
-                <div className="min-w-[200px] flex-1">
+                <div className="w-full sm:min-w-0 sm:flex-1">
                   <ProductAddToCart
                     productSlug={product.slug}
                     productId={product.id}

@@ -21,13 +21,13 @@ export function CoursePurchaseCardWp({
       : "تماس بگیرید";
 
   return (
-    <aside className="sticky top-28 rounded-2xl border border-slate-100 bg-white p-6 shadow-xl">
+    <aside className="rounded-2xl border border-slate-100 bg-white p-6 shadow-xl lg:sticky lg:top-28">
       <span
         className={`inline-block rounded-full border px-3 py-1 text-xs font-bold ${accent.badge}`}
       >
         {format.badge}
       </span>
-      <p className="mt-4 text-3xl font-bold text-gold-600">{displayPrice}</p>
+      <p className="mt-4 text-2xl font-bold text-gold-600 sm:text-3xl">{displayPrice}</p>
       <p className="mt-2 text-sm text-slate-500">
         {product.majd.duration || "—"}
         {product.majd.level ? ` · سطح ${product.majd.level}` : ""}

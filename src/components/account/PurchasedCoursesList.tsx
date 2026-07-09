@@ -55,7 +55,7 @@ export function PurchasedCourseCard({ item }: { item: PurchasedCourse }) {
           {isSpotPlayer && item.spotplayerLicense && (
             <div className="mt-3 rounded-lg bg-navy-950 px-3 py-2">
               <p className="text-xs text-white/60">کد لایسنس</p>
-              <code className="font-mono text-sm font-bold text-gold-400" dir="ltr">
+              <code className="break-all font-mono text-sm font-bold text-gold-400" dir="ltr">
                 {item.spotplayerLicense}
               </code>
             </div>

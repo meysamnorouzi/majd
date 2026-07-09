@@ -94,7 +94,7 @@ export function BlogPostContent() {
       <article className="py-16">
         <Container>
           <div className="grid gap-12 lg:grid-cols-12">
-            <div className="lg:col-span-8">
+            <div className="min-w-0 lg:col-span-8">
               <time className="text-sm text-gold-600">
                 {new Date(post.date).toLocaleDateString("fa-IR", {
                   year: "numeric",
