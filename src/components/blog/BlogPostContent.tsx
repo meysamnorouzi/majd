@@ -75,7 +75,7 @@ export function BlogPostContent() {
         <div className="py-24 text-center">
           <h1 className="text-2xl font-bold text-navy-900">مقاله یافت نشد</h1>
           <Link href="/blog/" className="mt-6 inline-block text-gold-600">
-            بازگشت به بلاگ
+            بازگشت به مقالات
           </Link>
         </div>
       </Container>
@@ -87,7 +87,7 @@ export function BlogPostContent() {
       <PageHero
         title={post.title}
         breadcrumb={[
-          { label: "بلاگ", href: "/blog/" },
+          { label: "مقالات", href: "/blog/" },
           { label: post.title },
         ]}
       />

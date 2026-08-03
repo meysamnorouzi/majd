@@ -9,6 +9,7 @@ import {
   BlogInlineBanner,
 } from "@/components/blog/BlogPromoBanner";
 import { fetchPostsClient, type BlogPost } from "@/lib/wordpress/client";
+import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { teamMembers } from "@/data/site";
 import type { LawyerOption } from "@/components/contact/ContactForm";
 
@@ -42,8 +43,10 @@ export function BlogPageContent() {
   const featuredPost = posts[0];
   const gridPosts = posts.slice(1);
   const midIndex = Math.floor(gridPosts.length / 2);
-  const firstHalf = gridPosts.slice(0, midIndex);
-  const secondHalf = gridPosts.slice(midIndex);
+  // Keep even split so each half fills complete 2-column rows
+  const splitAt = midIndex - (midIndex % 2);
+  const firstHalf = gridPosts.slice(0, splitAt || midIndex);
+  const secondHalf = gridPosts.slice(splitAt || midIndex);
 
   return (
     <section className="py-16 lg:py-20">
@@ -56,10 +59,14 @@ export function BlogPageContent() {
           <p className="text-center text-red-600">{error}</p>
         ) : (
           <div className="grid gap-12 lg:grid-cols-12">
-            <div className="lg:col-span-8">
-              {featuredPost && <BlogFeaturedPost post={featuredPost} />}
+            <div className="min-w-0 lg:col-span-8">
+              {featuredPost && (
+                <Reveal variant="up">
+                  <BlogFeaturedPost post={featuredPost} />
+                </Reveal>
+              )}
 
-              <div className="mb-8 flex items-end justify-between border-b border-slate-200 pb-4">
+              <Reveal className="mb-8 flex items-end justify-between border-b border-slate-200 pb-4">
                 <div>
                   <h2 className="text-xl font-bold text-navy-900">
                     آخرین مقالات
@@ -71,26 +78,40 @@ export function BlogPageContent() {
                 <span className="hidden text-sm text-slate-500 sm:block">
                   {posts.length.toLocaleString("fa-IR")} مقاله
                 </span>
-              </div>
+              </Reveal>
 
-              <div className="grid gap-8 sm:grid-cols-2">
+              <Stagger
+                className="grid grid-cols-2 gap-4 sm:gap-8"
+                stagger={0.08}
+              >
                 {firstHalf.map((post) => (
-                  <PostCard key={post.id} {...post} />
+                  <StaggerItem key={post.id} variant="up" className="min-w-0">
+                    <PostCard {...post} />
+                  </StaggerItem>
                 ))}
-              </div>
+              </Stagger>
 
-              {gridPosts.length > 2 && <BlogInlineBanner />}
+              {gridPosts.length > 2 && (
+                <Reveal>
+                  <BlogInlineBanner />
+                </Reveal>
+              )}
 
-              <div className="grid gap-8 sm:grid-cols-2">
+              <Stagger
+                className="grid grid-cols-2 gap-4 sm:gap-8"
+                stagger={0.08}
+              >
                 {secondHalf.map((post) => (
-                  <PostCard key={post.id} {...post} />
+                  <StaggerItem key={post.id} variant="up" className="min-w-0">
+                    <PostCard {...post} />
+                  </StaggerItem>
                 ))}
-              </div>
+              </Stagger>
             </div>
 
-            <div className="lg:col-span-4">
+            <Reveal className="lg:col-span-4" variant="left" delay={0.1}>
               <BlogSidebar lawyerOptions={lawyerOptions} />
-            </div>
+            </Reveal>
           </div>
         )}
       </Container>

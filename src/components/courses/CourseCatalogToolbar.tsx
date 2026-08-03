@@ -96,7 +96,7 @@ export function CourseCatalogToolbar({
                   sort: e.target.value as CourseSortOption,
                 })
               }
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20"
+              className="form-select w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-navy-900 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20"
             >
               {SORT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>

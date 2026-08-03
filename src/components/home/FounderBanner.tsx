@@ -1,8 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { assets } from "@/data/site";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
+import { FadeIn } from "@/components/motion/reveal";
 
 /** Full-width cinematic banner featuring the institute director */
 export function FounderBanner() {
@@ -21,26 +24,34 @@ export function FounderBanner() {
 
         <Container className="relative flex min-h-[420px] items-center py-16 md:min-h-[480px]">
           <div className="max-w-xl">
-            <span className="text-sm font-semibold tracking-wide text-gold-400">
-              مدیر موسسه
-            </span>
-            <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
-              مسعود جوکار درزی
-            </h2>
-            <p className="mt-2 text-lg text-gold-400/90">وکیل الرعایا</p>
-            <p className="mt-5 leading-relaxed text-white/80">
-              وکیل پایه یک دادگستری با بیش از دو دهه تجربه در پرونده‌های حقوقی و
-              کیفری. همراهی شما از اولین جلسه مشاوره تا نتیجه نهایی پرونده.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Button href="#consultation">رزرو وقت مشاوره</Button>
-              <Link
-                href="/team/masoud-jokar-darzi/"
-                className="inline-flex items-center justify-center rounded-lg border-2 border-white/30 px-6 py-3 font-semibold text-white transition hover:bg-white/10"
-              >
-                پروفایل وکیل
-              </Link>
-            </div>
+            <FadeIn delay={0.05}>
+              <span className="text-sm font-semibold tracking-wide text-gold-400">
+                مدیر موسسه
+              </span>
+            </FadeIn>
+            <FadeIn delay={0.15}>
+              <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
+                مسعود جوکار درزی
+              </h2>
+              <p className="mt-2 text-lg text-gold-400/90">وکیل الرعایا</p>
+            </FadeIn>
+            <FadeIn delay={0.25}>
+              <p className="mt-5 leading-relaxed text-white/80">
+                وکیل پایه یک دادگستری با بیش از دو دهه تجربه در پرونده‌های حقوقی و
+                کیفری. همراهی شما از اولین جلسه مشاوره تا نتیجه نهایی پرونده.
+              </p>
+            </FadeIn>
+            <FadeIn delay={0.35}>
+              <div className="mt-8 flex flex-wrap gap-4">
+                <Button href="#consultation">رزرو وقت مشاوره</Button>
+                <Link
+                  href="/team/masoud-jokar-darzi/"
+                  className="inline-flex items-center justify-center rounded-lg border-2 border-white/30 px-6 py-3 font-semibold text-white transition hover:bg-white/10"
+                >
+                  پروفایل وکیل
+                </Link>
+              </div>
+            </FadeIn>
           </div>
         </Container>
       </div>

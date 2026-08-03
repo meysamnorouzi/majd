@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { BlogPost } from "@/lib/wordpress/client";
+import { assets } from "@/data/site";
 
 export function BlogFeaturedPost({ post }: { post: BlogPost }) {
   return (
@@ -52,8 +53,7 @@ export function BlogInlineBanner() {
       <div
         className="pointer-events-none absolute inset-0 opacity-10"
         style={{
-          backgroundImage:
-            "url(https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1200&q=80)",
+          backgroundImage: `url(${assets.lawBooks})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}

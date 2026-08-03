@@ -119,8 +119,7 @@ export const courseFormats: CourseFormat[] = [
       "یادگیری با سرعت خودتان پس از کلاس",
     ],
     accent: "blue",
-    image:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200&q=80",
+    image: assets.onlineLearning,
     ctaLabel: "ثبت‌نام دوره آنلاین + آفلاین",
     courses: [
       {
@@ -290,8 +289,7 @@ export const courseFormats: CourseFormat[] = [
       "فرمت فشرده و مقرون‌به‌صرفه",
     ],
     accent: "violet",
-    image:
-      "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&q=80",
+    image: assets.classroom,
     ctaLabel: "ثبت‌نام نشست",
     courses: [
       {

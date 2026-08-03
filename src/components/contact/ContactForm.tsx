@@ -8,7 +8,6 @@ import {
 import { Toast, type ToastVariant } from "@/components/ui/Toast";
 import {
   CONSULTATION_AREAS,
-  CONSULTATION_AREA_LABEL,
   LAWYER_ANY_OPTION,
   LAWYER_PICKER_LABEL,
   type ConsultationArea,
@@ -65,11 +64,15 @@ export function ContactForm({
   const areaNote =
     defaultSubject && resolvedArea === "سایر" ? defaultSubject : undefined;
   const showLawyers =
-    showLawyerPicker && lawyerOptions && lawyerOptions.length > 0;
+    showLawyerPicker && lawyerOptions && lawyerOptions.length > 1;
 
   const inputClass = isDark
     ? "w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/40 focus:border-gold-400 focus:ring-2 focus:ring-gold-400/20 disabled:opacity-60"
-    : "w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 disabled:opacity-60";
+    : "w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 disabled:opacity-60";
+
+  const selectClass = isDark
+    ? "form-select form-select-dark w-full rounded-lg border border-white/20 bg-white/10 py-3 pl-10 pr-4 text-sm text-white outline-none transition focus:border-gold-400 focus:ring-2 focus:ring-gold-400/20 disabled:opacity-60"
+    : "form-select w-full rounded-lg border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-navy-900 outline-none transition focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 disabled:opacity-60";
 
   const labelClass = isDark
     ? "mb-1 block text-sm font-medium text-white"
@@ -193,6 +196,7 @@ export function ContactForm({
             />
           </div>
 
+          {/* Temporarily hidden — consultation area picker
           <div>
             <label
               htmlFor={`area-${id ?? "contact"}`}
@@ -205,7 +209,7 @@ export function ContactForm({
               name="consultation_area"
               required
               disabled={loading}
-              className={inputClass}
+              className={selectClass}
               defaultValue={resolvedArea}
             >
               <option value="" disabled>
@@ -221,6 +225,15 @@ export function ContactForm({
               <input type="hidden" name="area_detail" value={areaNote} />
             )}
           </div>
+          */}
+          <input
+            type="hidden"
+            name="consultation_area"
+            value={resolvedArea || "مشاوره حقوقی"}
+          />
+          {areaNote && (
+            <input type="hidden" name="area_detail" value={areaNote} />
+          )}
 
           {showLawyers && (
             <div>
@@ -234,7 +247,7 @@ export function ContactForm({
                 id={`lawyer-${id ?? "contact"}`}
                 name="lawyer"
                 disabled={loading}
-                className={inputClass}
+                className={selectClass}
                 defaultValue={defaultLawyer ?? LAWYER_ANY_OPTION}
               >
                 <option value={LAWYER_ANY_OPTION}>{LAWYER_ANY_OPTION}</option>

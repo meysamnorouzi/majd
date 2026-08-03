@@ -6,6 +6,7 @@ import { Container } from "@/components/ui/Container";
 import { TeamMemberCard } from "@/components/team/TeamMemberCard";
 import { TeamMemberTabs } from "@/components/team/TeamMemberTabs";
 import { TeamMemberSidebar } from "@/components/team/TeamMemberSidebar";
+import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { getTeam, getTeamMemberBySlug } from "@/lib/wordpress";
 
 export function generateStaticParams() {
@@ -65,7 +66,7 @@ export default async function TeamMemberPage({
       <section className="relative bg-cream pt-12 lg:pt-16">
         <Container>
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
-            <div className="order-2 lg:order-1 lg:col-span-7">
+            <Reveal className="order-2 lg:order-1 lg:col-span-7" variant="right">
               <div className="rounded-2xl bg-white p-6 shadow-lg shadow-navy-900/5 sm:p-8 lg:p-10">
                 <span className="inline-block rounded-full bg-gold-500/10 px-4 py-1.5 text-sm font-semibold text-gold-600">
                   {member.specialty}
@@ -100,62 +101,73 @@ export default async function TeamMemberPage({
                   <TeamMemberTabs member={member} />
                 </div>
               </div>
-            </div>
+            </Reveal>
 
-            <div className="order-1 lg:order-2 lg:col-span-5">
+            <Reveal className="order-1 lg:order-2 lg:col-span-5" variant="left" delay={0.1}>
               <TeamMemberSidebar
                 member={member}
                 lawyerOptions={lawyerOptions}
               />
-            </div>
+            </Reveal>
           </div>
         </Container>
       </section>
 
       <section className="bg-navy-900 py-16 text-white">
         <Container>
-          <div className="text-center">
+          <Reveal className="text-center">
             <h3 className="text-xl font-bold text-gold-400">
               حوزه‌های فعالیت {member.name}
             </h3>
             <p className="mt-2 text-sm text-white/60">
               زمینه‌های تخصصی که در آن‌ها فعالیت دارد
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-2">
-              {member.areasOfPractice.map((area) => (
-                <span
-                  key={area}
-                  className="rounded-lg border border-gold-400/30 bg-white/5 px-4 py-2 text-sm text-white/90"
-                >
+          </Reveal>
+          <Stagger
+            className="mt-8 flex flex-wrap justify-center gap-2"
+            stagger={0.05}
+          >
+            {member.areasOfPractice.map((area) => (
+              <StaggerItem key={area} variant="scale">
+                <span className="inline-block rounded-lg border border-gold-400/30 bg-white/5 px-4 py-2 text-sm text-white/90">
                   {area}
                 </span>
-              ))}
-            </div>
-          </div>
+              </StaggerItem>
+            ))}
+          </Stagger>
         </Container>
       </section>
 
-      <section className="py-16">
-        <Container>
-          <h3 className="text-xl font-bold text-navy-900">سایر اعضای تیم</h3>
-          <p className="mt-2 text-sm text-slate-600">
-            با سایر وکلای متخصص موسسه مجد آشنا شوید
-          </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {otherMembers.map((m) => (
-              <TeamMemberCard key={m.id} member={m} variant="compact" />
-            ))}
-          </div>
-          <div className="mt-8">
-            <Link
-              href="/team/"
-              className="text-sm font-semibold text-navy-900 hover:text-gold-600"
+      {otherMembers.length > 0 && (
+        <section className="py-16">
+          <Container>
+            <Reveal>
+              <h3 className="text-xl font-bold text-navy-900">سایر اعضای تیم</h3>
+              <p className="mt-2 text-sm text-slate-600">
+                با سایر وکلای متخصص موسسه مجد آشنا شوید
+              </p>
+            </Reveal>
+            <Stagger
+              className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+              stagger={0.09}
             >
-              بازگشت به لیست اعضای تیم ←
-            </Link>
-          </div>
-        </Container>
-      </section>
+              {otherMembers.map((m) => (
+                <StaggerItem key={m.id} variant="up">
+                  <TeamMemberCard member={m} variant="compact" />
+                </StaggerItem>
+              ))}
+            </Stagger>
+            <Reveal className="mt-8" delay={0.1}>
+              <Link
+                href="/team/"
+                className="text-sm font-semibold text-navy-900 hover:text-gold-600"
+              >
+                بازگشت به لیست اعضای تیم ←
+              </Link>
+            </Reveal>
+          </Container>
+        </section>
+      )}
     </>
   );
 }

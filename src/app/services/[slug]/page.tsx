@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHero } from "@/components/layout/PageHero";
 import { Container } from "@/components/ui/Container";
@@ -9,12 +10,13 @@ import { ServiceSidebar } from "@/components/services/ServiceSidebar";
 import { ServiceFAQ } from "@/components/services/ServiceFAQ";
 import { ServiceRelatedServices } from "@/components/services/ServiceRelatedServices";
 import { LatestBlogSection } from "@/components/blog/LatestBlogSection";
-import { getServiceBySlug, getServices } from "@/lib/wordpress";
+import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
+import { getServiceBySlug, getAllServiceSlugs, getServices } from "@/lib/wordpress";
 import type { Metadata } from "next";
 import type { Service } from "@/types";
 
 export async function generateStaticParams() {
-  return getServices().map((s) => ({ slug: s.slug }));
+  return getAllServiceSlugs().map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -34,48 +36,46 @@ export async function generateMetadata({
 function ServiceFeatures({ features }: { features: Service["features"] }) {
   if (!features?.length) return null;
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <Stagger className="grid gap-4 sm:grid-cols-2" stagger={0.08}>
       {features.map((feature) => (
-        <div
-          key={feature.title}
-          className="group flex items-start gap-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition hover:border-gold-400/40 hover:shadow-md"
-        >
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-navy-900/5 text-gold-600 transition group-hover:bg-gold-500/10">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-            </svg>
+        <StaggerItem key={feature.title} variant="up">
+          <div className="group flex h-full items-start gap-4 rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition hover:border-gold-400/40 hover:shadow-md">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-navy-900/5 text-gold-600 transition group-hover:bg-gold-500/10">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-semibold text-navy-900">{feature.title}</h4>
+              <p className="mt-1 text-sm leading-relaxed text-slate-600">
+                {feature.description}
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 className="font-semibold text-navy-900">{feature.title}</h4>
-            <p className="mt-1 text-sm leading-relaxed text-slate-600">
-              {feature.description}
-            </p>
-          </div>
-        </div>
+        </StaggerItem>
       ))}
-    </div>
+    </Stagger>
   );
 }
 
 function ServiceProcessSteps({ steps }: { steps: Service["processSteps"] }) {
   if (!steps?.length) return null;
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" stagger={0.09}>
       {steps.map((step) => (
-        <div
-          key={step.step}
-          className="relative rounded-xl border border-slate-100 bg-white p-5 shadow-sm"
-        >
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gold-500/15 text-sm font-bold text-gold-600">
-            {step.step.toLocaleString("fa-IR")}
-          </span>
-          <h4 className="mt-4 font-semibold text-navy-900">{step.title}</h4>
-          <p className="mt-2 text-sm leading-relaxed text-slate-600">
-            {step.description}
-          </p>
-        </div>
+        <StaggerItem key={step.step} variant="up">
+          <div className="relative h-full rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gold-500/15 text-sm font-bold text-gold-600">
+              {step.step.toLocaleString("fa-IR")}
+            </span>
+            <h4 className="mt-4 font-semibold text-navy-900">{step.title}</h4>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">
+              {step.description}
+            </p>
+          </div>
+        </StaggerItem>
       ))}
-    </div>
+    </Stagger>
   );
 }
 
@@ -97,6 +97,14 @@ export default async function ServiceDetailPage({
         description={service.excerpt}
         breadcrumb={[
           { label: "خدمات", href: "/services/" },
+          ...(service.parentSlug && service.parentTitle
+            ? [
+                {
+                  label: service.parentTitle,
+                  href: `/services/${service.parentSlug}/`,
+                },
+              ]
+            : []),
           { label: service.title },
         ]}
       />
@@ -104,7 +112,7 @@ export default async function ServiceDetailPage({
       <section className="py-12 lg:py-16">
         <Container>
           <div className="grid gap-12 lg:grid-cols-3">
-            <div className="lg:col-span-2">
+            <Reveal className="lg:col-span-2" variant="left">
               {service.image && (
                 <div className="relative mb-8 aspect-video overflow-hidden rounded-2xl shadow-lg">
                   <Image
@@ -131,6 +139,37 @@ export default async function ServiceDetailPage({
               <div className="mt-8">
                 <ServiceDetailActions />
               </div>
+
+              {service.children && service.children.length > 0 && (
+                <div className="mt-12">
+                  <h2 className="text-xl font-bold text-navy-900">
+                    زیرمجموعه‌های این خدمت
+                  </h2>
+                  <p className="mt-2 text-sm text-slate-600">
+                    حوزه‌های تخصصی مرتبط با {service.title}
+                  </p>
+                  <Stagger className="mt-6 grid gap-4 sm:grid-cols-2" stagger={0.08}>
+                    {service.children.map((child) => (
+                      <StaggerItem key={child.slug} variant="up">
+                        <Link
+                          href={`/services/${child.slug}/`}
+                          className="group flex h-full flex-col rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition hover:border-gold-400/40 hover:shadow-md"
+                        >
+                          <h3 className="font-semibold text-navy-900 group-hover:text-gold-600">
+                            {child.title}
+                          </h3>
+                          <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
+                            {child.excerpt}
+                          </p>
+                          <span className="mt-3 text-sm font-semibold text-gold-600">
+                            جزئیات بیشتر ←
+                          </span>
+                        </Link>
+                      </StaggerItem>
+                    ))}
+                  </Stagger>
+                </div>
+              )}
 
               {service.highlights && service.highlights.length > 0 && (
                 <div className="mt-10 flex flex-wrap gap-2">
@@ -235,11 +274,11 @@ export default async function ServiceDetailPage({
                   </div>
                 </div>
               )}
-            </div>
+            </Reveal>
 
-            <div className="lg:col-span-1">
+            <Reveal className="lg:col-span-1" variant="right" delay={0.1}>
               <ServiceSidebar service={service} />
-            </div>
+            </Reveal>
           </div>
         </Container>
       </section>

@@ -1,5 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { navLinks, practiceAreas, siteConfig } from "@/data/site";
+import { EnamadSeal } from "@/components/ui/EnamadSeal";
 import { Logo } from "@/components/ui/Logo";
 
 export function Footer() {
@@ -12,8 +14,18 @@ export function Footer() {
               <Logo size="md" variant="dark" />
             </div>
             <p className="text-sm leading-relaxed text-white/70">
-              {siteConfig.description.slice(0, 120)}...
+              {siteConfig.footerBlurb}
             </p>
+            <div className="mt-6 flex flex-wrap items-center gap-4">
+              <Image
+                src={siteConfig.award.image}
+                alt={`${siteConfig.award.title} — ${siteConfig.award.year}`}
+                width={150}
+                height={75}
+                className="h-auto w-[140px] object-contain"
+              />
+              <EnamadSeal />
+            </div>
           </div>
 
           <div>
@@ -44,14 +56,14 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-4 font-bold text-gold-400">تماس با ما</h3>
+            <h3 className="mb-4 font-bold text-gold-400">راه‌های ارتباطی با ما</h3>
             <ul className="space-y-3 text-sm text-white/70">
-              <li>{siteConfig.address}</li>
+              <li className="leading-relaxed">{siteConfig.address}</li>
               {siteConfig.phones.map((phone, i) => (
                 <li key={phone}>
                   <a
                     href={`tel:${siteConfig.phonesTel[i]}`}
-                    className="hover:text-gold-400"
+                    className="transition hover:text-gold-400"
                     dir="ltr"
                   >
                     {phone}
@@ -59,9 +71,10 @@ export function Footer() {
                 </li>
               ))}
               <li>
+                <span className="text-white/50">ایمیل: </span>
                 <a
                   href={`mailto:${siteConfig.email}`}
-                  className="hover:text-gold-400"
+                  className="transition hover:text-gold-400"
                 >
                   {siteConfig.email}
                 </a>

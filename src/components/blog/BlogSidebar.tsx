@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ContactForm } from "@/components/contact/ContactForm";
-import { siteConfig, services, stats } from "@/data/site";
+import { siteConfig, services, stats, assets } from "@/data/site";
 import type { LawyerOption } from "@/components/contact/ContactForm";
 
 export function BlogSidebar({ lawyerOptions }: { lawyerOptions?: LawyerOption[] }) {
@@ -67,11 +67,12 @@ export function BlogSidebar({ lawyerOptions }: { lawyerOptions?: LawyerOption[] 
         </Link>
       </div>
 
-      <div
+      {/* Temporarily hidden — no payment gateway yet */}
+      {/* <div
         className="relative overflow-hidden rounded-2xl p-6 text-white"
         style={{
           backgroundImage:
-            "linear-gradient(135deg, rgba(12,31,61,0.95) 0%, rgba(19,45,82,0.9) 100%), url(https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&q=80)",
+            `linear-gradient(135deg, rgba(12,31,61,0.95) 0%, rgba(19,45,82,0.9) 100%), url(${assets.signingDocument})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -86,7 +87,7 @@ export function BlogSidebar({ lawyerOptions }: { lawyerOptions?: LawyerOption[] 
         >
           مشاهده دوره‌ها
         </Link>
-      </div>
+      </div> */}
     </aside>
   );
 }

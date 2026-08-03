@@ -6,40 +6,43 @@ import { useState } from "react";
 import { navLinks, siteConfig } from "@/data/site";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
-import { CartLink } from "@/components/cart/CartLink";
-import { NavCoursesDropdown } from "@/components/layout/NavCoursesDropdown";
-import { useAuth } from "@/components/providers/AuthProvider";
+import { NavServicesDropdown } from "@/components/layout/NavServicesDropdown";
+// Temporarily hidden — no payment gateway yet
+// import { CartLink } from "@/components/cart/CartLink";
+// import { NavCoursesDropdown } from "@/components/layout/NavCoursesDropdown";
+// import { useAuth } from "@/components/providers/AuthProvider";
 
-const COURSES_NAV_HREF = "/courses/";
+const SERVICES_NAV_HREF = "/services/";
+// const COURSES_NAV_HREF = "/courses/";
 
-function AccountLink() {
-  const { user, displayName, loading } = useAuth();
-  const pathname = usePathname();
-
-  if (loading) return null;
-
-  const href = user ? "/account/" : "/account/login/";
-  const isActive = pathname.startsWith("/account");
-  const label = user
-    ? displayName.split(" ")[0] || "حساب من"
-    : "حساب کاربری";
-
-  return (
-    <Link
-      href={href}
-      className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-        isActive
-          ? "bg-white/10 text-gold-400"
-          : "text-white/80 hover:bg-white/5 hover:text-white"
-      }`}
-    >
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
-      {label}
-    </Link>
-  );
-}
+// function AccountLink() {
+//   const { user, displayName, loading } = useAuth();
+//   const pathname = usePathname();
+//
+//   if (loading) return null;
+//
+//   const href = user ? "/account/" : "/account/login/";
+//   const isActive = pathname.startsWith("/account");
+//   const label = user
+//     ? displayName.split(" ")[0] || "حساب من"
+//     : "حساب کاربری";
+//
+//   return (
+//     <Link
+//       href={href}
+//       className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+//         isActive
+//           ? "bg-white/10 text-gold-400"
+//           : "text-white/80 hover:bg-white/5 hover:text-white"
+//       }`}
+//     >
+//       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+//         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+//       </svg>
+//       {label}
+//     </Link>
+//   );
+// }
 
 export function Header() {
   const pathname = usePathname();
@@ -47,9 +50,12 @@ export function Header() {
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/" || pathname === "";
-    if (href === COURSES_NAV_HREF) {
-      return pathname === COURSES_NAV_HREF || pathname.startsWith("/courses");
+    if (href === SERVICES_NAV_HREF) {
+      return pathname === SERVICES_NAV_HREF || pathname.startsWith("/services");
     }
+    // if (href === COURSES_NAV_HREF) {
+    //   return pathname === COURSES_NAV_HREF || pathname.startsWith("/courses");
+    // }
     return pathname.startsWith(href.replace(/\/$/, ""));
   };
 
@@ -62,8 +68,8 @@ export function Header() {
 
         <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 lg:flex xl:gap-1">
           {navLinks.map((link) =>
-            link.href === COURSES_NAV_HREF ? (
-              <NavCoursesDropdown key={link.href} />
+            link.href === SERVICES_NAV_HREF ? (
+              <NavServicesDropdown key={link.href} />
             ) : (
               <Link
                 key={link.href}
@@ -81,8 +87,9 @@ export function Header() {
         </nav>
 
         <div className="hidden shrink-0 items-center gap-2 lg:flex xl:gap-3">
-          <AccountLink />
-          <CartLink />
+          {/* Temporarily hidden — no payment gateway yet */}
+          {/* <AccountLink /> */}
+          {/* <CartLink /> */}
           <a
             href={`tel:${siteConfig.phonesTel[0]}`}
             className="hidden text-sm font-semibold text-gold-400 hover:text-gold-300 xl:inline"
@@ -96,7 +103,8 @@ export function Header() {
         </div>
 
         <div className="flex shrink-0 items-center gap-2 lg:hidden">
-          <CartLink />
+          {/* Temporarily hidden — no payment gateway yet */}
+          {/* <CartLink /> */}
           <button
             type="button"
             className="rounded-lg p-2 text-white"
@@ -117,16 +125,12 @@ export function Header() {
       {open && (
         <nav className="border-t border-white/10 bg-navy-900 px-4 py-4 lg:hidden">
           {navLinks.map((link) =>
-            link.href === COURSES_NAV_HREF ? (
-              <div key={link.href} className="mb-2">
-                <p className="px-4 py-2 text-xs font-semibold text-white/50">
-                  دوره‌های آموزشی
-                </p>
-                <NavCoursesDropdown
-                  variant="mobile"
-                  onNavigate={() => setOpen(false)}
-                />
-              </div>
+            link.href === SERVICES_NAV_HREF ? (
+              <NavServicesDropdown
+                key={link.href}
+                variant="mobile"
+                onNavigate={() => setOpen(false)}
+              />
             ) : (
               <Link
                 key={link.href}
@@ -141,7 +145,8 @@ export function Header() {
             ),
           )}
           <div className="mt-4 border-t border-white/10 pt-4">
-            <Link
+            {/* Temporarily hidden — no payment gateway yet */}
+            {/* <Link
               href="/account/"
               onClick={() => setOpen(false)}
               className="mb-3 block rounded-lg bg-white/10 px-4 py-3 text-center text-sm font-semibold text-gold-400"
@@ -154,7 +159,7 @@ export function Header() {
               className="mb-3 block rounded-lg bg-white/10 px-4 py-3 text-center text-sm font-semibold text-gold-400"
             >
               سبد خرید
-            </Link>
+            </Link> */}
             <Button href="/contact/" className="w-full">
               مشاوره رایگان
             </Button>

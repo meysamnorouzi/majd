@@ -5,6 +5,20 @@ export const assets = {
   logo: "/images/logo.png",
   founderPortrait: "/images/Masoud-Jokar-Darzi.jpg",
   webinarBanner: "/images/banner-webinar.jpg",
+  awardBadge: "/images/award-1401.png",
+  lawBooks: "/images/law-books.jpg",
+  signingDocument: "/images/signing-document.jpg",
+  businessDesk: "/images/business-desk.jpg",
+  realEstate: "/images/real-estate.jpg",
+  financeMoney: "/images/finance-money.jpg",
+  businessSuit: "/images/business-suit.jpg",
+  teamMemberMale1: "/images/team-member-male-1.jpg",
+  teamMemberFemale: "/images/team-member-female.jpg",
+  teamMemberMale2: "/images/team-member-male-2.jpg",
+  legalBooksClose: "/images/legal-books-close.jpg",
+  onlineLearning: "/images/online-learning.jpg",
+  classroom: "/images/classroom.jpg",
+  studyDesk: "/images/study-desk.jpg",
 } as const;
 
 export const siteConfig = {
@@ -12,13 +26,33 @@ export const siteConfig = {
   shortName: "موسسه حقوقی مجد",
   tagline: "پیشگام در ارائه خدمات حقوقی تخصصی",
   description:
-    "موسسه حقوقی مجد وکیل الرعایا با سال‌ها سابقه درخشان، ارائه‌دهنده خدمات حقوقی و مشاوره تخصصی در تهران. وکلای مجرب ما در صدها پرونده حقوقی و کیفری همراه شما هستند.",
+    "موسسه حقوقی مجد وکیل الرعایا برترین موسسه حقوقی تهران در سال ۱۴۰۱ شناخته شد و مفتخر است موفق‌ترین پرونده‌ها را به سرانجام رسانده است. وکلای مجرب ما در صدها پرونده حقوقی و کیفری همراه شما هستند.",
+  footerBlurb:
+    "موسسه حقوقی مجد وکیل الرعایا برترین موسسه حقوقی تهران در سال ۱۴۰۱ شناخته شد و مفتخر است موفق‌ترین پرونده‌ها را به سرانجام رسانده.",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://vakilmajd.com",
+  city: "تهران",
   phones: ["۰۹۱۲۱۰۱۱۰۹۲", "۰۲۱۷۷۷۲۸۹۳۲", "۰۲۱۷۷۸۸۶۴۳۷"],
   phonesTel: ["+989121011092", "+982177728932", "+982177886437"],
   email: "info@vakilmajd.com",
-  address: "تهران، خیابان ولیعصر، بالاتر از میدان ونک",
+  address:
+    "تهران، بزرگراه شهید باقری، نبش خیابان ۱۶۲ غربی، ساختمان پویا، پلاک ۴۳ واحد ۱۰",
+  mapEmbedUrl:
+    "https://maps.google.com/maps?q=PGM9%2BGCG%20District%204%2C%20Tehran%2C%20Tehran%20Province%2C%20Iran&t=m&z=18&output=embed&iwloc=near",
+  mapTitle: "موقعیت موسسه حقوقی مجد — تهرانپارس، بزرگراه شهید باقری",
   workingHours: "شنبه تا چهارشنبه ۹ تا ۱۸ — پنجشنبه ۹ تا ۱۳",
+  contactCta: "برای دریافت مشاوره هم‌اکنون تماس بگیرید",
+  award: {
+    year: "۱۴۰۱",
+    title: "برترین موسسه حقوقی تهران",
+    image: assets.awardBadge,
+  },
+  enamad: {
+    id: "743215",
+    code: "7SKG26yITKKlLDZN7zUOfiV9OfEPFjil",
+    href: "https://trustseal.enamad.ir/?id=743215&Code=7SKG26yITKKlLDZN7zUOfiV9OfEPFjil",
+    image:
+      "https://trustseal.enamad.ir/logo.aspx?id=743215&Code=7SKG26yITKKlLDZN7zUOfiV9OfEPFjil",
+  },
   social: {
     instagram: "https://instagram.com",
     telegram: "https://t.me",
@@ -51,8 +85,42 @@ export const services: Service[] = [
     description:
       "تیم حقوقی موسسه مجد در تمامی مراحل دادرسی — از دادسرا تا دیوان عالی — همراه موکلین است. تمرکز ما بر تحلیل دقیق مستندات، تنظیم لوایح مستدل و دستیابی به بهترین نتیجه ممکن است.",
     icon: "scale",
-    image:
-      "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&q=80",
+    image: assets.lawBooks,
+    children: [
+      {
+        id: "1-1",
+        slug: "davaye-gharardadi",
+        title: "دعاوی قراردادی",
+        excerpt:
+          "اختلافات ناشی از قراردادهای خرید، فروش، پیمانکاری، مشارکت و تعهدات قراردادی.",
+        description:
+          "از تفسیر مفاد قرارداد تا مطالبه خسارت و فسخ، وکلای موسسه مجد با تحلیل دقیق تعهدات طرفین، بهترین مسیر حقوقی را برای احقاق حق شما طراحی می‌کنند.",
+        icon: "scale",
+        image: assets.lawBooks,
+      },
+      {
+        id: "1-2",
+        slug: "davaye-sherkatha",
+        title: "دعاوی شرکت‌ها",
+        excerpt:
+          "اختلافات سهامداران، هیئت‌مدیره، انحلال و مسئولیت مدیران شرکت.",
+        description:
+          "پرونده‌های شرکتی نیازمند تسلط بر قانون تجارت و اساسنامه است. تیم ما در اختلافات داخلی شرکت، عزل مدیران و دعاوی بین شرکا همراه شماست.",
+        icon: "scale",
+        image: assets.businessDesk,
+      },
+      {
+        id: "1-3",
+        slug: "divan-edalat",
+        title: "دیوان عدالت اداری",
+        excerpt:
+          "اعتراض به آراء و تصمیمات اداری، دولتی و نهادهای عمومی.",
+        description:
+          "طرح دعوا در دیوان عدالت اداری قواعد خاص خود را دارد. وکلای موسسه مجد در اعتراض به تصمیمات اداری و احقاق حقوق در برابر دستگاه‌های دولتی تخصص دارند.",
+        icon: "scale",
+        image: assets.lawBooks,
+      },
+    ],
   },
   {
     id: "2",
@@ -63,8 +131,42 @@ export const services: Service[] = [
     description:
       "وکلای کیفری موسسه با تسلط بر قانون مجازات اسلامی و رویه قضایی، دفاع علمی و مستند ارائه می‌دهند و در اخذ تخفیف و تسریع روند پرونده تخصص دارند.",
     icon: "gavel",
-    image:
-      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80",
+    image: assets.signingDocument,
+    children: [
+      {
+        id: "2-1",
+        slug: "jarayem-eghtesadi",
+        title: "جرایم اقتصادی",
+        excerpt:
+          "دفاع در پرونده‌های پول‌شویی، اخلال در نظام اقتصادی و جرایم مالی پیچیده.",
+        description:
+          "جرایم اقتصادی با پیچیدگی مستندات و تعدد اتهامات همراهند. تیم کیفری موسسه مجد با تجربه در این حوزه، دفاع تخصصی و مستند ارائه می‌دهد.",
+        icon: "gavel",
+        image: assets.financeMoney,
+      },
+      {
+        id: "2-2",
+        slug: "mavade-mokhadder",
+        title: "مواد مخدر",
+        excerpt:
+          "دفاع در پرونده‌های نگهداری، حمل و قاچاق مواد مخدر در تمام مراحل.",
+        description:
+          "پرونده‌های مواد مخدر از حساس‌ترین دعاوی کیفری هستند. حضور وکیل از مراحل اولیه بازجویی تا صدور رأی نهایی نقش تعیین‌کننده‌ای در نتیجه پرونده دارد.",
+        icon: "gavel",
+        image: assets.signingDocument,
+      },
+      {
+        id: "2-3",
+        slug: "kolahbardari",
+        title: "کلاهبرداری",
+        excerpt:
+          "پیگیری و دفاع در پرونده‌های کلاهبرداری، خیانت در امانت و انتقال مال غیر.",
+        description:
+          "چه شاکی باشید و چه متهم، وکلای موسسه مجد با تحلیل دقیق ادله و مستندات، مسیر قانونی مناسب را برای احقاق حق یا دفاع از شما دنبال می‌کنند.",
+        icon: "gavel",
+        image: assets.signingDocument,
+      },
+    ],
   },
   {
     id: "3",
@@ -75,8 +177,42 @@ export const services: Service[] = [
     description:
       "پرونده‌های خانواده نیازمند حساسیت و تخصص همزمان است. موسسه مجد در تمامی دعاوی خانواده از مشاوره اولیه تا اجرای احکام در کنار شماست.",
     icon: "heart",
-    image:
-      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
+    image: assets.businessDesk,
+    children: [
+      {
+        id: "3-1",
+        slug: "talagh-mehrieh",
+        title: "طلاق و مهریه",
+        excerpt:
+          "طلاق توافقی و یک‌طرفه، مطالبه و تقسیط مهریه با رویکرد حمایتی.",
+        description:
+          "از تنظیم دادخواست طلاق تا پیگیری مهریه و حقوق مالی زوجین، تیم خانواده موسسه مجد با درک حساسیت موضوع، مسیر حقوقی را شفاف و حرفه‌ای پیش می‌برد.",
+        icon: "heart",
+        image: assets.businessDesk,
+      },
+      {
+        id: "3-2",
+        slug: "hezanat-farzand",
+        title: "حضانت فرزند",
+        excerpt:
+          "تعیین و سلب حضانت، ملاقات فرزند و حفظ منافع کودک.",
+        description:
+          "در دعاوی حضانت، اولویت با مصلحت کودک است. وکلای ما با تسلط بر قوانین خانواده، از حقوق والدین و فرزندان در دادگاه دفاع می‌کنند.",
+        icon: "heart",
+        image: assets.businessDesk,
+      },
+      {
+        id: "3-3",
+        slug: "nafaghe",
+        title: "نفقه",
+        excerpt:
+          "مطالبه نفقه زوجه و اولاد، ترک انفاق و اجرای احکام نفقه.",
+        description:
+          "نفقه از حقوق قانونی زوجه و فرزندان است. موسسه مجد در مطالبه، پیگیری و اجرای احکام نفقه با سرعت و دقت اقدام می‌کند.",
+        icon: "heart",
+        image: assets.businessDesk,
+      },
+    ],
   },
   {
     id: "4",
@@ -87,8 +223,42 @@ export const services: Service[] = [
     description:
       "از تنظیم قراردادهای اجاره و بیع تا دعاوی تصرف عدوانی و خلع ید، تیم ملکی موسسه مجد تجربه گسترده‌ای در دادگاه‌های تخصصی دارد.",
     icon: "building",
-    image:
-      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80",
+    image: assets.realEstate,
+    children: [
+      {
+        id: "4-1",
+        slug: "malek-mostajer",
+        title: "مالک و مستأجر",
+        excerpt:
+          "تخلیه عین مستأجره، مطالبه اجاره‌بها و اختلافات قرارداد اجاره.",
+        description:
+          "روابط استیجاری قواعد خاص خود را دارد. وکلای ملکی موسسه مجد در تخلیه، تعدیل اجاره و حل اختلافات مالک و مستأجر تخصص دارند.",
+        icon: "building",
+        image: assets.realEstate,
+      },
+      {
+        id: "4-2",
+        slug: "davaye-sabti",
+        title: "دعاوی ثبتی",
+        excerpt:
+          "اعتراض به ثبت، افراز، تفکیک و پیگیری امور ثبت اسناد و املاک.",
+        description:
+          "دعاوی ثبتی نیازمند آشنایی با قانون ثبت و رویه ادارات ثبت است. تیم ملکی موسسه مجد پرونده‌های ثبتی را از ابتدا تا صدور سند پیگیری می‌کند.",
+        icon: "building",
+        image: assets.realEstate,
+      },
+      {
+        id: "4-3",
+        slug: "khale-yad",
+        title: "خلع ید و تصرف",
+        excerpt:
+          "خلع ید، تصرف عدوانی، ممانعت از حق و رفع مزاحمت ملکی.",
+        description:
+          "در دعاوی تصرف و خلع ید، سرعت اقدام و تنظیم صحیح دادخواست اهمیت ویژه‌ای دارد. وکلای موسسه مجد این پرونده‌ها را با اولویت و دقت پیگیری می‌کنند.",
+        icon: "building",
+        image: assets.realEstate,
+      },
+    ],
   },
   {
     id: "5",
@@ -99,8 +269,31 @@ export const services: Service[] = [
     description:
       "با بهره‌گیری از مسیرهای قانونی وصول مطالبات و اجرای احکام، حقوق مالی موکلین را در کوتاه‌ترین زمان ممکن پیگیری می‌کنیم.",
     icon: "coins",
-    image:
-      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80",
+    image: assets.financeMoney,
+    children: [
+      {
+        id: "5-1",
+        slug: "check-bargashti",
+        title: "چک برگشتی",
+        excerpt:
+          "پیگیری کیفری و حقوقی چک بلامحل و وصول وجه چک.",
+        description:
+          "از ثبت شکایت کیفری تا اجرای ثبت و وصول وجه چک، مسیر قانونی چک برگشتی را گام‌به‌گام و با سرعت برای شما طی می‌کنیم.",
+        icon: "coins",
+        image: assets.financeMoney,
+      },
+      {
+        id: "5-2",
+        slug: "ejraye-ahkam",
+        title: "اجرای احکام مالی",
+        excerpt:
+          "اجرای احکام قطعی، توقیف اموال و وصول محکوم‌به.",
+        description:
+          "صدور حکم پایان کار نیست؛ اجرای آن اهمیت دارد. واحد وصول مطالبات موسسه مجد احکام مالی را تا وصول کامل پیگیری می‌کند.",
+        icon: "coins",
+        image: assets.financeMoney,
+      },
+    ],
   },
   {
     id: "6",
@@ -111,12 +304,12 @@ export const services: Service[] = [
     description:
       "قبل از هر اقدام حقوقی، مشاوره دقیق می‌تواند مسیر پرونده را تغییر دهد. اولین جلسه مشاوره برای پرونده‌های خاص رایگان ارائه می‌شود.",
     icon: "chat",
-    image:
-      "https://images.unsplash.com/photo-1507679799987-c737795a7a8c?w=800&q=80",
+    image: assets.businessSuit,
   },
 ];
 
-export const teamMembers: TeamMember[] = [
+/** Full roster — kept for later; public UI uses `teamMembers` only */
+const allTeamMembers: TeamMember[] = [
   {
     id: "1",
     slug: "masoud-jokar-darzi",
@@ -165,8 +358,7 @@ export const teamMembers: TeamMember[] = [
       "دکتر علی رضایی با تخصص در حقوق تجارت و قراردادها، یکی از ارکان اصلی تیم حقوقی موسسه مجد است. ایشان در تنظیم، بازبینی و دفاع از قراردادهای تجاری پیچیده تجربه گسترده‌ای دارند.",
       "حوزه فعالیت ایشان شامل دعاوی تجاری، ورشکستگی، اختلافات سهامداران و قراردادهای بین‌المللی است. رویکرد ایشان ترکیبی از دقت حقوقی و درک عمیق از نیازهای کسب‌وکار است.",
     ],
-    image:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&q=80",
+    image: assets.teamMemberMale1,
     education: "دکترای حقوق خصوصی — دانشگاه تهران",
     experienceYears: "۱۵+",
     areasOfPractice: [
@@ -197,8 +389,7 @@ export const teamMembers: TeamMember[] = [
       "خانم سارا محمدی، وکیل پایه یک دادگستری، متخصص حقوق خانواده و دعاوی مرتبط با ازدواج، طلاق و حضانت فرزندان است. ایشان با رویکردی همدلانه و حرفه‌ای، در یکی از حساس‌ترین حوزه‌های حقوقی همراه موکلان است.",
       "تجربه ایشان در پرونده‌های طلاق توافقی و غیرتوافقی، تعیین نفقه، مهریه و حضانت، به همراه آشنایی با رویه قضایی دیوان عالی، از نقاط قوت تخصصی ایشان محسوب می‌شود.",
     ],
-    image:
-      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&q=80",
+    image: assets.teamMemberFemale,
     education: "کارشناسی ارشد حقوق خانواده",
     experienceYears: "۱۲+",
     areasOfPractice: [
@@ -229,8 +420,7 @@ export const teamMembers: TeamMember[] = [
       "مهندس رضا کریمی با ترکیب دانش حقوقی و فنی مهندسی، در حوزه حقوق ملکی و ثبتی یکی از متخصصان برجسته موسسه مجد است. ایشان در پرونده‌های پیچیده املاک، ثبت اسناد و اختلافات مشاع سابقه درخشانی دارند.",
       "توانایی ایشان در تحلیل نقشه‌ها، اسناد ثبتی و قراردادهای ملکی، همراه با تجربه دادرسی، موجب شده تا در پرونده‌های ملکی با ابعاد فنی-حقوقی به نتایج مطلوبی دست یابند.",
     ],
-    image:
-      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&q=80",
+    image: assets.teamMemberMale2,
     education: "کارشناسی مهندسی عمران — کارشناسی ارشد حقوق خصوصی",
     experienceYears: "۱۴+",
     areasOfPractice: [
@@ -252,11 +442,16 @@ export const teamMembers: TeamMember[] = [
   },
 ];
 
+/** Temporarily show only the founder; restore full `allTeamMembers` when ready */
+export const teamMembers: TeamMember[] = allTeamMembers.filter(
+  (m) => m.slug === "masoud-jokar-darzi",
+);
+
 export const aboutContent = {
   title: "درباره موسسه حقوقی مجد",
   paragraphs: [
-    "موسسه حقوقی مجد وکیل الرعایا یکی از معتبرترین مراکز ارائه خدمات حقوقی در تهران است که با بهره‌گیری از وکلای مجرب و متخصص، طیف گسترده‌ای از خدمات حقوقی را به اشخاص حقیقی و حقوقی ارائه می‌دهد.",
-    "این موسسه موفق به دریافت برترین تندیس موسسه حقوقی کشور شده و در صدها پرونده حقوقی و کیفری فعالیت درخشانی داشته است. تیم ما در حوزه‌های حقوق خصوصی، جزا، خانواده، ملکی، تجارت بین‌الملل و حقوق بشر تخصص دارد.",
+    "موسسه حقوقی مجد وکیل الرعایا برترین موسسه حقوقی تهران در سال ۱۴۰۱ شناخته شد و مفتخر است موفق‌ترین پرونده‌ها را به سرانجام رسانده است. این موسسه با بهره‌گیری از وکلای مجرب و متخصص، طیف گسترده‌ای از خدمات حقوقی را به اشخاص حقیقی و حقوقی ارائه می‌دهد.",
+    "تیم ما در حوزه‌های حقوق خصوصی، جزا، خانواده، ملکی، تجارت بین‌الملل و حقوق بشر تخصص دارد و در صدها پرونده حقوقی و کیفری فعالیت درخشانی داشته است.",
     "همکاری با سفارتخانه‌ها و اتاق‌های بازرگانی کشورهایی چون سوئد، دانمارک و اسپانیا، گواه بر گستره بین‌المللی فعالیت‌های موسسه است. ما متعهد به ارائه مشاوره صادقانه، دفاع مستدل و همراهی موکل در تمامی مراحل دادرسی هستیم.",
   ],
   values: [
@@ -288,8 +483,7 @@ export const fallbackPosts = [
       "قتل از جدی‌ترین جرایم علیه تمامیت جسمانی است. نقش وکیل متخصص در دفاع علمی و اخذ تخفیف...",
     content: "",
     date: "2024-01-15",
-    image:
-      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80",
+    image: assets.signingDocument,
   },
   {
     id: 2,
@@ -299,8 +493,7 @@ export const fallbackPosts = [
       "طلاق توافقی سریع‌ترین مسیر برای پایان زندگی مشترک است. وکیل خانواده موسسه مجد...",
     content: "",
     date: "2024-02-20",
-    image:
-      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
+    image: assets.businessDesk,
   },
   {
     id: 3,
@@ -310,8 +503,7 @@ export const fallbackPosts = [
       "اختلافات مربوط به املاک مشاع از پرتکرارترین دعاوی ملکی است. راهکارهای قانونی...",
     content: "",
     date: "2024-03-10",
-    image:
-      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80",
+    image: assets.realEstate,
   },
 ];
 
@@ -323,8 +515,7 @@ export const fallbackProducts = [
     short_description: "چاپ جدید ۱۴۰۳ — منبع کامل برای وکلا و دانشجویان",
     description: "",
     price: "۴۵۰۰۰۰",
-    image:
-      "https://images.unsplash.com/photo-1589998059171-988d887df646?w=600&q=80",
+    image: assets.legalBooksClose,
   },
   {
     id: 2,
@@ -333,8 +524,7 @@ export const fallbackProducts = [
     short_description: "شامل ۵۰ فرم قرارداد تجاری و ملکی",
     description: "",
     price: "۲۸۰۰۰۰",
-    image:
-      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&q=80",
+    image: assets.signingDocument,
   },
   {
     id: 3,
@@ -343,18 +533,19 @@ export const fallbackProducts = [
     short_description: "مشاوره تخصصی با وکیل پایه یک",
     description: "",
     price: "۸۵۰۰۰۰",
-    image:
-      "https://images.unsplash.com/photo-1507679799987-c737795a7a8c?w=600&q=80",
+    image: assets.businessSuit,
   },
 ];
 
 export const navLinks = [
   { href: "/", label: "صفحه اصلی" },
   { href: "/services/", label: "خدمات" },
-  { href: "/courses/", label: "دوره‌های آموزشی" },
+  // Temporarily hidden — no payment gateway yet
+  // { href: "/courses/", label: "دوره‌های آموزشی" },
   { href: "/team/", label: "اعضای تیم" },
-  { href: "/blog/", label: "بلاگ" },
-  { href: "/shop/", label: "فروشگاه" },
+  { href: "/blog/", label: "مقالات" },
+  // Temporarily hidden — no payment gateway yet
+  // { href: "/shop/", label: "فروشگاه" },
   { href: "/about/", label: "درباره ما" },
   { href: "/contact/", label: "تماس با ما" },
 ];

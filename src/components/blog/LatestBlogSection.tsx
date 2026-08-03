@@ -9,7 +9,7 @@ import { fetchPostsClient, type BlogPost } from "@/lib/wordpress/client";
 
 export function LatestBlogSection({
   eyebrow = "مقالات حقوقی",
-  title = "آخرین مطالب بلاگ",
+  title = "آخرین مقالات",
   description = "تحلیل‌ها و راهنماهای حقوقی مرتبط",
 }: {
   eyebrow?: string;

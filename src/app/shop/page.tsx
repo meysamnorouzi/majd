@@ -1,6 +1,9 @@
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { PageHero } from "@/components/layout/PageHero";
-import { ShopPageContent } from "@/components/shop/ShopPageContent";
+
+// Temporarily hidden — no payment gateway yet
+// import { PageHero } from "@/components/layout/PageHero";
+// import { ShopPageContent } from "@/components/shop/ShopPageContent";
 
 export const metadata: Metadata = {
   title: "فروشگاه",
@@ -8,14 +11,15 @@ export const metadata: Metadata = {
 };
 
 export default function ShopPage() {
-  return (
-    <>
-      <PageHero
-        title="فروشگاه"
-        description="کتاب‌ها، فرم‌های قراردادی و خدمات مشاوره آنلاین"
-        breadcrumb={[{ label: "فروشگاه" }]}
-      />
-      <ShopPageContent />
-    </>
-  );
+  notFound();
+  // return (
+  //   <>
+  //     <PageHero
+  //       title="فروشگاه"
+  //       description="کتاب‌ها، فرم‌های قراردادی و خدمات مشاوره آنلاین"
+  //       breadcrumb={[{ label: "فروشگاه" }]}
+  //     />
+  //     <ShopPageContent />
+  //   </>
+  // );
 }

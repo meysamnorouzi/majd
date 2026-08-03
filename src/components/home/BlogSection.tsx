@@ -1,7 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { SectionTitle } from "@/components/ui/SectionTitle";
+import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 
 interface BlogPost {
   id: number;
@@ -18,53 +21,52 @@ export function BlogSection({ posts }: { posts: BlogPost[] }) {
       <Container>
         <SectionTitle
           eyebrow="مقالات حقوقی"
-          title="آخرین مطالب بلاگ"
+          title="آخرین مقالات"
           description="تحلیل‌های تخصصی و راهنمای حقوقی از وکلای موسسه مجد"
         />
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <Stagger className="grid gap-8 md:grid-cols-2 lg:grid-cols-3" stagger={0.1}>
           {posts.slice(0, 3).map((post) => (
-            <article
-              key={post.id}
-              className="group overflow-hidden rounded-2xl bg-white shadow-md transition hover:shadow-xl"
-            >
-              <Link href={`/blog/post/${post.slug}/`}>
-                <div className="relative h-48 overflow-hidden">
-                  {post.image && (
-                    <Image
-                      src={post.image}
-                      alt={post.title}
-                      fill
-                      className="object-cover transition duration-500 group-hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
-                  )}
-                </div>
-                <div className="p-6">
-                  <time className="text-xs text-gold-600">
-                    {new Date(post.date).toLocaleDateString("fa-IR")}
-                  </time>
-                  <h3 className="mt-2 text-lg font-bold text-navy-900 group-hover:text-gold-600">
-                    {post.title}
-                  </h3>
-                  <p className="mt-2 line-clamp-2 text-sm text-slate-600">
-                    {post.excerpt}
-                  </p>
-                  <span className="mt-4 inline-block text-sm font-semibold text-gold-600">
-                    ادامه مطلب ←
-                  </span>
-                </div>
-              </Link>
-            </article>
+            <StaggerItem key={post.id} as="article" variant="up">
+              <div className="group h-full overflow-hidden rounded-2xl bg-white shadow-md transition hover:shadow-xl">
+                <Link href={`/blog/post/${post.slug}/`}>
+                  <div className="relative h-48 overflow-hidden">
+                    {post.image && (
+                      <Image
+                        src={post.image}
+                        alt={post.title}
+                        fill
+                        className="object-cover transition duration-500 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                    )}
+                  </div>
+                  <div className="p-6">
+                    <time className="text-xs text-gold-600">
+                      {new Date(post.date).toLocaleDateString("fa-IR")}
+                    </time>
+                    <h3 className="mt-2 text-lg font-bold text-navy-900 group-hover:text-gold-600">
+                      {post.title}
+                    </h3>
+                    <p className="mt-2 line-clamp-2 text-sm text-slate-600">
+                      {post.excerpt}
+                    </p>
+                    <span className="mt-4 inline-block text-sm font-semibold text-gold-600">
+                      ادامه مطلب ←
+                    </span>
+                  </div>
+                </Link>
+              </div>
+            </StaggerItem>
           ))}
-        </div>
-        <div className="mt-10 text-center">
+        </Stagger>
+        <Reveal className="mt-10 text-center" delay={0.1}>
           <Link
             href="/blog/"
             className="inline-flex items-center gap-2 rounded-lg border-2 border-navy-900 px-8 py-3 font-semibold text-navy-900 transition hover:bg-navy-900 hover:text-white"
           >
             همه مقالات
           </Link>
-        </div>
+        </Reveal>
       </Container>
     </section>
   );

@@ -3,6 +3,7 @@ import { Container } from "@/components/ui/Container";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { CTASection } from "@/components/home/CTASection";
 import { TeamMemberCard } from "@/components/team/TeamMemberCard";
+import { Stagger, StaggerItem } from "@/components/motion/reveal";
 import { getTeam } from "@/lib/wordpress";
 import type { Metadata } from "next";
 
@@ -27,11 +28,20 @@ export default function TeamPage() {
             title="تیم حقوقی ما"
             description="هر یک از وکلای موسسه در حوزه تخصصی خود سال‌ها تجربه عملی دارند."
           />
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+          <Stagger
+            className={`grid gap-10 sm:grid-cols-2 ${
+              team.length === 1
+                ? "mx-auto max-w-sm lg:grid-cols-1"
+                : "lg:grid-cols-4"
+            }`}
+            stagger={0.1}
+          >
             {team.map((member) => (
-              <TeamMemberCard key={member.id} member={member} />
+              <StaggerItem key={member.id} variant="up">
+                <TeamMemberCard member={member} />
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </Container>
       </section>
       <CTASection />

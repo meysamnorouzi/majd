@@ -94,6 +94,11 @@ export interface Service {
   description: string;
   icon: string;
   image?: string;
+  /** Nested nav / detail pages under this service */
+  children?: Service[];
+  /** Set when this item is a child of another service */
+  parentSlug?: string;
+  parentTitle?: string;
   longDescription?: string[];
   whyNeed?: { title: string; paragraphs: string[] };
   highlights?: string[];

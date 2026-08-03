@@ -11,7 +11,7 @@ export function CoursesHero() {
     <section className="relative overflow-hidden bg-navy-950 text-white">
       <div className="absolute inset-0">
         <Image
-          src="https://images.unsplash.com/photo-1434030214721-735608b8d94b?w=1920&q=80"
+          src={assets.studyDesk}
           alt=""
           fill
           className="object-cover opacity-25"

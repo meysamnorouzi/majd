@@ -15,11 +15,6 @@ const nextConfig: NextConfig = {
         hostname: wpHostname,
         pathname: "/**",
       },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-        pathname: "/**",
-      },
     ],
   },
 };

@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { teamMembers } from "@/data/site";
 import { Container } from "@/components/ui/Container";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { TeamMemberCard } from "@/components/team/TeamMemberCard";
+import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 
 export function TeamSection() {
   return (
@@ -13,19 +16,30 @@ export function TeamSection() {
           title="وکلای متخصص موسسه مجد"
           description="وکلای پایه یک با تجربه در پرونده‌های پیچیده حقوقی و کیفری"
         />
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <Stagger
+          className={`grid gap-8 sm:grid-cols-2 ${
+            teamMembers.length === 1
+              ? "mx-auto max-w-sm lg:grid-cols-1"
+              : "lg:grid-cols-4"
+          }`}
+          stagger={0.1}
+        >
           {teamMembers.map((member) => (
-            <TeamMemberCard key={member.id} member={member} />
+            <StaggerItem key={member.id} variant="up">
+              <TeamMemberCard member={member} />
+            </StaggerItem>
           ))}
-        </div>
-        <div className="mt-10 text-center">
-          <Link
-            href="/team/"
-            className="text-sm font-semibold text-navy-900 hover:text-gold-600"
-          >
-            مشاهده تمام اعضای تیم ←
-          </Link>
-        </div>
+        </Stagger>
+        {teamMembers.length > 1 && (
+          <Reveal className="mt-10 text-center" delay={0.1}>
+            <Link
+              href="/team/"
+              className="text-sm font-semibold text-navy-900 hover:text-gold-600"
+            >
+              مشاهده تمام اعضای تیم ←
+            </Link>
+          </Reveal>
+        )}
       </Container>
     </section>
   );

@@ -1,10 +1,13 @@
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { CoursesHero } from "@/components/courses/CoursesHero";
-import { FormatOverviewCards } from "@/components/courses/FormatOverviewCards";
-import { CoursesCatalog } from "@/components/courses/CoursesCatalog";
-import { EnrollmentSteps } from "@/components/courses/EnrollmentSteps";
-import { CoursesFAQ } from "@/components/courses/CoursesFAQ";
-import { CoursesCTA } from "@/components/courses/CoursesCTA";
+
+// Temporarily hidden — no payment gateway yet
+// import { CoursesHero } from "@/components/courses/CoursesHero";
+// import { FormatOverviewCards } from "@/components/courses/FormatOverviewCards";
+// import { CoursesCatalog } from "@/components/courses/CoursesCatalog";
+// import { EnrollmentSteps } from "@/components/courses/EnrollmentSteps";
+// import { CoursesFAQ } from "@/components/courses/CoursesFAQ";
+// import { CoursesCTA } from "@/components/courses/CoursesCTA";
 
 export const metadata: Metadata = {
   title: "دوره‌های آموزشی",
@@ -13,18 +16,19 @@ export const metadata: Metadata = {
 };
 
 export default function CoursesPage() {
-  return (
-    <>
-      <CoursesHero />
-      <FormatOverviewCards />
-      <CoursesCatalog
-        sectionId="courses-catalog"
-        heading="جستجو و فیلتر دوره‌ها"
-        description="تمام دوره‌های موسسه را جستجو کنید یا با فیلتر نوع، سطح و قیمت، دوره مناسب خود را بیابید."
-      />
-      <EnrollmentSteps />
-      <CoursesFAQ />
-      <CoursesCTA />
-    </>
-  );
+  notFound();
+  // return (
+  //   <>
+  //     <CoursesHero />
+  //     <FormatOverviewCards />
+  //     <CoursesCatalog
+  //       sectionId="courses-catalog"
+  //       heading="جستجو و فیلتر دوره‌ها"
+  //       description="تمام دوره‌های موسسه را جستجو کنید یا با فیلتر نوع، سطح و قیمت، دوره مناسب خود را بیابید."
+  //     />
+  //     <EnrollmentSteps />
+  //     <CoursesFAQ />
+  //     <CoursesCTA />
+  //   </>
+  // );
 }

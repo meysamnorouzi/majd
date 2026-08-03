@@ -1,5 +1,5 @@
 import { ContactForm } from "@/components/contact/ContactForm";
-import { siteConfig, teamMembers } from "@/data/site";
+import { teamMembers } from "@/data/site";
 import type { Service } from "@/types";
 
 const lawyerOptions = teamMembers.map((m) => ({
@@ -20,6 +20,7 @@ export function ServiceSidebar({ service }: { service: Service }) {
         <p className="mt-2 text-sm text-white/70">{service.title}</p>
       </div>
 
+      {/* Temporarily hidden — direct contact block
       <div className="mb-6 space-y-2 rounded-xl bg-white/5 p-4 text-sm">
         <p className="text-white/50">تماس مستقیم</p>
         <a
@@ -31,6 +32,7 @@ export function ServiceSidebar({ service }: { service: Service }) {
         </a>
         <p className="text-xs text-white/50">{siteConfig.workingHours}</p>
       </div>
+      */}
 
       <ContactForm
         variant="dark"

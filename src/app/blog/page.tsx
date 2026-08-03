@@ -3,7 +3,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { BlogPageContent } from "@/components/blog/BlogPageContent";
 
 export const metadata: Metadata = {
-  title: "بلاگ",
+  title: "مقالات",
   description: "مقالات و تحلیل‌های حقوقی موسسه حقوقی مجد وکیل الرعایا",
 };
 
@@ -11,9 +11,9 @@ export default function BlogPage() {
   return (
     <>
       <PageHero
-        title="بلاگ حقوقی"
+        title="مقالات حقوقی"
         description="آخرین مقالات، تحلیل‌ها و راهنماهای حقوقی از وکلای متخصص"
-        breadcrumb={[{ label: "بلاگ" }]}
+        breadcrumb={[{ label: "مقالات" }]}
       />
       <BlogPageContent />
     </>

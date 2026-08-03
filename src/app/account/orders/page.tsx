@@ -1,10 +1,14 @@
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { OrdersPageContent } from "@/components/account/OrdersPageContent";
+
+// Temporarily hidden — no payment gateway yet
+// import { OrdersPageContent } from "@/components/account/OrdersPageContent";
 
 export const metadata: Metadata = {
   title: "سفارش‌ها",
 };
 
 export default function OrdersPage() {
-  return <OrdersPageContent />;
+  notFound();
+  // return <OrdersPageContent />;
 }

@@ -185,10 +185,35 @@ export function getServices() {
   return services;
 }
 
+export function getAllServiceSlugs(): string[] {
+  const slugs: string[] = [];
+  for (const service of services) {
+    slugs.push(service.slug);
+    for (const child of service.children ?? []) {
+      slugs.push(child.slug);
+    }
+  }
+  return slugs;
+}
+
 export function getServiceBySlug(slug: string) {
-  const service = services.find((s) => s.slug === slug);
-  if (!service) return null;
-  return enrichService(service);
+  const top = services.find((s) => s.slug === slug);
+  if (top) return enrichService(top);
+
+  for (const parent of services) {
+    const child = parent.children?.find((c) => c.slug === slug);
+    if (child) {
+      return enrichService({
+        ...child,
+        icon: child.icon || parent.icon,
+        image: child.image || parent.image,
+        parentSlug: parent.slug,
+        parentTitle: parent.title,
+      });
+    }
+  }
+
+  return null;
 }
 
 export function getTeam() {

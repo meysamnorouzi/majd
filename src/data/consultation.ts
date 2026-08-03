@@ -8,7 +8,8 @@ export const CONSULTATION_AREAS = [
   "حقوق تجاری و قراردادها",
   "وصول مطالبات",
   "حقوق بین‌الملل",
-  "دوره آموزشی",
+  // Temporarily hidden — no payment gateway yet
+  // "دوره آموزشی",
   "سایر",
 ] as const;
 

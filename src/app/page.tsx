@@ -1,6 +1,7 @@
 import { Hero } from "@/components/home/Hero";
 import { ServicesSection } from "@/components/home/ServicesSection";
-import { CoursesPreview } from "@/components/home/CoursesPreview";
+// Temporarily hidden — no payment gateway yet
+// import { CoursesPreview } from "@/components/home/CoursesPreview";
 import { AboutSection } from "@/components/home/AboutSection";
 import { TeamSection } from "@/components/home/TeamSection";
 import { BlogSectionLive } from "@/components/home/BlogSectionLive";
@@ -11,7 +12,8 @@ export default function HomePage() {
     <>
       <Hero />
       <ServicesSection />
-      <CoursesPreview />
+      {/* Temporarily hidden — no payment gateway yet */}
+      {/* <CoursesPreview /> */}
       <AboutSection />
       <TeamSection />
       <BlogSectionLive />

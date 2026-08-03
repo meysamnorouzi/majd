@@ -1,4 +1,9 @@
+"use client";
+
+import Link from "next/link";
 import { Container } from "@/components/ui/Container";
+import { FadeIn } from "@/components/motion/reveal";
+import { assets } from "@/data/site";
 
 export function PageHero({
   title,
@@ -14,34 +19,41 @@ export function PageHero({
       <div
         className="absolute inset-0 opacity-20 bg-cover bg-center"
         style={{
-          backgroundImage:
-            "url(https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1200&q=80)",
+          backgroundImage: `url(${assets.lawBooks})`,
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-l from-navy-950/90 to-navy-800/80" />
       <Container className="relative">
         {breadcrumb && (
-          <nav className="mb-4 flex flex-wrap items-center gap-2 text-sm text-white/60">
-            <a href="/" className="hover:text-gold-400">
-              خانه
-            </a>
-            {breadcrumb.map((item, i) => (
-              <span key={i} className="flex items-center gap-2">
-                <span>/</span>
-                {item.href ? (
-                  <a href={item.href} className="hover:text-gold-400">
-                    {item.label}
-                  </a>
-                ) : (
-                  <span className="line-clamp-1 text-gold-400">{item.label}</span>
-                )}
-              </span>
-            ))}
-          </nav>
+          <FadeIn delay={0.05}>
+            <nav className="mb-4 flex flex-wrap items-center gap-2 text-sm text-white/60">
+              <Link href="/" className="hover:text-gold-400">
+                خانه
+              </Link>
+              {breadcrumb.map((item, i) => (
+                <span key={i} className="flex items-center gap-2">
+                  <span>/</span>
+                  {item.href ? (
+                    <Link href={item.href} className="hover:text-gold-400">
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <span className="line-clamp-1 text-gold-400">{item.label}</span>
+                  )}
+                </span>
+              ))}
+            </nav>
+          </FadeIn>
         )}
-        <h1 className="text-3xl font-bold sm:text-4xl lg:text-5xl">{title}</h1>
+        <FadeIn delay={0.12}>
+          <h1 className="text-3xl font-bold sm:text-4xl lg:text-5xl">{title}</h1>
+        </FadeIn>
         {description && (
-          <p className="mt-4 max-w-2xl text-base text-white/75 sm:text-lg">{description}</p>
+          <FadeIn delay={0.22}>
+            <p className="mt-4 max-w-2xl text-base text-white/75 sm:text-lg">
+              {description}
+            </p>
+          </FadeIn>
         )}
       </Container>
     </section>
