@@ -6,7 +6,8 @@ import { notFound } from "next/navigation";
 
 export function generateStaticParams() {
   // return courseFormats.map((f) => ({ slug: f.slug }));
-  return [] as { slug: string }[];
+  // output: "export" requires at least one param (empty [] fails the build)
+  return [{ slug: "_disabled" }];
 }
 
 export default async function CourseFormatDetailPage({
