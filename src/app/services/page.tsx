@@ -4,14 +4,22 @@ import { ServiceIcon } from "@/components/icons/ServiceIcons";
 import { Stagger, StaggerItem } from "@/components/motion/reveal";
 import Link from "next/link";
 import Image from "next/image";
+import { createPageMetadata } from "@/lib/seo";
 import { getServices } from "@/lib/wordpress";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "خدمات حقوقی",
   description:
     "خدمات تخصصی موسسه حقوقی مجد: وکالت حقوقی، کیفری، خانواده، ملکی و مشاوره",
-};
+  path: "/services/",
+  keywords: [
+    "خدمات حقوقی",
+    "وکالت حقوقی",
+    "وکالت کیفری",
+    "مشاوره حقوقی",
+  ],
+});
 
 export default function ServicesPage() {
   const services = getServices();

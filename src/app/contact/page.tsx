@@ -2,7 +2,13 @@ import { PageHero } from "@/components/layout/PageHero";
 import { Container } from "@/components/ui/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { siteConfig, teamMembers } from "@/data/site";
+import {
+  absoluteUrl,
+  breadcrumbJsonLd,
+  createPageMetadata,
+} from "@/lib/seo";
 import type { Metadata } from "next";
 
 const lawyerOptions = teamMembers.map((m) => ({
@@ -10,14 +16,31 @@ const lawyerOptions = teamMembers.map((m) => ({
   name: m.name,
 }));
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "تماس با ما",
   description: `تماس با ${siteConfig.name} — ${siteConfig.address} | تلفن ${siteConfig.phones.join(" — ")}`,
-};
+  path: "/contact/",
+  keywords: ["تماس با وکیل", "مشاوره حقوقی تهران", "آدرس موسسه حقوقی مجد"],
+});
 
 export default function ContactPage() {
   return (
     <>
+      <JsonLd
+        data={[
+          breadcrumbJsonLd([
+            { name: "خانه", path: "/" },
+            { name: "تماس با ما", path: "/contact/" },
+          ]),
+          {
+            "@context": "https://schema.org",
+            "@type": "ContactPage",
+            name: "تماس با ما",
+            url: absoluteUrl("/contact/"),
+            mainEntity: { "@id": `${absoluteUrl("/")}#organization` },
+          },
+        ]}
+      />
       <PageHero
         title="تماس با ما"
         description="برای مشاوره حقوقی، پذیرش پرونده یا هرگونه سوال با ما در ارتباط باشید"

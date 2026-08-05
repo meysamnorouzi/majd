@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { createPageMetadata } from "@/lib/seo";
 
 // Temporarily hidden — no payment gateway yet
 // import { CoursesHero } from "@/components/courses/CoursesHero";
@@ -9,11 +10,13 @@ import type { Metadata } from "next";
 // import { CoursesFAQ } from "@/components/courses/CoursesFAQ";
 // import { CoursesCTA } from "@/components/courses/CoursesCTA";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "دوره‌های آموزشی",
   description:
     "دوره‌های حقوقی در پنج قالب — وبینار آنلاین، آنلاین + آفلاین، حضوری + آنلاین + آفلاین، نشست ترکیبی و نشست حضوری — موسسه حقوقی مجد",
-};
+  path: "/courses/",
+  noIndex: true,
+});
 
 export default function CoursesPage() {
   notFound();

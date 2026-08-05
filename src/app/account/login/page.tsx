@@ -1,13 +1,17 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { createPageMetadata } from "@/lib/seo";
 
 // Temporarily hidden — no payment gateway yet
 // import { Suspense } from "react";
 // import { LoginForm } from "@/components/account/LoginForm";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "ورود",
-};
+  description: "ورود به پنل کاربری موسسه حقوقی مجد",
+  path: "/account/login/",
+  noIndex: true,
+});
 
 export default function LoginPage() {
   notFound();

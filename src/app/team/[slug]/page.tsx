@@ -7,6 +7,12 @@ import { TeamMemberCard } from "@/components/team/TeamMemberCard";
 import { TeamMemberTabs } from "@/components/team/TeamMemberTabs";
 import { TeamMemberSidebar } from "@/components/team/TeamMemberSidebar";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
+import { JsonLd } from "@/components/seo/JsonLd";
+import {
+  breadcrumbJsonLd,
+  createPageMetadata,
+  personJsonLd,
+} from "@/lib/seo";
 import { getTeam, getTeamMemberBySlug } from "@/lib/wordpress";
 
 export function generateStaticParams() {
@@ -21,10 +27,14 @@ export async function generateMetadata({
   const { slug } = await params;
   const member = getTeamMemberBySlug(slug);
   if (!member) return { title: "عضو تیم یافت نشد" };
-  return {
+  return createPageMetadata({
     title: member.name,
     description: `${member.role} — ${member.specialty}. ${member.bio}`,
-  };
+    path: `/team/${member.slug}/`,
+    image: member.image,
+    type: "profile",
+    keywords: [member.name, member.role, member.specialty, "وکیل"],
+  });
 }
 
 function StatCard({ label, value }: { label: string; value: string }) {
@@ -54,6 +64,16 @@ export default async function TeamMemberPage({
 
   return (
     <>
+      <JsonLd
+        data={[
+          personJsonLd(member),
+          breadcrumbJsonLd([
+            { name: "خانه", path: "/" },
+            { name: "اعضای تیم", path: "/team/" },
+            { name: member.name, path: `/team/${member.slug}/` },
+          ]),
+        ]}
+      />
       <PageHero
         title={member.name}
         description={member.role}

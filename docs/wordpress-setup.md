@@ -179,7 +179,7 @@ Course meta appears under `extensions.majd` on product responses (requires accou
 Copy [`.env.example`](../.env.example):
 
 ```env
-NEXT_PUBLIC_WP_URL=https://vakilmajd.com
+NEXT_PUBLIC_WP_URL=admin.vakilmajd.com
 NEXT_PUBLIC_SITE_URL=https://vakilmajd.com
 NEXT_PUBLIC_WC_PAYMENT_METHOD=zarinpal
 ```

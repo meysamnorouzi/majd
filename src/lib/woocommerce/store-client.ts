@@ -5,7 +5,7 @@ import type {
   StoreCart,
 } from "@/types";
 
-const WP_URL = process.env.NEXT_PUBLIC_WP_URL ?? "https://vakilmajd.com";
+const WP_URL = process.env.NEXT_PUBLIC_WP_URL ?? "https://admin.vakilmajd.com";
 const CART_TOKEN_KEY = "wc_cart_token";
 const NONCE_KEY = "wc_store_nonce";
 

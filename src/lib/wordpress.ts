@@ -7,7 +7,7 @@ import {
 import { enrichService } from "@/data/services-detail";
 import type { WpPost, WpProduct } from "@/types";
 
-const WP_URL = process.env.NEXT_PUBLIC_WP_URL ?? "https://vakilmajd.com";
+const WP_URL = process.env.NEXT_PUBLIC_WP_URL ?? "https://admin.vakilmajd.com";
 
 function apiUrl(path: string): string {
   return `${WP_URL.replace(/\/$/, "")}${path}`;

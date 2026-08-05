@@ -5,12 +5,15 @@ import { CTASection } from "@/components/home/CTASection";
 import { FounderBanner } from "@/components/home/FounderBanner";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { aboutContent, assets, practiceAreas, stats } from "@/data/site";
+import { createPageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "درباره ما",
-  description: "درباره موسسه حقوقی مجد وکیل الرعایا — سابقه، ارزش‌ها و حوزه‌های تخصصی",
-};
+  description:
+    "درباره موسسه حقوقی مجد وکیل الرعایا — سابقه، ارزش‌ها و حوزه‌های تخصصی",
+  path: "/about/",
+});
 
 export default function AboutPage() {
   return (

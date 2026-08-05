@@ -11,6 +11,13 @@ import { ServiceFAQ } from "@/components/services/ServiceFAQ";
 import { ServiceRelatedServices } from "@/components/services/ServiceRelatedServices";
 import { LatestBlogSection } from "@/components/blog/LatestBlogSection";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
+import { JsonLd } from "@/components/seo/JsonLd";
+import {
+  breadcrumbJsonLd,
+  createPageMetadata,
+  faqJsonLd,
+  serviceJsonLd,
+} from "@/lib/seo";
 import { getServiceBySlug, getAllServiceSlugs, getServices } from "@/lib/wordpress";
 import type { Metadata } from "next";
 import type { Service } from "@/types";
@@ -27,10 +34,13 @@ export async function generateMetadata({
   const { slug } = await params;
   const service = getServiceBySlug(slug);
   if (!service) return { title: "خدمت یافت نشد" };
-  return {
+  return createPageMetadata({
     title: service.title,
     description: service.excerpt,
-  };
+    path: `/services/${service.slug}/`,
+    image: service.image,
+    keywords: [service.title, "خدمات حقوقی", "موسسه حقوقی مجد"],
+  });
 }
 
 function ServiceFeatures({ features }: { features: Service["features"] }) {
@@ -92,6 +102,25 @@ export default async function ServiceDetailPage({
 
   return (
     <>
+      <JsonLd
+        data={[
+          serviceJsonLd(service),
+          breadcrumbJsonLd([
+            { name: "خانه", path: "/" },
+            { name: "خدمات", path: "/services/" },
+            ...(service.parentSlug && service.parentTitle
+              ? [
+                  {
+                    name: service.parentTitle,
+                    path: `/services/${service.parentSlug}/`,
+                  },
+                ]
+              : []),
+            { name: service.title, path: `/services/${service.slug}/` },
+          ]),
+          ...(service.faqs?.length ? [faqJsonLd(service.faqs)] : []),
+        ]}
+      />
       <PageHero
         title={service.title}
         description={service.excerpt}

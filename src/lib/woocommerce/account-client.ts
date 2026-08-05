@@ -11,7 +11,7 @@ import type {
   CustomerProfile,
 } from "@/types";
 
-const WP_URL = process.env.NEXT_PUBLIC_WP_URL ?? "https://vakilmajd.com";
+const WP_URL = process.env.NEXT_PUBLIC_WP_URL ?? "https://admin.vakilmajd.com";
 const TOKEN_KEY = "majd_auth_token";
 
 export class AccountApiError extends Error {

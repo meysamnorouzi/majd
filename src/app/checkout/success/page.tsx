@@ -1,10 +1,19 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { createPageMetadata } from "@/lib/seo";
 
 // Temporarily hidden — no payment gateway yet
 // import { Suspense } from "react";
 // import { PageHero } from "@/components/layout/PageHero";
 // import { Container } from "@/components/ui/Container";
 // import { CheckoutSuccessContent } from "@/components/checkout/CheckoutSuccessContent";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "نتیجه پرداخت",
+  description: "نتیجه پرداخت سفارش",
+  path: "/checkout/success/",
+  noIndex: true,
+});
 
 export default function CheckoutSuccessPage() {
   notFound();

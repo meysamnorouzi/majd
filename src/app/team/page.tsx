@@ -4,13 +4,16 @@ import { SectionTitle } from "@/components/ui/SectionTitle";
 import { CTASection } from "@/components/home/CTASection";
 import { TeamMemberCard } from "@/components/team/TeamMemberCard";
 import { Stagger, StaggerItem } from "@/components/motion/reveal";
+import { createPageMetadata } from "@/lib/seo";
 import { getTeam } from "@/lib/wordpress";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "اعضای تیم",
   description: "وکلای پایه یک و متخصص موسسه حقوقی مجد وکیل الرعایا",
-};
+  path: "/team/",
+  keywords: ["وکیل پایه یک", "تیم حقوقی مجد", "وکلای تهران"],
+});
 
 export default function TeamPage() {
   const team = getTeam();
