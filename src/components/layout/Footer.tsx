@@ -1,6 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { navLinks, practiceAreas, siteConfig } from "@/data/site";
+import {
+  InstagramIcon,
+  SocialIconLink,
+  TelegramIcon,
+} from "@/components/icons/SocialIcons";
 import { EnamadSeal } from "@/components/ui/EnamadSeal";
 import { Logo } from "@/components/ui/Logo";
 
@@ -88,21 +93,21 @@ export function Footer() {
           <p className="text-center text-sm text-white/50">
             © {new Date().getFullYear()} {siteConfig.name}. تمامی حقوق محفوظ است.
           </p>
-          <div className="flex gap-4">
-            <a
+          <div className="flex items-center gap-2">
+            <SocialIconLink
               href={siteConfig.social.instagram}
-              className="text-white/50 transition hover:text-gold-400"
-              aria-label="اینستاگرام"
+              label="اینستاگرام"
+              className="bg-white/5 text-white/60 hover:bg-white/10 hover:text-gold-400"
             >
-              Instagram
-            </a>
-            <a
+              <InstagramIcon className="h-5 w-5" />
+            </SocialIconLink>
+            <SocialIconLink
               href={siteConfig.social.telegram}
-              className="text-white/50 transition hover:text-gold-400"
-              aria-label="تلگرام"
+              label="تلگرام"
+              className="bg-white/5 text-white/60 hover:bg-white/10 hover:text-gold-400"
             >
-              Telegram
-            </a>
+              <TelegramIcon className="h-5 w-5" />
+            </SocialIconLink>
           </div>
         </div>
       </div>

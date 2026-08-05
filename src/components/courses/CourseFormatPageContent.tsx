@@ -21,6 +21,7 @@ import { formatIcon } from "@/components/courses/FormatIcons";
 import { getAccent } from "@/components/courses/accentStyles";
 
 import { getCourseFormat } from "@/data/courses";
+import { portraitObjectPosition } from "@/data/site";
 import { isCourseCategory } from "@/lib/woocommerce/store-products-client";
 import type { CourseFormatSlug } from "@/types";
 
@@ -41,6 +42,7 @@ export function CourseFormatPageContent({ slug }: { slug: string }) {
   const accent = getAccent(format);
 
   const lockedSlug = format.slug as CourseFormatSlug;
+  const objectPosition = portraitObjectPosition(format.image);
 
 
 
@@ -83,6 +85,8 @@ export function CourseFormatPageContent({ slug }: { slug: string }) {
                 fill
 
                 className="object-cover"
+
+                style={objectPosition ? { objectPosition } : undefined}
 
                 sizes="100vw"
 

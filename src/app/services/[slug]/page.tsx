@@ -141,7 +141,7 @@ export default async function ServiceDetailPage({
       <section className="py-12 lg:py-16">
         <Container>
           <div className="grid gap-12 lg:grid-cols-3">
-            <Reveal className="lg:col-span-2" variant="left">
+            <Reveal className="lg:col-span-2" variant="left" immediate>
               {service.image && (
                 <div className="relative mb-8 aspect-video overflow-hidden rounded-2xl shadow-lg">
                   <Image
@@ -305,7 +305,7 @@ export default async function ServiceDetailPage({
               )}
             </Reveal>
 
-            <Reveal className="lg:col-span-1" variant="right" delay={0.1}>
+            <Reveal className="lg:col-span-1" variant="right" delay={0.1} immediate>
               <ServiceSidebar service={service} />
             </Reveal>
           </div>

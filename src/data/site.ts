@@ -52,6 +52,12 @@ const founderGallery = [
   },
 ] as const;
 
+/** Standing-window portrait: subject sits on the left — nudge ~50px further left */
+export function portraitObjectPosition(src: string): string | undefined {
+  if (src.includes("founder-standing-window")) return "-80px center";
+  return undefined;
+}
+
 export const siteConfig = {
   name: "موسسه حقوقی مجد وکیل الرعایا",
   shortName: "موسسه حقوقی مجد",

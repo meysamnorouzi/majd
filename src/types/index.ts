@@ -16,9 +16,32 @@ export interface WpPost {
   content: { rendered: string };
   date: string;
   featured_media: number;
+  categories?: number[];
   _embedded?: {
     "wp:featuredmedia"?: WpFeaturedMedia[];
   };
+}
+
+/** Raw WordPress REST category (`/wp/v2/categories`) */
+export interface WpCategory {
+  id: number;
+  count: number;
+  description: string;
+  link: string;
+  name: string;
+  slug: string;
+  parent: number;
+}
+
+/** Nested category used in nav / blog UI */
+export interface BlogCategory {
+  id: number;
+  slug: string;
+  name: string;
+  description: string;
+  count: number;
+  parent: number;
+  children: BlogCategory[];
 }
 
 export interface WpPage {

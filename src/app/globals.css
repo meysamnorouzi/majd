@@ -146,7 +146,9 @@ body {
 
 .portrait-filter {
   filter: saturate(0.92) contrast(1.04) brightness(0.98);
-  transition: filter 0.7s ease;
+  transition:
+    filter 0.7s ease,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .group:hover .portrait-filter,
@@ -156,7 +158,9 @@ body {
 
 .portrait-warm {
   filter: sepia(0.12) saturate(1.05) contrast(1.03);
-  transition: filter 0.6s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    filter 0.6s ease,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .group:hover .portrait-warm {

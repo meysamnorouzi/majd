@@ -7,12 +7,14 @@ import { navLinks, siteConfig } from "@/data/site";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
 import { NavServicesDropdown } from "@/components/layout/NavServicesDropdown";
+import { NavBlogDropdown } from "@/components/layout/NavBlogDropdown";
 // Temporarily hidden — no payment gateway yet
 // import { CartLink } from "@/components/cart/CartLink";
 // import { NavCoursesDropdown } from "@/components/layout/NavCoursesDropdown";
 // import { useAuth } from "@/components/providers/AuthProvider";
 
 const SERVICES_NAV_HREF = "/services/";
+const BLOG_NAV_HREF = "/blog/";
 // const COURSES_NAV_HREF = "/courses/";
 
 // function AccountLink() {
@@ -53,6 +55,9 @@ export function Header() {
     if (href === SERVICES_NAV_HREF) {
       return pathname === SERVICES_NAV_HREF || pathname.startsWith("/services");
     }
+    if (href === BLOG_NAV_HREF) {
+      return pathname === BLOG_NAV_HREF || pathname.startsWith("/blog");
+    }
     // if (href === COURSES_NAV_HREF) {
     //   return pathname === COURSES_NAV_HREF || pathname.startsWith("/courses");
     // }
@@ -70,6 +75,8 @@ export function Header() {
           {navLinks.map((link) =>
             link.href === SERVICES_NAV_HREF ? (
               <NavServicesDropdown key={link.href} />
+            ) : link.href === BLOG_NAV_HREF ? (
+              <NavBlogDropdown key={link.href} />
             ) : (
               <Link
                 key={link.href}
@@ -127,6 +134,12 @@ export function Header() {
           {navLinks.map((link) =>
             link.href === SERVICES_NAV_HREF ? (
               <NavServicesDropdown
+                key={link.href}
+                variant="mobile"
+                onNavigate={() => setOpen(false)}
+              />
+            ) : link.href === BLOG_NAV_HREF ? (
+              <NavBlogDropdown
                 key={link.href}
                 variant="mobile"
                 onNavigate={() => setOpen(false)}

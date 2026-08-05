@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { TeamMember } from "@/types";
+import { portraitObjectPosition } from "@/data/site";
 
 export function TeamMemberCard({
   member,
@@ -10,6 +11,7 @@ export function TeamMemberCard({
   variant?: "default" | "compact";
 }) {
   const href = `/team/${member.slug}/`;
+  const objectPosition = portraitObjectPosition(member.image);
 
   if (variant === "compact") {
     return (
@@ -23,6 +25,7 @@ export function TeamMemberCard({
             alt={member.name}
             fill
             className="object-cover"
+            style={objectPosition ? { objectPosition } : undefined}
             sizes="64px"
           />
         </div>
@@ -44,7 +47,10 @@ export function TeamMemberCard({
             src={member.image}
             alt={member.name}
             fill
-            className="portrait-filter object-cover object-[center_18%] duration-700 group-hover:scale-105"
+            className="portrait-filter object-cover will-change-transform group-hover:scale-105"
+            style={{
+              objectPosition: objectPosition ?? "center 18%",
+            }}
             sizes="(max-width: 768px) 50vw, 25vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-navy-950/90 via-navy-950/20 to-transparent opacity-85 transition duration-500 group-hover:opacity-95" />

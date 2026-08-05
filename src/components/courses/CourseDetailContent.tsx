@@ -10,6 +10,7 @@ import { CoursePurchaseCardWp } from "@/components/courses/CoursePurchaseCardWp"
 import { formatIcon } from "@/components/courses/FormatIcons";
 import { getAccent } from "@/components/courses/accentStyles";
 import { getCourseFormat } from "@/data/courses";
+import { portraitObjectPosition } from "@/data/site";
 import {
   fetchStoreProductBySlugClient,
   type StoreProductView,
@@ -92,6 +93,7 @@ export function CourseDetailContent() {
   const Icon = formatIcon(format.slug);
   const accent = getAccent(format);
   const heroImage = product.image ?? format.image;
+  const objectPosition = portraitObjectPosition(heroImage);
   const description =
     stripHtml(product.description) || product.short_description;
   const syllabus = product.majd.syllabus;
@@ -118,6 +120,7 @@ export function CourseDetailContent() {
                 alt={product.name}
                 fill
                 className="object-cover"
+                style={objectPosition ? { objectPosition } : undefined}
                 sizes="100vw"
                 priority
               />

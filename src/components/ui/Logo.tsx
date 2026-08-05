@@ -38,11 +38,11 @@ export function Logo({
       {showText && (
         <span className="hidden min-w-0 sm:block">
           <span
-            className={`block text-sm font-bold leading-tight ${textPrimary}`}
+            className={`block text-base font-bold leading-tight ${textPrimary}`}
           >
             {siteConfig.shortName}
           </span>
-          <span className={`block text-xs ${textAccent}`}>وکیل الرعایا</span>
+          <span className={`block text-sm ${textAccent}`}>وکیل الرعایا</span>
         </span>
       )}
     </Link>

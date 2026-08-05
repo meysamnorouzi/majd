@@ -5,6 +5,7 @@ import { hasSpotPlayerLicense, usesSkyroom } from "@/lib/courses/format-utils";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { CourseCard } from "@/components/courses/CourseCard";
+import { portraitObjectPosition } from "@/data/site";
 import { formatIcon } from "./FormatIcons";
 import { getAccent } from "./accentStyles";
 
@@ -18,6 +19,7 @@ export function CourseFormatSection({
   const Icon = formatIcon(format.slug);
   const accent = getAccent(format);
   const isDark = hasSpotPlayerLicense(format.slug);
+  const objectPosition = portraitObjectPosition(format.image);
   return (
     <section
       id={format.slug}
@@ -31,6 +33,7 @@ export function CourseFormatSection({
               alt={format.title}
               fill
               className="object-cover"
+              style={objectPosition ? { objectPosition } : undefined}
               sizes="100vw"
             />
             <div

@@ -5,18 +5,24 @@ import {
   teamMembers,
 } from "@/data/site";
 import { enrichService } from "@/data/services-detail";
-import type { WpPost, WpProduct } from "@/types";
-
-const WP_URL = process.env.NEXT_PUBLIC_WP_URL ?? "https://admin.vakilmajd.com";
+import {
+  buildCategoryTree,
+  findCategoryBySlug,
+  flattenCategories,
+  normalizeWpSlug,
+} from "@/lib/wordpress/categories";
+import { wpApiUrl, wpServerHeaders } from "@/lib/wordpress/config";
+import type { BlogCategory, WpCategory, WpPost, WpProduct } from "@/types";
 
 function apiUrl(path: string): string {
-  return `${WP_URL.replace(/\/$/, "")}${path}`;
+  return wpApiUrl(path);
 }
 
 async function fetchJson<T>(url: string): Promise<T | null> {
   try {
     const res = await fetch(url, {
       cache: "force-cache",
+      headers: wpServerHeaders(),
     });
     if (!res.ok) return null;
     return (await res.json()) as T;
@@ -39,7 +45,32 @@ export function getFeaturedImage(post: WpPost): string | undefined {
   return media?.source_url;
 }
 
-export async function getPosts(limit = 12): Promise<
+export async function getCategories(): Promise<BlogCategory[]> {
+  const data = await fetchJson<WpCategory[]>(
+    apiUrl(
+      "/wp-json/wp/v2/categories?per_page=100&hide_empty=true&orderby=name&order=asc",
+    ),
+  );
+  if (!data?.length) return [];
+  return buildCategoryTree(data);
+}
+
+export async function getAllCategorySlugs(): Promise<string[]> {
+  const tree = await getCategories();
+  return flattenCategories(tree).map((c) => c.slug);
+}
+
+export async function getCategoryBySlug(
+  slug: string,
+): Promise<BlogCategory | null> {
+  const tree = await getCategories();
+  return findCategoryBySlug(tree, normalizeWpSlug(slug));
+}
+
+export async function getPosts(
+  limit = 12,
+  options?: { categoryId?: number },
+): Promise<
   {
     id: number;
     slug: string;
@@ -50,14 +81,17 @@ export async function getPosts(limit = 12): Promise<
     image?: string;
   }[]
 > {
+  const categoryQuery = options?.categoryId
+    ? `&categories=${options.categoryId}`
+    : "";
   const data = await fetchJson<WpPost[]>(
-    apiUrl(`/wp-json/wp/v2/posts?per_page=${limit}&_embed`),
+    apiUrl(`/wp-json/wp/v2/posts?per_page=${limit}&_embed${categoryQuery}`),
   );
 
   if (data?.length) {
     return data.map((p) => ({
       id: p.id,
-      slug: p.slug,
+      slug: normalizeWpSlug(p.slug),
       title: stripHtml(p.title.rendered),
       excerpt: stripHtml(p.excerpt.rendered).slice(0, 200),
       content: p.content.rendered,
@@ -66,19 +100,22 @@ export async function getPosts(limit = 12): Promise<
     }));
   }
 
-  return fallbackPosts;
+  return options?.categoryId ? [] : fallbackPosts;
 }
 
 export async function getPostBySlug(slug: string) {
+  const normalized = normalizeWpSlug(slug);
   const data = await fetchJson<WpPost[]>(
-    apiUrl(`/wp-json/wp/v2/posts?slug=${slug}&_embed`),
+    apiUrl(
+      `/wp-json/wp/v2/posts?slug=${encodeURIComponent(normalized)}&_embed`,
+    ),
   );
 
   if (data?.[0]) {
     const p = data[0];
     return {
       id: p.id,
-      slug: p.slug,
+      slug: normalizeWpSlug(p.slug),
       title: stripHtml(p.title.rendered),
       excerpt: stripHtml(p.excerpt.rendered),
       content: p.content.rendered,
@@ -87,7 +124,9 @@ export async function getPostBySlug(slug: string) {
     };
   }
 
-  const fallback = fallbackPosts.find((p) => p.slug === slug);
+  const fallback = fallbackPosts.find(
+    (p) => p.slug === normalized || p.slug === slug,
+  );
   if (!fallback) return null;
 
   return {
@@ -102,7 +141,7 @@ export async function getAllPostSlugs(): Promise<string[]> {
   const data = await fetchJson<{ slug: string }[]>(
     apiUrl("/wp-json/wp/v2/posts?per_page=100&_fields=slug"),
   );
-  if (data?.length) return data.map((p) => p.slug);
+  if (data?.length) return data.map((p) => normalizeWpSlug(p.slug));
   return fallbackPosts.map((p) => p.slug);
 }
 

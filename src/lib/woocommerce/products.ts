@@ -1,9 +1,8 @@
 import type { WpProduct } from "@/types";
-
-const WP_URL = process.env.NEXT_PUBLIC_WP_URL ?? "https://admin.vakilmajd.com";
+import { wpApiUrl, wpServerHeaders } from "@/lib/wordpress/config";
 
 function apiUrl(path: string): string {
-  return `${WP_URL.replace(/\/$/, "")}${path}`;
+  return wpApiUrl(path);
 }
 
 export interface StoreProduct {
@@ -23,7 +22,7 @@ export async function getStoreProductBySlug(
   try {
     const res = await fetch(
       apiUrl(`/wp-json/wc/store/v1/products?slug=${encodeURIComponent(slug)}`),
-      { cache: "no-store" },
+      { cache: "no-store", headers: wpServerHeaders() },
     );
     if (!res.ok) return null;
     const data = (await res.json()) as WpProduct[];

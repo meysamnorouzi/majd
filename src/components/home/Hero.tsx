@@ -94,14 +94,15 @@ export function Hero() {
             <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-gold-500/20 via-transparent to-navy-700/30 blur-sm" />
             <div className="group relative w-full overflow-hidden rounded-2xl border border-gold-500/25 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)]">
               <div className="relative aspect-[4/5] w-full">
-                <Image
-                  src={assets.founderPortrait}
-                  alt="مسعود جوکار درزی — وکیل پایه یک و مدیر موسسه حقوقی مجد"
-                  fill
-                  className="portrait-filter object-cover object-[center_18%]"
-                  sizes="(max-width: 1280px) 50vw, 560px"
-                  priority
-                />
+                  <Image
+                    src={assets.founderPortrait}
+                    alt="مسعود جوکار درزی — وکیل پایه یک و مدیر موسسه حقوقی مجد"
+                    fill
+                    className="portrait-filter object-cover"
+                    style={{ objectPosition: "-80px center" }}
+                    sizes="(max-width: 1280px) 50vw, 560px"
+                    priority
+                  />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-transparent to-navy-950/30" />
                 <div className="absolute inset-0 bg-gradient-to-l from-navy-950/40 via-transparent to-transparent" />
               </div>

@@ -57,7 +57,8 @@ function buildVariants(
   };
 }
 
-const viewport = { once: true, amount: 0.2, margin: "0px 0px -48px 0px" };
+/** "some" = any pixel visible. Avoid amount ratios — tall wrappers never hit 20% in-view. */
+const viewport = { once: true, amount: "some" as const, margin: "0px 0px -40px 0px" };
 
 type RevealProps = {
   children: ReactNode;
@@ -65,6 +66,8 @@ type RevealProps = {
   variant?: RevealVariant;
   delay?: number;
   as?: "div" | "section" | "article" | "header" | "footer" | "li" | "span";
+  /** Use for above-the-fold content that should animate on mount */
+  immediate?: boolean;
 } & Omit<HTMLMotionProps<"div">, "children" | "variants" | "initial" | "animate">;
 
 export function Reveal({
@@ -73,6 +76,7 @@ export function Reveal({
   variant = "up",
   delay = 0,
   as = "div",
+  immediate = false,
   ...rest
 }: RevealProps) {
   const reduced = useReducedMotion();
@@ -83,8 +87,9 @@ export function Reveal({
       className={className}
       variants={buildVariants(variant, reduced)}
       initial="hidden"
-      whileInView="visible"
-      viewport={viewport}
+      {...(immediate
+        ? { animate: "visible" as const }
+        : { whileInView: "visible" as const, viewport })}
       transition={{ delay }}
       {...rest}
     >

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { Container } from "@/components/ui/Container";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
+import { portraitObjectPosition } from "@/data/site";
 import type { TeamMember, TeamMemberGalleryItem } from "@/types";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -24,6 +25,7 @@ function GalleryLightbox({
 }) {
   const item = items[index];
   if (!item) return null;
+  const objectPosition = portraitObjectPosition(item.src) ?? "center";
 
   return (
     <motion.div
@@ -83,6 +85,7 @@ function GalleryLightbox({
           alt={item.alt}
           fill
           className="object-cover"
+          style={{ objectPosition }}
           sizes="(max-width: 1024px) 100vw, 896px"
           priority
         />
@@ -102,6 +105,8 @@ export function TeamMemberGallery({ member }: { member: TeamMember }) {
   if (gallery.length === 0) return null;
 
   const [featured, ...rest] = gallery;
+  const featuredPosition =
+    featured ? portraitObjectPosition(featured.src) ?? "center" : "center";
 
   return (
     <section className="bg-cream-dark/40 py-16 lg:py-20">
@@ -129,6 +134,7 @@ export function TeamMemberGallery({ member }: { member: TeamMember }) {
                     alt={featured.alt}
                     fill
                     className="portrait-warm object-cover"
+                    style={{ objectPosition: featuredPosition }}
                     sizes="(max-width: 1024px) 100vw, 58vw"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-navy-950/60 via-transparent to-transparent opacity-80 transition duration-500 group-hover:opacity-95" />
@@ -146,31 +152,36 @@ export function TeamMemberGallery({ member }: { member: TeamMember }) {
             className="grid grid-cols-2 gap-4 lg:col-span-5"
             stagger={0.08}
           >
-            {rest.map((item, i) => (
-              <StaggerItem key={item.src} variant="left">
-                <button
-                  type="button"
-                  onClick={() => setActive(i + 1)}
-                  className="group relative block h-full w-full overflow-hidden rounded-2xl text-right shadow-md ring-1 ring-navy-900/5"
-                >
-                  <div className="relative aspect-square sm:aspect-[4/5]">
-                    <Image
-                      src={item.src}
-                      alt={item.alt}
-                      fill
-                      className="portrait-warm object-cover"
-                      sizes="(max-width: 1024px) 50vw, 20vw"
-                    />
-                    <div className="absolute inset-0 bg-navy-950/0 transition duration-500 group-hover:bg-navy-950/30" />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 transition duration-500 group-hover:opacity-100">
-                      <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
-                        بزرگ‌نمایی
-                      </span>
+            {rest.map((item, i) => {
+              const objectPosition =
+                portraitObjectPosition(item.src) ?? "center";
+              return (
+                <StaggerItem key={item.src} variant="left">
+                  <button
+                    type="button"
+                    onClick={() => setActive(i + 1)}
+                    className="group relative block h-full w-full overflow-hidden rounded-2xl text-right shadow-md ring-1 ring-navy-900/5"
+                  >
+                    <div className="relative aspect-square sm:aspect-[4/5]">
+                      <Image
+                        src={item.src}
+                        alt={item.alt}
+                        fill
+                        className="portrait-warm object-cover"
+                        style={{ objectPosition }}
+                        sizes="(max-width: 1024px) 50vw, 20vw"
+                      />
+                      <div className="absolute inset-0 bg-navy-950/0 transition duration-500 group-hover:bg-navy-950/30" />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 transition duration-500 group-hover:opacity-100">
+                        <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
+                          بزرگ‌نمایی
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </button>
-              </StaggerItem>
-            ))}
+                  </button>
+                </StaggerItem>
+              );
+            })}
           </Stagger>
         </div>
       </Container>

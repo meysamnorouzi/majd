@@ -10,6 +10,7 @@ import {
   fetchCourseProductsClient,
   type StoreProductView,
 } from "@/lib/woocommerce/store-products-client";
+import { portraitObjectPosition } from "@/data/site";
 
 export function CourseFormatSectionDynamic({
   format,
@@ -20,6 +21,7 @@ export function CourseFormatSectionDynamic({
 }) {
   const [courses, setCourses] = useState<StoreProductView[]>([]);
   const isDark = hasSpotPlayerLicense(format.slug);
+  const objectPosition = portraitObjectPosition(format.image);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,6 +54,7 @@ export function CourseFormatSectionDynamic({
                   alt={format.title}
                   fill
                   className="object-cover"
+                  style={objectPosition ? { objectPosition } : undefined}
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>

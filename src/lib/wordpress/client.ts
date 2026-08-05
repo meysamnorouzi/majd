@@ -1,5 +1,6 @@
 import { fallbackPosts, fallbackProducts } from "@/data/site";
 import { wpApiUrl } from "@/lib/wordpress/config";
+import { normalizeWpSlug } from "@/lib/wordpress/categories";
 import type { WpPost } from "@/types";
 
 export interface BlogPost {
@@ -29,7 +30,7 @@ function getFeaturedImage(post: WpPost): string | undefined {
 function mapPost(p: WpPost): BlogPost {
   return {
     id: p.id,
-    slug: p.slug,
+    slug: normalizeWpSlug(p.slug),
     title: stripHtml(p.title.rendered),
     excerpt: stripHtml(p.excerpt.rendered).slice(0, 200),
     content: p.content.rendered,
@@ -48,14 +49,22 @@ async function fetchJson<T>(url: string): Promise<T | null> {
   }
 }
 
-export async function fetchPostsClient(limit = 24): Promise<BlogPost[]> {
+export async function fetchPostsClient(
+  limit = 24,
+  options?: { categoryId?: number },
+): Promise<BlogPost[]> {
+  const categoryQuery = options?.categoryId
+    ? `&categories=${options.categoryId}`
+    : "";
   const data = await fetchJson<WpPost[]>(
-    wpApiUrl(`/wp-json/wp/v2/posts?per_page=${limit}&_embed`),
+    wpApiUrl(`/wp-json/wp/v2/posts?per_page=${limit}&_embed${categoryQuery}`),
   );
 
   if (data?.length) {
     return data.map(mapPost);
   }
+
+  if (options?.categoryId) return [];
 
   return fallbackPosts.map((p) => ({
     id: p.id,
@@ -68,18 +77,31 @@ export async function fetchPostsClient(limit = 24): Promise<BlogPost[]> {
   }));
 }
 
+export {
+  fetchCategoriesClient,
+  findCategoryBySlug,
+  flattenCategories,
+  normalizeWpSlug,
+} from "@/lib/wordpress/categories";
+export type { BlogCategory } from "@/types";
+
 export async function fetchPostBySlugClient(
   slug: string,
 ): Promise<BlogPost | null> {
+  const normalized = normalizeWpSlug(slug);
   const data = await fetchJson<WpPost[]>(
-    wpApiUrl(`/wp-json/wp/v2/posts?slug=${encodeURIComponent(slug)}&_embed`),
+    wpApiUrl(
+      `/wp-json/wp/v2/posts?slug=${encodeURIComponent(normalized)}&_embed`,
+    ),
   );
 
   if (data?.[0]) {
     return mapPost(data[0]);
   }
 
-  const fallback = fallbackPosts.find((p) => p.slug === slug);
+  const fallback = fallbackPosts.find(
+    (p) => p.slug === normalized || p.slug === slug,
+  );
   if (!fallback) return null;
 
   return {

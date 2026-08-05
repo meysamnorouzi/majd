@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import { Container } from "@/components/ui/Container";
 import { FadeIn } from "@/components/motion/reveal";
+import { portraitObjectPosition } from "@/data/site";
 import type { TeamMember } from "@/types";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -12,6 +13,8 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 export function TeamMemberHero({ member }: { member: TeamMember }) {
   const reduced = useReducedMotion();
   const banner = member.bannerImage ?? member.image;
+  const portraitPosition =
+    portraitObjectPosition(member.image) ?? "center 15%";
 
   return (
     <section className="relative isolate overflow-hidden bg-navy-950 text-white">
@@ -102,7 +105,8 @@ export function TeamMemberHero({ member }: { member: TeamMember }) {
                   alt={member.name}
                   fill
                   priority
-                  className="portrait-filter object-cover object-[center_15%]"
+                  className="portrait-filter object-cover"
+                  style={{ objectPosition: portraitPosition }}
                   sizes="320px"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-950/80 via-transparent to-navy-950/20" />
