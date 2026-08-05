@@ -3,7 +3,15 @@ import type { Service, TeamMember } from "@/types";
 /** Local assets in /public/images */
 export const assets = {
   logo: "/images/logo.png",
-  founderPortrait: "/images/Masoud-Jokar-Darzi.jpg",
+  /** Primary portrait — standing by office window */
+  founderPortrait: "/images/founder-standing-window.png",
+  /** Wide cinematic banners (copy space) */
+  founderBanner: "/images/founder-office-desk.png",
+  founderBoardroom: "/images/founder-boardroom.png",
+  founderArchitecture: "/images/founder-architecture.png",
+  founderReading: "/images/founder-reading.png",
+  /** Legacy still used as fallback / secondary */
+  founderPortraitLegacy: "/images/Masoud-Jokar-Darzi.jpg",
   webinarBanner: "/images/banner-webinar.jpg",
   awardBadge: "/images/award-1401.png",
   lawBooks: "/images/law-books.jpg",
@@ -20,6 +28,29 @@ export const assets = {
   classroom: "/images/classroom.jpg",
   studyDesk: "/images/study-desk.jpg",
 } as const;
+
+const founderGallery = [
+  {
+    src: assets.founderPortrait,
+    alt: "مسعود جوکار درزی — ایستاده در دفتر وکالت",
+  },
+  {
+    src: assets.founderBoardroom,
+    alt: "مسعود جوکار درزی — جلسه مشاوره در اتاق کنفرانس",
+  },
+  {
+    src: assets.founderArchitecture,
+    alt: "مسعود جوکار درزی — پرتره حرفه‌ای",
+  },
+  {
+    src: assets.founderReading,
+    alt: "مسعود جوکار درزی — مطالعه پرونده حقوقی",
+  },
+  {
+    src: assets.founderBanner,
+    alt: "مسعود جوکار درزی — در دفتر کار",
+  },
+] as const;
 
 export const siteConfig = {
   name: "موسسه حقوقی مجد وکیل الرعایا",
@@ -323,6 +354,8 @@ const allTeamMembers: TeamMember[] = [
       "رویکرد حرفه‌ای ایشان بر پایه مشاوره صادقانه، برنامه‌ریزی دقیق دفاعی و همراهی مستمر موکل در تمامی مراحل دادرسی استوار است.",
     ],
     image: assets.founderPortrait,
+    bannerImage: assets.founderBanner,
+    gallery: [...founderGallery],
     education: "کارشناسی ارشد حقوق جزا و جرم‌شناسی",
     experienceYears: "۲۰+",
     areasOfPractice: [

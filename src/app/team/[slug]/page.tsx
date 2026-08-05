@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { PageHero } from "@/components/layout/PageHero";
 import { Container } from "@/components/ui/Container";
 import { TeamMemberCard } from "@/components/team/TeamMemberCard";
 import { TeamMemberTabs } from "@/components/team/TeamMemberTabs";
 import { TeamMemberSidebar } from "@/components/team/TeamMemberSidebar";
+import { TeamMemberHero } from "@/components/team/TeamMemberHero";
+import { TeamMemberGallery } from "@/components/team/TeamMemberGallery";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
@@ -39,7 +40,7 @@ export async function generateMetadata({
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-white px-5 py-4 shadow-sm">
+    <div className="rounded-xl border border-slate-100 bg-white px-5 py-4 shadow-sm transition hover:border-gold-400/30 hover:shadow-md">
       <p className="text-2xl font-bold text-gold-600">{value}</p>
       <p className="mt-1 text-sm text-slate-600">{label}</p>
     </div>
@@ -74,14 +75,8 @@ export default async function TeamMemberPage({
           ]),
         ]}
       />
-      <PageHero
-        title={member.name}
-        description={member.role}
-        breadcrumb={[
-          { label: "اعضای تیم", href: "/team/" },
-          { label: member.name },
-        ]}
-      />
+
+      <TeamMemberHero member={member} />
 
       <section className="relative bg-cream pt-12 lg:pt-16">
         <Container>
@@ -133,6 +128,8 @@ export default async function TeamMemberPage({
         </Container>
       </section>
 
+      <TeamMemberGallery member={member} />
+
       <section className="bg-navy-900 py-16 text-white">
         <Container>
           <Reveal className="text-center">
@@ -149,7 +146,7 @@ export default async function TeamMemberPage({
           >
             {member.areasOfPractice.map((area) => (
               <StaggerItem key={area} variant="scale">
-                <span className="inline-block rounded-lg border border-gold-400/30 bg-white/5 px-4 py-2 text-sm text-white/90">
+                <span className="inline-block rounded-lg border border-gold-400/30 bg-white/5 px-4 py-2 text-sm text-white/90 transition hover:border-gold-400/60 hover:bg-white/10">
                   {area}
                 </span>
               </StaggerItem>

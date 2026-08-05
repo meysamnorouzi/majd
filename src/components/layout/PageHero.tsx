@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { FadeIn } from "@/components/motion/reveal";
@@ -9,20 +10,34 @@ export function PageHero({
   title,
   description,
   breadcrumb,
+  image,
+  imagePosition = "center",
 }: {
   title: string;
   description?: string;
   breadcrumb?: { label: string; href?: string }[];
+  /** Optional background image — defaults to law books */
+  image?: string;
+  imagePosition?: string;
 }) {
+  const bg = image ?? assets.lawBooks;
+
   return (
     <section className="relative overflow-hidden bg-navy-900 py-12 text-white sm:py-16 lg:py-20">
-      <div
-        className="absolute inset-0 opacity-20 bg-cover bg-center"
-        style={{
-          backgroundImage: `url(${assets.lawBooks})`,
-        }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-l from-navy-950/90 to-navy-800/80" />
+      <div className="absolute inset-0">
+        <Image
+          src={bg}
+          alt=""
+          fill
+          className="object-cover opacity-[0.28] portrait-filter"
+          style={{ objectPosition: imagePosition }}
+          sizes="100vw"
+          priority
+          aria-hidden
+        />
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-l from-navy-950/92 via-navy-950/80 to-navy-800/70" />
+      <div className="absolute inset-0 bg-gradient-to-t from-navy-950/50 via-transparent to-navy-950/30" />
       <Container className="relative">
         {breadcrumb && (
           <FadeIn delay={0.05}>

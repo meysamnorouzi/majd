@@ -47,7 +47,7 @@ function ContactRow({
   );
 
   return (
-    <div className="flex items-center gap-3 rounded-lg bg-white/5 px-4 py-3">
+    <div className="flex items-center gap-3 rounded-lg bg-white/5 px-4 py-3 transition hover:bg-white/10">
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-gold-400">
         {icon}
       </span>
@@ -70,31 +70,36 @@ export function TeamMemberSidebar({
   const phoneTel = siteConfig.phonesTel[0];
   const email = member.email ?? siteConfig.email;
   const location = member.location ?? siteConfig.address;
+  const portrait = member.gallery?.[3]?.src ?? member.image;
 
   return (
-    <aside className="relative h-fit overflow-hidden rounded-2xl bg-navy-900 text-white lg:sticky lg:top-8">
+    <aside className="group relative h-fit overflow-hidden rounded-2xl bg-navy-900 text-white shadow-xl shadow-navy-900/20 lg:sticky lg:top-8">
       <div className="absolute left-0 top-0 h-full w-1 gold-gradient" />
+      <div className="pointer-events-none absolute -left-20 top-10 h-56 w-56 rounded-full bg-gold-500/10 blur-3xl" />
 
-      <div className="relative mx-6 -mt-0 overflow-hidden rounded-xl border-4 border-navy-800 shadow-2xl lg:mx-8 lg:mt-0 lg:rounded-b-none lg:border-b-0">
+      <div className="relative overflow-hidden">
         <div className="relative aspect-[4/5]">
           <Image
-            src={member.image}
+            src={portrait}
             alt={member.name}
             fill
-            className="object-cover"
-            sizes="320px"
+            className="portrait-filter object-cover object-[center_18%]"
+            sizes="(max-width: 1024px) 100vw, 400px"
             priority
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-navy-900/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-l from-navy-900/30 via-transparent to-transparent" />
+        </div>
+        <div className="absolute inset-x-0 bottom-0 p-6">
+          <StarRating />
+          <h3 className="mt-3 text-xl font-bold text-white">{member.name}</h3>
+          <p className="mt-1 text-sm text-gold-400">{member.role}</p>
+          <p className="mt-2 text-xs text-white/60">{member.specialty}</p>
         </div>
       </div>
 
-      <div className="p-6 pt-5 lg:p-8">
-        <StarRating />
-        <h3 className="mt-3 text-xl font-bold text-white">{member.name}</h3>
-        <p className="mt-1 text-sm text-gold-400">{member.role}</p>
-        <p className="mt-2 text-xs text-white/60">{member.specialty}</p>
-
-        <div className="mt-6 space-y-2">
+      <div className="p-6 pt-2 lg:p-8 lg:pt-4">
+        <div className="space-y-2">
           <h4 className="text-sm font-bold text-gold-400">راه‌های ارتباطی</h4>
 
           <ContactRow

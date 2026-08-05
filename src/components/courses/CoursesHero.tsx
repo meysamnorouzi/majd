@@ -74,10 +74,10 @@ export function CoursesHero() {
             <div className="relative overflow-hidden rounded-2xl border border-gold-500/25 shadow-2xl">
               <div className="relative aspect-[5/4]">
                 <Image
-                  src={assets.founderPortrait}
+                  src={assets.founderReading}
                   alt="آموزش حقوقی — موسسه مجد"
                   fill
-                  className="object-cover object-top"
+                  className="portrait-filter object-cover object-[center_25%]"
                   sizes="560px"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-transparent to-navy-950/20" />

@@ -50,13 +50,13 @@ export function Hero() {
             </FadeIn>
 
             <FadeIn delay={0.4} className="lg:hidden">
-              <div className="relative mt-10 overflow-hidden rounded-2xl border border-gold-500/20 shadow-2xl">
+              <div className="group relative mt-10 overflow-hidden rounded-2xl border border-gold-500/20 shadow-2xl">
                 <div className="relative aspect-[4/3]">
                   <Image
-                    src={assets.founderPortrait}
+                    src={assets.founderArchitecture}
                     alt="مسعود جوکار درزی — مدیر موسسه"
                     fill
-                    className="object-cover object-top"
+                    className="portrait-filter object-cover object-[center_20%]"
                     sizes="100vw"
                     priority
                   />
@@ -92,13 +92,13 @@ export function Hero() {
 
           <FadeIn delay={0.2} className="relative order-1 hidden lg:order-2 lg:block">
             <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-gold-500/20 via-transparent to-navy-700/30 blur-sm" />
-            <div className="relative w-full overflow-hidden rounded-2xl border border-gold-500/25 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)]">
+            <div className="group relative w-full overflow-hidden rounded-2xl border border-gold-500/25 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)]">
               <div className="relative aspect-[4/5] w-full">
                 <Image
                   src={assets.founderPortrait}
                   alt="مسعود جوکار درزی — وکیل پایه یک و مدیر موسسه حقوقی مجد"
                   fill
-                  className="object-cover object-[center_12%]"
+                  className="portrait-filter object-cover object-[center_18%]"
                   sizes="(max-width: 1280px) 50vw, 560px"
                   priority
                 />

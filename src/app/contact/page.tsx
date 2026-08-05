@@ -3,7 +3,7 @@ import { Container } from "@/components/ui/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { siteConfig, teamMembers } from "@/data/site";
+import { assets, siteConfig, teamMembers } from "@/data/site";
 import {
   absoluteUrl,
   breadcrumbJsonLd,
@@ -45,6 +45,8 @@ export default function ContactPage() {
         title="تماس با ما"
         description="برای مشاوره حقوقی، پذیرش پرونده یا هرگونه سوال با ما در ارتباط باشید"
         breadcrumb={[{ label: "تماس با ما" }]}
+        image={assets.founderBoardroom}
+        imagePosition="center 35%"
       />
 
       <section className="border-b border-cream-dark/80 bg-white py-14">

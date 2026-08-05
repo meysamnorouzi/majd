@@ -20,7 +20,7 @@ export function CTASection() {
         <div
           className="h-full w-full bg-cover bg-center"
           style={{
-            backgroundImage: `url(${assets.signingDocument})`,
+            backgroundImage: `url(${assets.founderBanner})`,
           }}
         />
       </div>

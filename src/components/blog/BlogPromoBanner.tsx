@@ -51,13 +51,14 @@ export function BlogInlineBanner() {
     <div className="relative my-12 overflow-hidden rounded-2xl bg-navy-900 px-6 py-10 sm:px-10">
       <div className="absolute left-0 top-0 h-full w-1 gold-gradient" />
       <div
-        className="pointer-events-none absolute inset-0 opacity-10"
+        className="pointer-events-none absolute inset-0 opacity-[0.18]"
         style={{
-          backgroundImage: `url(${assets.lawBooks})`,
+          backgroundImage: `url(${assets.founderReading})`,
           backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundPosition: "center 30%",
         }}
       />
+      <div className="absolute inset-0 bg-gradient-to-l from-navy-950/80 via-navy-950/60 to-transparent" />
       <div className="relative flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-xl font-bold text-white sm:text-2xl">

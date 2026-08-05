@@ -51,6 +51,11 @@ export interface TeamMemberSocial {
   linkedin?: string;
 }
 
+export interface TeamMemberGalleryItem {
+  src: string;
+  alt: string;
+}
+
 export interface TeamMember {
   id: string;
   slug: string;
@@ -60,6 +65,10 @@ export interface TeamMember {
   bio: string;
   fullBio: string[];
   image: string;
+  /** Wide cinematic banner for the detail-page hero */
+  bannerImage?: string;
+  /** Extra portraits shown in the detail gallery */
+  gallery?: TeamMemberGalleryItem[];
   education: string;
   experienceYears: string;
   areasOfPractice: string[];

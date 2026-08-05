@@ -12,14 +12,15 @@ export function AboutSection() {
       <Container>
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <Reveal variant="left" className="relative">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl shadow-2xl">
+            <div className="group relative aspect-[4/5] overflow-hidden rounded-2xl shadow-2xl ring-1 ring-gold-500/15">
               <Image
-                src={assets.founderPortrait}
+                src={assets.founderArchitecture}
                 alt="مسعود جوکار درزی — مدیر موسسه حقوقی مجد"
                 fill
-                className="object-cover object-top"
+                className="portrait-warm object-cover object-[center_15%]"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-navy-950/40 via-transparent to-transparent opacity-60" />
             </div>
             <div className="absolute -bottom-6 -left-6 rounded-xl bg-navy-900 p-6 text-white shadow-xl lg:-left-8">
               <p className="text-3xl font-bold text-gold-400">۱۵+</p>

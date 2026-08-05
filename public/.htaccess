@@ -1,0 +1,31 @@
+# SPA fallbacks for client-rendered detail routes (static Next.js export).
+# Equivalent to public/_redirects — required on Apache / LiteSpeed / cPanel.
+#
+# Without these rules, posts/products/courses published after the last
+# build (or Persian slugs not present as folders) return Apache 404.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Prefer trailing-slash URLs (matches Next trailingSlash: true)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_URI} !/$
+  RewriteCond %{REQUEST_URI} !\.[a-zA-Z0-9]{2,5}$
+  RewriteRule ^(.*)$ /$1/ [R=301,L]
+
+  # Blog post shell: /blog/post/<slug>/ → /blog/post/index.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^blog/post/.+$ /blog/post/index.html [L]
+
+  # Shop product shell
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^shop/product/.+$ /shop/product/index.html [L]
+
+  # Course detail shell
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^courses/view/.+$ /courses/view/index.html [L]
+</IfModule>

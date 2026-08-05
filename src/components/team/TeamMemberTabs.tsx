@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { TeamMember } from "@/types";
 
 const TAB_ITEMS = [
@@ -10,6 +11,8 @@ const TAB_ITEMS = [
 ] as const;
 
 type TabId = (typeof TAB_ITEMS)[number]["id"];
+
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 function TabIcon({ type }: { type: string }) {
   if (type === "user") {
@@ -48,12 +51,13 @@ function ExpertiseCard({ area }: { area: string }) {
 
 export function TeamMemberTabs({ member }: { member: TeamMember }) {
   const [activeTab, setActiveTab] = useState<TabId>("bio");
+  const reduced = useReducedMotion();
 
   return (
     <div>
       <div
         role="tablist"
-        className="flex gap-2 overflow-x-auto rounded-xl bg-white p-2 shadow-sm"
+        className="flex gap-2 overflow-x-auto rounded-xl bg-cream/80 p-2"
       >
         {TAB_ITEMS.map((tab) => (
           <button
@@ -61,10 +65,10 @@ export function TeamMemberTabs({ member }: { member: TeamMember }) {
             role="tab"
             aria-selected={activeTab === tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex shrink-0 items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition ${
+            className={`relative flex shrink-0 items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition ${
               activeTab === tab.id
                 ? "bg-navy-900 text-gold-400 shadow-md"
-                : "text-slate-600 hover:bg-slate-50 hover:text-navy-900"
+                : "text-slate-600 hover:bg-white hover:text-navy-900"
             }`}
           >
             <TabIcon type={tab.icon} />
@@ -74,53 +78,63 @@ export function TeamMemberTabs({ member }: { member: TeamMember }) {
       </div>
 
       <div className="mt-8" role="tabpanel">
-        {activeTab === "bio" && (
-          <div className="space-y-5">
-            {member.fullBio.map((paragraph, i) => (
-              <p
-                key={i}
-                className="leading-relaxed text-slate-600 first:text-lg first:font-medium first:text-slate-700"
-              >
-                {paragraph}
-              </p>
-            ))}
-            <div className="flex items-center gap-4 rounded-xl bg-cream/80 p-5">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-navy-900 text-gold-400">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342" />
-                </svg>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={reduced ? false : { opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduced ? undefined : { opacity: 0, y: -8 }}
+            transition={{ duration: reduced ? 0.01 : 0.35, ease: EASE }}
+          >
+            {activeTab === "bio" && (
+              <div className="space-y-5">
+                {member.fullBio.map((paragraph, i) => (
+                  <p
+                    key={i}
+                    className="leading-relaxed text-slate-600 first:text-lg first:font-medium first:text-slate-700"
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+                <div className="flex items-center gap-4 rounded-xl bg-cream/80 p-5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-navy-900 text-gold-400">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-navy-900">تحصیلات</p>
+                    <p className="mt-0.5 text-sm text-slate-600">{member.education}</p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-semibold text-navy-900">تحصیلات</p>
-                <p className="mt-0.5 text-sm text-slate-600">{member.education}</p>
+            )}
+
+            {activeTab === "expertise" && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {member.areasOfPractice.map((area) => (
+                  <ExpertiseCard key={area} area={area} />
+                ))}
               </div>
-            </div>
-          </div>
-        )}
+            )}
 
-        {activeTab === "expertise" && (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {member.areasOfPractice.map((area) => (
-              <ExpertiseCard key={area} area={area} />
-            ))}
-          </div>
-        )}
-
-        {activeTab === "achievements" && (
-          <ul className="space-y-3">
-            {member.achievements.map((item) => (
-              <li
-                key={item}
-                className="flex gap-3 rounded-xl border border-slate-100 bg-white px-5 py-4 text-sm text-slate-700 shadow-sm"
-              >
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gold-500/15 text-xs font-bold text-gold-600">
-                  ✓
-                </span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        )}
+            {activeTab === "achievements" && (
+              <ul className="space-y-3">
+                {member.achievements.map((item) => (
+                  <li
+                    key={item}
+                    className="flex gap-3 rounded-xl border border-slate-100 bg-white px-5 py-4 text-sm text-slate-700 shadow-sm"
+                  >
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gold-500/15 text-xs font-bold text-gold-600">
+                      ✓
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );

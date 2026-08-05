@@ -27,13 +27,18 @@ Set this to your Next.js production URL (also used for Zarinpal return redirect 
 
 ### Static hosting rewrites
 
-[`public/_redirects`](../public/_redirects) enables client-side detail routes without rebuild:
+Detail routes load content from WordPress in the browser. The static host must rewrite unknown slugs to the shell HTML (otherwise Apache returns “Not Found”).
 
-- `/blog/post/*` → blog post shell
-- `/shop/product/*` → shop product shell
-- `/courses/view/*` → course detail shell
+| Host | Config |
+|------|--------|
+| Netlify / Cloudflare Pages | [`public/_redirects`](../public/_redirects) |
+| Apache / LiteSpeed / cPanel | [`public/.htaccess`](../public/.htaccess) (copied into `out/` on build) |
 
-Configure equivalent rewrites on nginx/Apache if not using Netlify.
+- `/blog/post/*` → `/blog/post/index.html`
+- `/shop/product/*` → `/shop/product/index.html`
+- `/courses/view/*` → `/courses/view/index.html`
+
+For nginx, add equivalent `try_files` rules pointing at those `index.html` shells.
 
 ---
 

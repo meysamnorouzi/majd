@@ -6,6 +6,7 @@ import { TeamMemberCard } from "@/components/team/TeamMemberCard";
 import { Stagger, StaggerItem } from "@/components/motion/reveal";
 import { createPageMetadata } from "@/lib/seo";
 import { getTeam } from "@/lib/wordpress";
+import { assets } from "@/data/site";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = createPageMetadata({
@@ -24,6 +25,8 @@ export default function TeamPage() {
         title="اعضای تیم"
         description="وکلای مجرب و متخصص موسسه حقوقی مجد"
         breadcrumb={[{ label: "اعضای تیم" }]}
+        image={assets.founderBanner}
+        imagePosition="center 28%"
       />
       <section className="py-20">
         <Container>
