@@ -8,6 +8,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { Container } from "@/components/ui/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { BlogSidebar } from "@/components/blog/BlogSidebar";
+import { WpRichContent } from "@/components/content/WpRichContent";
 import { fetchPostBySlugClient, type BlogPost } from "@/lib/wordpress/client";
 import { teamMembers } from "@/data/site";
 import type { LawyerOption } from "@/components/contact/ContactForm";
@@ -114,10 +115,7 @@ export function BlogPostContent() {
                   />
                 </div>
               )}
-              <div
-                className="prose-wp"
-                dangerouslySetInnerHTML={{ __html: post.content }}
-              />
+              <WpRichContent html={post.content} />
               <div className="mt-12 rounded-2xl border border-gold-400/30 bg-navy-900 p-6 sm:p-8">
                 <ContactForm
                   variant="dark"

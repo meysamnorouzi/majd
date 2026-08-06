@@ -3,6 +3,7 @@ import { Container } from "@/components/ui/Container";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { ProductFAQ } from "@/components/shop/ProductFAQ";
+import { WpRichContent } from "@/components/content/WpRichContent";
 import {
   getProductDetailMeta,
   shopTrustItems,
@@ -219,9 +220,9 @@ export function ProductDetailBottom({
                 eyebrow="معرفی کامل"
                 title="توضیحات تفصیلی"
               />
-              <div
-                className="prose-wp rounded-2xl border border-slate-100 bg-cream/50 p-8 sm:p-10"
-                dangerouslySetInnerHTML={{ __html: description }}
+              <WpRichContent
+                className="rounded-2xl border border-slate-100 bg-cream/50 p-8 sm:p-10"
+                html={description}
               />
             </div>
           </Container>

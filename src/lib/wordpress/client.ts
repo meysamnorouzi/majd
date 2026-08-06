@@ -1,5 +1,9 @@
 import { fallbackPosts, fallbackProducts } from "@/data/site";
-import { wpApiUrl } from "@/lib/wordpress/config";
+import {
+  normalizeWpContentHtml,
+  rewriteWpMediaUrl,
+  wpApiUrl,
+} from "@/lib/wordpress/config";
 import { normalizeWpSlug } from "@/lib/wordpress/categories";
 import type { WpPost } from "@/types";
 
@@ -24,7 +28,8 @@ export function stripHtml(html: string): string {
 
 function getFeaturedImage(post: WpPost): string | undefined {
   const media = post._embedded?.["wp:featuredmedia"]?.[0];
-  return media?.source_url;
+  const url = media?.source_url;
+  return url ? rewriteWpMediaUrl(url) : undefined;
 }
 
 function mapPost(p: WpPost): BlogPost {
@@ -33,7 +38,7 @@ function mapPost(p: WpPost): BlogPost {
     slug: normalizeWpSlug(p.slug),
     title: stripHtml(p.title.rendered),
     excerpt: stripHtml(p.excerpt.rendered).slice(0, 200),
-    content: p.content.rendered,
+    content: normalizeWpContentHtml(p.content.rendered),
     date: p.date,
     image: getFeaturedImage(p),
   };

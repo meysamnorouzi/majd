@@ -43,6 +43,26 @@ body {
 .prose-wp {
   overflow-wrap: anywhere;
   max-width: 100%;
+  font-family: var(--font-sans);
+  direction: rtl;
+  unicode-bidi: isolate;
+}
+
+/* Override WordPress/Word inline font-family (e.g. trebuchet ms) */
+.prose-wp :where(*):not(code):not(pre):not(kbd):not(samp) {
+  font-family: inherit !important;
+}
+
+/* Keep LTR islands (numbers like "5.") from flipping to ".5" in RTL */
+.prose-wp [dir="ltr"],
+.prose-wp [dir="LTR"],
+.prose-wp .wp-ltr-num {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.prose-wp .wp-ltr-num {
+  display: inline-block;
 }
 
 .prose-wp h2,
@@ -67,14 +87,152 @@ body {
 .prose-wp img,
 .prose-wp iframe,
 .prose-wp video {
+  display: block;
+  width: 100%;
   max-width: 100%;
   height: auto;
+  border-radius: 1rem;
+  margin-inline: auto;
+}
+
+/* —— Content tables (Word / WordPress) —— */
+.prose-wp div:has(> table),
+.prose-wp figure:has(> table) {
+  display: block;
+  max-width: 100%;
+  margin: 1.75rem 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 1rem;
+  border: 1px solid rgba(12, 31, 61, 0.1);
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgba(12, 31, 61, 0.04),
+    0 8px 24px rgba(12, 31, 61, 0.06);
 }
 
 .prose-wp table {
-  display: block;
-  max-width: 100%;
-  overflow-x: auto;
+  direction: rtl;
+  width: 100%;
+  min-width: 20rem;
+  margin: 1.75rem 0;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border: 1px solid rgba(12, 31, 61, 0.1) !important;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgba(12, 31, 61, 0.04),
+    0 8px 24px rgba(12, 31, 61, 0.06);
+}
+
+.prose-wp div:has(> table) > table,
+.prose-wp figure:has(> table) > table {
+  margin: 0;
+  border: none !important;
+  border-radius: 0;
+  box-shadow: none;
+  min-width: 100%;
+}
+
+.prose-wp table caption {
+  caption-side: top;
+  padding: 0.75rem 1rem;
+  text-align: right;
+  font-weight: 700;
+  color: var(--navy-900);
+}
+
+.prose-wp table td,
+.prose-wp table th {
+  padding: 0.9rem 1.1rem !important;
+  text-align: right !important;
+  vertical-align: middle;
+  border: none !important;
+  border-bottom: 1px solid rgba(12, 31, 61, 0.08) !important;
+  color: #334155 !important;
+  background: transparent;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+
+.prose-wp table td *,
+.prose-wp table th * {
+  color: inherit !important;
+}
+
+.prose-wp table td p,
+.prose-wp table th p,
+.prose-wp table td .MsoNormal,
+.prose-wp table th .MsoNormal {
+  margin: 0 !important;
+  line-height: 1.7;
+}
+
+/* Header: real <thead>, or first row when Word skips thead */
+.prose-wp table thead td,
+.prose-wp table thead th,
+.prose-wp table:not(:has(thead)) > tr:first-child > td,
+.prose-wp table:not(:has(thead)) > tr:first-child > th,
+.prose-wp table:not(:has(thead)) > tbody:first-child > tr:first-child > td,
+.prose-wp table:not(:has(thead)) > tbody:first-child > tr:first-child > th {
+  background: var(--navy-900) !important;
+  color: #fff !important;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  letter-spacing: 0.01em;
+  border: none !important;
+  border-bottom: 2px solid var(--gold-500) !important;
+}
+
+.prose-wp table thead td *,
+.prose-wp table thead th *,
+.prose-wp table:not(:has(thead)) > tr:first-child > td *,
+.prose-wp table:not(:has(thead)) > tr:first-child > th *,
+.prose-wp table:not(:has(thead)) > tbody:first-child > tr:first-child > td *,
+.prose-wp table:not(:has(thead)) > tbody:first-child > tr:first-child > th * {
+  color: #fff !important;
+}
+
+.prose-wp table tbody tr:nth-child(even) td,
+.prose-wp table tbody tr:nth-child(even) th {
+  background: rgba(248, 246, 241, 0.85) !important;
+}
+
+.prose-wp table tbody tr:hover td,
+.prose-wp table tbody tr:hover th {
+  background: rgba(212, 175, 55, 0.12) !important;
+}
+
+.prose-wp table thead tr:hover td,
+.prose-wp table thead tr:hover th,
+.prose-wp table:not(:has(thead)) > tbody:first-child > tr:first-child:hover > td,
+.prose-wp table:not(:has(thead)) > tbody:first-child > tr:first-child:hover > th {
+  background: var(--navy-900) !important;
+}
+
+.prose-wp table tbody tr:last-child td,
+.prose-wp table tbody tr:last-child th {
+  border-bottom: none !important;
+}
+
+.prose-wp table a {
+  color: var(--gold-600);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.prose-wp table a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .prose-wp table td,
+  .prose-wp table th {
+    padding: 0.75rem 0.85rem !important;
+    font-size: 0.875rem;
+  }
 }
 
 .gold-gradient {

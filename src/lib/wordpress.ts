@@ -11,7 +11,12 @@ import {
   flattenCategories,
   normalizeWpSlug,
 } from "@/lib/wordpress/categories";
-import { wpApiUrl, wpServerHeaders } from "@/lib/wordpress/config";
+import {
+  normalizeWpContentHtml,
+  rewriteWpMediaUrl,
+  wpApiUrl,
+  wpServerHeaders,
+} from "@/lib/wordpress/config";
 import type { BlogCategory, WpCategory, WpPost, WpProduct } from "@/types";
 
 function apiUrl(path: string): string {
@@ -42,7 +47,8 @@ export function stripHtml(html: string): string {
 
 export function getFeaturedImage(post: WpPost): string | undefined {
   const media = post._embedded?.["wp:featuredmedia"]?.[0];
-  return media?.source_url;
+  const url = media?.source_url;
+  return url ? rewriteWpMediaUrl(url) : undefined;
 }
 
 export async function getCategories(): Promise<BlogCategory[]> {
@@ -94,7 +100,7 @@ export async function getPosts(
       slug: normalizeWpSlug(p.slug),
       title: stripHtml(p.title.rendered),
       excerpt: stripHtml(p.excerpt.rendered).slice(0, 200),
-      content: p.content.rendered,
+      content: normalizeWpContentHtml(p.content.rendered),
       date: p.date,
       image: getFeaturedImage(p),
     }));
@@ -118,7 +124,7 @@ export async function getPostBySlug(slug: string) {
       slug: normalizeWpSlug(p.slug),
       title: stripHtml(p.title.rendered),
       excerpt: stripHtml(p.excerpt.rendered),
-      content: p.content.rendered,
+      content: normalizeWpContentHtml(p.content.rendered),
       date: p.date,
       image: getFeaturedImage(p),
     };
