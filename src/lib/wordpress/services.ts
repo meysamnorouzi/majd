@@ -12,6 +12,7 @@ import {
   wpApiUrl,
   wpServerHeaders,
 } from "@/lib/wordpress/config";
+import { wpFetch } from "@/lib/wordpress/fetch";
 import type { BlogCategory, Service, WpPost } from "@/types";
 
 function stripHtml(html: string): string {
@@ -305,12 +306,12 @@ async function fetchJson<T>(
   url: string,
   options?: { headers?: HeadersInit; cache?: RequestCache },
 ): Promise<T | null> {
+  const res = await wpFetch(url, {
+    cache: options?.cache ?? "no-store",
+    headers: options?.headers,
+  });
+  if (!res?.ok) return null;
   try {
-    const res = await fetch(url, {
-      cache: options?.cache ?? "no-store",
-      headers: options?.headers,
-    });
-    if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
     return null;
@@ -332,8 +333,8 @@ async function fetchAllServicePosts(
     const url = wpApiUrl(
       `/wp-json/wp/v2/posts?per_page=100&page=${page}&_embed&categories=${categoryIds.join(",")}`,
     );
-    const res = await fetch(url, { cache, headers });
-    if (!res.ok) break;
+    const res = await wpFetch(url, { cache, headers });
+    if (!res?.ok) break;
 
     const batch = (await res.json()) as WpPost[];
     posts.push(...batch);

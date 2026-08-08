@@ -14,6 +14,7 @@ import {
   wpApiUrl,
   wpServerHeaders,
 } from "@/lib/wordpress/config";
+import { wpFetch } from "@/lib/wordpress/fetch";
 import {
   applyFallbackBlogPosts,
   applyPostsListOptions,
@@ -39,12 +40,12 @@ function apiUrl(path: string): string {
 }
 
 async function fetchJson<T>(url: string): Promise<T | null> {
+  const res = await wpFetch(url, {
+    cache: "force-cache",
+    headers: wpServerHeaders(),
+  });
+  if (!res?.ok) return null;
   try {
-    const res = await fetch(url, {
-      cache: "force-cache",
-      headers: wpServerHeaders(),
-    });
-    if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
     return null;

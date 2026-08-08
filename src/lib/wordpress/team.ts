@@ -5,6 +5,7 @@ import {
   wpApiUrl,
   wpServerHeaders,
 } from "@/lib/wordpress/config";
+import { wpFetch } from "@/lib/wordpress/fetch";
 import type {
   TeamMember,
   TeamMemberGalleryItem,
@@ -89,12 +90,12 @@ async function fetchJson<T>(
   url: string,
   options?: { headers?: HeadersInit; cache?: RequestCache },
 ): Promise<T | null> {
+  const res = await wpFetch(url, {
+    cache: options?.cache ?? "no-store",
+    headers: options?.headers,
+  });
+  if (!res?.ok) return null;
   try {
-    const res = await fetch(url, {
-      cache: options?.cache ?? "no-store",
-      headers: options?.headers,
-    });
-    if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
     return null;
@@ -114,8 +115,8 @@ async function fetchAllTeamPosts(
 
   while (page <= totalPages && page <= 10) {
     const url = wpApiUrl(`${TEAM_QUERY}&page=${page}`);
-    const res = await fetch(url, { cache, headers });
-    if (!res.ok) break;
+    const res = await wpFetch(url, { cache, headers });
+    if (!res?.ok) break;
 
     const batch = (await res.json()) as WpTeamMember[];
     posts.push(...batch);
