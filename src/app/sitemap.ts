@@ -29,9 +29,11 @@ function entry(
  * (hidden shop/courses/account surfaces are omitted).
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [postSlugs] = await Promise.all([getAllPostSlugs()]);
-  const serviceSlugs = getAllServiceSlugs();
-  const team = getTeam();
+  const [postSlugs, serviceSlugs] = await Promise.all([
+    getAllPostSlugs(),
+    getAllServiceSlugs(),
+  ]);
+  const team = await getTeam();
 
   const staticRoutes: SitemapEntry[] = [
     entry("/", { changeFrequency: "weekly", priority: 1 }),

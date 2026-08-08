@@ -2,13 +2,31 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { services } from "@/data/site";
+import { useEffect, useState } from "react";
+import { fetchServicesClient } from "@/lib/wordpress/client";
 import { Container } from "@/components/ui/Container";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { ServiceIcon } from "@/components/icons/ServiceIcons";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
+import type { Service } from "@/types";
 
 export function ServicesSection() {
+  const [services, setServices] = useState<Service[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchServicesClient().then(({ posts }) => {
+      if (!cancelled) {
+        setServices(posts.slice(0, 6));
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!services.length) return null;
+
   return (
     <section className="py-20 lg:py-28">
       <Container>
@@ -18,7 +36,7 @@ export function ServicesSection() {
           description="از دعاوی کیفری تا خانواده و ملکی — تیم ما در تمامی شعب قضایی تهران در کنار شماست."
         />
         <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" stagger={0.09}>
-          {services.slice(0, 6).map((service) => (
+          {services.map((service) => (
             <StaggerItem key={service.id} variant="up">
               <Link
                 href={`/services/${service.slug}/`}

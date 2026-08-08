@@ -5,7 +5,6 @@ import { Container } from "@/components/ui/Container";
 import { TeamMemberCard } from "@/components/team/TeamMemberCard";
 import { TeamMemberTabs } from "@/components/team/TeamMemberTabs";
 import { TeamMemberSidebar } from "@/components/team/TeamMemberSidebar";
-import { TeamMemberHero } from "@/components/team/TeamMemberHero";
 import { TeamMemberGallery } from "@/components/team/TeamMemberGallery";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -16,8 +15,9 @@ import {
 } from "@/lib/seo";
 import { getTeam, getTeamMemberBySlug } from "@/lib/wordpress";
 
-export function generateStaticParams() {
-  return getTeam().map((m) => ({ slug: m.slug }));
+export async function generateStaticParams() {
+  const team = await getTeam();
+  return team.map((m) => ({ slug: m.slug }));
 }
 
 export async function generateMetadata({
@@ -26,7 +26,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const member = getTeamMemberBySlug(slug);
+  const member = await getTeamMemberBySlug(slug);
   if (!member) return { title: "عضو تیم یافت نشد" };
   return createPageMetadata({
     title: member.name,
@@ -53,10 +53,10 @@ export default async function TeamMemberPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const member = getTeamMemberBySlug(slug);
+  const member = await getTeamMemberBySlug(slug);
   if (!member) notFound();
 
-  const allMembers = getTeam();
+  const allMembers = await getTeam();
   const otherMembers = allMembers.filter((m) => m.slug !== slug);
   const lawyerOptions = allMembers.map((m) => ({
     slug: m.slug,
@@ -76,9 +76,7 @@ export default async function TeamMemberPage({
         ]}
       />
 
-      <TeamMemberHero member={member} />
-
-      <section className="relative bg-cream pt-12 lg:pt-16">
+      <section className="relative bg-cream py-20">
         <Container>
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
             <Reveal className="order-2 lg:order-1 lg:col-span-7" variant="right">

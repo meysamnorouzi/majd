@@ -8,7 +8,8 @@ import {
   fetchCategoriesClient,
   type BlogCategory,
 } from "@/lib/wordpress/client";
-import { siteConfig, services, stats, teamMembers } from "@/data/site";
+import { siteConfig, services, stats } from "@/data/site";
+import { useTeamMembers } from "@/hooks/useTeamMembers";
 import type { LawyerOption } from "@/components/contact/ContactForm";
 
 function flattenForNav(tree: BlogCategory[]): BlogCategory[] {
@@ -36,7 +37,8 @@ function BlogSidebarInner({
   const activeSlug = activeCategorySlug ?? urlCategory;
 
   const [categories, setCategories] = useState<BlogCategory[]>([]);
-  const founder = teamMembers[0];
+  const team = useTeamMembers();
+  const founder = team[0];
 
   useEffect(() => {
     let cancelled = false;

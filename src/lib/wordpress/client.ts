@@ -5,7 +5,17 @@ import {
   wpApiUrl,
 } from "@/lib/wordpress/config";
 import { normalizeWpSlug } from "@/lib/wordpress/categories";
+import {
+  applyFallbackBlogPosts,
+  applyPostsListOptions,
+  buildPostsQuery,
+  hasPostsQueryFilters,
+  postsFetchLimitWhenSearching,
+  type FetchPostsOptions,
+} from "@/lib/wordpress/posts-query";
 import type { WpPost } from "@/types";
+
+export type { BlogPostSortOption, FetchPostsOptions } from "@/lib/wordpress/posts-query";
 
 export interface BlogPost {
   id: number;
@@ -56,30 +66,35 @@ async function fetchJson<T>(url: string): Promise<T | null> {
 
 export async function fetchPostsClient(
   limit = 24,
-  options?: { categoryId?: number },
+  options?: FetchPostsOptions,
 ): Promise<BlogPost[]> {
-  const categoryQuery = options?.categoryId
-    ? `&categories=${options.categoryId}`
-    : "";
+  const searching = Boolean(options?.search?.trim());
+  const fetchLimit = searching ? postsFetchLimitWhenSearching : limit;
   const data = await fetchJson<WpPost[]>(
-    wpApiUrl(`/wp-json/wp/v2/posts?per_page=${limit}&_embed${categoryQuery}`),
+    wpApiUrl(`/wp-json/wp/v2/posts?${buildPostsQuery(fetchLimit, options)}`),
   );
 
   if (data?.length) {
-    return data.map(mapPost);
+    const posts = data.map(mapPost);
+    return searching
+      ? applyPostsListOptions(posts, options, limit)
+      : posts;
   }
 
-  if (options?.categoryId) return [];
+  if (hasPostsQueryFilters(options)) return [];
 
-  return fallbackPosts.map((p) => ({
-    id: p.id,
-    slug: p.slug,
-    title: p.title,
-    excerpt: p.excerpt,
-    content: p.content || `<p>${p.excerpt}</p>`,
-    date: p.date,
-    image: p.image,
-  }));
+  return applyFallbackBlogPosts(
+    fallbackPosts.map((p) => ({
+      id: p.id,
+      slug: p.slug,
+      title: p.title,
+      excerpt: p.excerpt,
+      content: p.content || `<p>${p.excerpt}</p>`,
+      date: p.date,
+      image: p.image,
+    })),
+    options,
+  ).slice(0, limit);
 }
 
 export {
@@ -88,6 +103,17 @@ export {
   flattenCategories,
   normalizeWpSlug,
 } from "@/lib/wordpress/categories";
+export {
+  fetchServicesClient,
+  fetchServiceBySlugClient,
+  megaTreesToMenuItems,
+} from "@/lib/wordpress/services";
+export type { MegaMenuItem, ServiceMenuData } from "@/lib/wordpress/services";
+export {
+  fetchTeamClient,
+  fetchTeamMemberBySlugClient,
+  toLawyerOptions,
+} from "@/lib/wordpress/team";
 export type { BlogCategory } from "@/types";
 
 export async function fetchPostBySlugClient(

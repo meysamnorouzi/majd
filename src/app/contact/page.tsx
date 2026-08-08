@@ -3,18 +3,15 @@ import { Container } from "@/components/ui/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { Reveal } from "@/components/motion/reveal";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { assets, siteConfig, teamMembers } from "@/data/site";
+import { assets, siteConfig } from "@/data/site";
+import { getTeam } from "@/lib/wordpress";
+import { toLawyerOptions } from "@/lib/wordpress/team";
 import {
   absoluteUrl,
   breadcrumbJsonLd,
   createPageMetadata,
 } from "@/lib/seo";
 import type { Metadata } from "next";
-
-const lawyerOptions = teamMembers.map((m) => ({
-  slug: m.slug,
-  name: m.name,
-}));
 
 export const metadata: Metadata = createPageMetadata({
   title: "تماس با ما",
@@ -23,7 +20,9 @@ export const metadata: Metadata = createPageMetadata({
   keywords: ["تماس با وکیل", "مشاوره حقوقی تهران", "آدرس موسسه حقوقی مجد"],
 });
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const lawyerOptions = toLawyerOptions(await getTeam());
+
   return (
     <>
       <JsonLd

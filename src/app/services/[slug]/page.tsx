@@ -10,6 +10,7 @@ import { ServiceSidebar } from "@/components/services/ServiceSidebar";
 import { ServiceFAQ } from "@/components/services/ServiceFAQ";
 import { ServiceRelatedServices } from "@/components/services/ServiceRelatedServices";
 import { LatestBlogSection } from "@/components/blog/LatestBlogSection";
+import { WpRichContent } from "@/components/content/WpRichContent";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
@@ -19,11 +20,13 @@ import {
   serviceJsonLd,
 } from "@/lib/seo";
 import { getServiceBySlug, getAllServiceSlugs, getServices } from "@/lib/wordpress";
+import { getTopLevelServices } from "@/lib/wordpress/services";
 import type { Metadata } from "next";
 import type { Service } from "@/types";
 
 export async function generateStaticParams() {
-  return getAllServiceSlugs().map((slug) => ({ slug }));
+  const slugs = await getAllServiceSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -32,7 +35,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const service = getServiceBySlug(slug);
+  const service = await getServiceBySlug(slug);
   if (!service) return { title: "خدمت یافت نشد" };
   return createPageMetadata({
     title: service.title,
@@ -95,10 +98,11 @@ export default async function ServiceDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const service = getServiceBySlug(slug);
+  const service = await getServiceBySlug(slug);
   if (!service) notFound();
 
-  const allServices = getServices();
+  const allServices = await getServices();
+  const relatedServices = getTopLevelServices(allServices);
 
   return (
     <>
@@ -303,6 +307,12 @@ export default async function ServiceDetailPage({
                   </div>
                 </div>
               )}
+
+              {service.contentHtml ? (
+                <div className="mt-12 border-t border-slate-100 pt-10">
+                  <WpRichContent html={service.contentHtml} />
+                </div>
+              ) : null}
             </Reveal>
 
             <Reveal className="lg:col-span-1" variant="right" delay={0.1} immediate>
@@ -316,7 +326,7 @@ export default async function ServiceDetailPage({
 
       <ServiceRelatedServices
         currentSlug={service.slug}
-        services={allServices}
+        services={relatedServices}
       />
 
       <LatestBlogSection

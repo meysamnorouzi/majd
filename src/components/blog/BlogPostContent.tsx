@@ -10,13 +10,7 @@ import { ContactForm } from "@/components/contact/ContactForm";
 import { BlogSidebar } from "@/components/blog/BlogSidebar";
 import { WpRichContent } from "@/components/content/WpRichContent";
 import { fetchPostBySlugClient, type BlogPost } from "@/lib/wordpress/client";
-import { teamMembers } from "@/data/site";
-import type { LawyerOption } from "@/components/contact/ContactForm";
-
-const lawyerOptions: LawyerOption[] = teamMembers.map((m) => ({
-  slug: m.slug,
-  name: m.name,
-}));
+import { useLawyerOptions } from "@/hooks/useTeamMembers";
 
 function slugFromPathname(pathname: string): string {
   const base = "/blog/post";
@@ -29,6 +23,7 @@ function slugFromPathname(pathname: string): string {
 export function BlogPostContent() {
   const pathname = usePathname();
   const slug = slugFromPathname(pathname);
+  const lawyerOptions = useLawyerOptions();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);

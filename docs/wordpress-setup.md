@@ -13,9 +13,10 @@ This site is a **static Next.js frontend** (`output: "export"`) backed by **Word
 
 | Repo file | Install as |
 |-----------|------------|
-| [`public/wordpress-cors-mu-plugin.php`](../public/wordpress-cors-mu-plugin.php) | `majd-headless-cors.php` |
-| [`public/wordpress-majd-account-api.php`](../public/wordpress-majd-account-api.php) | `wordpress-majd-account-api.php` |
-| [`public/wordpress-majd-contact-api.php`](../public/wordpress-majd-contact-api.php) | `wordpress-majd-contact-api.php` |
+| [`plugins/wordpress-cors-mu-plugin.php`](../plugins/wordpress-cors-mu-plugin.php) | `majd-headless-cors.php` |
+| [`plugins/wordpress-majd-account-api.php`](../plugins/wordpress-majd-account-api.php) | `wordpress-majd-account-api.php` |
+| [`plugins/wordpress-majd-contact-api.php`](../plugins/wordpress-majd-contact-api.php) | `wordpress-majd-contact-api.php` |
+| [`plugins/wordpress-majd-team-api.php`](../plugins/wordpress-majd-team-api.php) | `wordpress-majd-team-api.php` |
 
 ### Server environment
 
@@ -145,7 +146,7 @@ Guest orders are linked by **billing email** when the customer registers or logs
 
 The contact page (`/contact/`) submits to WordPress via `POST /wp-json/majd/v1/contact`.
 
-After installing [`wordpress-majd-contact-api.php`](../public/wordpress-majd-contact-api.php), a new admin menu appears:
+After installing [`plugins/wordpress-majd-contact-api.php`](../plugins/wordpress-majd-contact-api.php), a new admin menu appears:
 
 **پیام‌های تماس** — lists all form submissions with name, phone, subject, and status (جدید / بررسی شده).
 
@@ -153,7 +154,100 @@ New submissions also trigger an email to the WordPress admin address.
 
 ---
 
+## Team members (اعضای تیم)
+
+Team profiles are managed in WordPress under **اعضای تیم** (custom post type installed by [`plugins/wordpress-majd-team-api.php`](../plugins/wordpress-majd-team-api.php)).
+
+### Adding a team member
+
+1. **اعضای تیم → افزودن عضو**
+2. **Title** — full name (e.g. مسعود جوکار درزی)
+3. **Slug** — URL slug (e.g. `masoud-jokar-darzi`)
+4. **خلاصه (Excerpt)** — short bio shown on cards
+5. **Featured image** — portrait photo
+6. **Page attributes → Order** — display order (lower = first)
+7. Fill meta boxes:
+   - **اطلاعات حرفه‌ای** — role, specialty, education, experience years
+   - **بیوگرافی کامل** — one paragraph per line
+   - **تصاویر** — wide banner + gallery (`URL | alt text` per line)
+   - **تماس و شبکه‌های اجتماعی** — phone, email, location, social links
+   - **حوزه‌ها و دستاوردها** — one item per line
+
+Publish to show on `/team/` and the homepage team section. Draft to hide without deleting.
+
+### REST API
+
+- `GET /wp-json/wp/v2/team?per_page=100&_embed&orderby=menu_order&order=asc` — all members
+- `GET /wp-json/wp/v2/team?slug={slug}&_embed` — single member
+
+Each response includes a `majd_team` object with structured fields (role, fullBio, gallery, etc.).
+
+Build-time fetch uses `WP_API_KEY`. Homepage team section and contact lawyer picker fetch live in the browser. Offline fallback: founder only in [`src/data/site.ts`](../src/data/site.ts) (`fallbackTeamMembers`).
+
+**New member slugs** need a static rebuild for detail pages (`/team/{slug}/`). The team list page updates live.
+
+---
+
+## Legal services (خدمات حقوقی)
+
+Services use the **same WordPress Posts API as the blog** (`/wp-json/wp/v2/posts`), grouped by **categories**.
+
+### Category structure (mega menu)
+
+| Category slug | Mega menu label | Notes |
+|---------------|-----------------|-------|
+| `ملکی` | وکیل ملکی | Layer 1 |
+| `خانواده` | وکیل خانواده | Layer 1 — merges with `خانواده-fa` / `khanavade-fa` |
+| `کیفری` | وکیل کیفری | Layer 1 |
+
+- **Layer 2** (mega menu middle column): child categories under each root (e.g. sub-topics).
+- **Layer 3** (mega menu left column): **posts** assigned to the hovered child category.
+- Posts assigned directly to a root category (not in a child) appear in layer 2 as direct links.
+
+Create categories in **Posts → Categories** with the slugs above. Assign each service post to the appropriate child category.
+
+### Service post content
+
+Each service is a normal **Post** with title, slug, excerpt, featured image, and content.
+
+Structured UI blocks (highlights, features, FAQs, process steps, etc.) are stored in a JSON block inside the post content:
+
+```html
+<!-- majd:service
+{
+  "icon": "building",
+  "highlights": ["نکته ۱", "نکته ۲"],
+  "features": [{ "title": "...", "description": "..." }],
+  "processSteps": [{ "step": 1, "title": "...", "description": "..." }],
+  "cases": ["..."],
+  "faqs": [{ "q": "...", "a": "..." }],
+  "whyNeed": { "title": "...", "paragraphs": ["..."] },
+  "longDescription": ["پارagraph ۱", "پارagraph ۲"]
+}
+-->
+
+<p>Additional HTML content rendered below the structured sections.</p>
+```
+
+The frontend parses this block and renders the same UI components as before (features grid, FAQ accordion, timeline, etc.). Remaining HTML is shown via `WpRichContent`.
+
+### REST API (same as blog)
+
+- `GET /wp-json/wp/v2/categories?per_page=100` — category tree
+- `GET /wp-json/wp/v2/posts?categories={ids}&per_page=100&_embed` — service posts
+- `GET /wp-json/wp/v2/posts?slug={slug}&_embed` — single service
+
+Build-time fetch uses `WP_API_KEY`. Mega menu and home section fetch live in the browser. Fallback: [`src/data/site.ts`](../src/data/site.ts).
+
+**New post slugs** need a static rebuild for detail pages. Mega menu and home update live.
+
+---
+
 ## API reference
+
+### WordPress — Team
+
+- `GET /wp-json/wp/v2/team?per_page=100&_embed&orderby=menu_order&order=asc`
 
 ### WordPress — Blog
 
@@ -201,6 +295,7 @@ NEXT_PUBLIC_WC_PAYMENT_METHOD=zarinpal
 6. Checkout → Zarinpal → redirect to `/checkout/success/`.
 7. Enter license on order → visible in account panel after login.
 8. Submit contact form on `/contact/` → toast success; message appears under **پیام‌های تماس** in WP admin.
+9. Add a team member in **اعضای تیم** → visible on `/team/` without redeploying Next.
 
 ---
 
