@@ -399,3 +399,9 @@ body {
     color: #d4af37;
   }
 }
+
+/* Pin Goftino chat to bottom-left (opposite the call FAB) */
+#goftino_w {
+  left: 24px !important;
+  right: auto !important;
+}

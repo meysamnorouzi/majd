@@ -16,10 +16,11 @@ export function FloatingCTA() {
   return (
     <a
       href={`tel:${siteConfig.phonesTel[0]}`}
-      className="fixed start-6 bottom-[calc(1.5rem+env(safe-area-inset-bottom))] z-40 flex items-center gap-2 rounded-full bg-gold-500 px-5 py-3 text-sm font-bold text-navy-950 shadow-xl shadow-gold-500/40 transition hover:scale-105 hover:bg-gold-400"
-      dir="ltr"
+      aria-label="تماس فوری"
+      title="تماس فوری"
+      className="fixed right-6 bottom-[calc(1.5rem+env(safe-area-inset-bottom))] z-40 flex h-14 w-14 items-center justify-center rounded-full bg-gold-500 text-navy-950 shadow-xl shadow-gold-500/40 transition duration-200 hover:scale-105 hover:bg-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 focus-visible:ring-offset-cream"
     >
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -27,7 +28,6 @@ export function FloatingCTA() {
           d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
         />
       </svg>
-      تماس فوری
     </a>
   );
 }
