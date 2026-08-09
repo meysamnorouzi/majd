@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { fallbackTeamMembers } from "@/data/site";
 import { fetchTeamClient } from "@/lib/wordpress/client";
 import { Container } from "@/components/ui/Container";
 import { SectionTitle } from "@/components/ui/SectionTitle";
@@ -10,12 +11,12 @@ import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import type { TeamMember } from "@/types";
 
 export function TeamSection() {
-  const [team, setTeam] = useState<TeamMember[]>([]);
+  const [team, setTeam] = useState<TeamMember[]>(fallbackTeamMembers);
 
   useEffect(() => {
     let cancelled = false;
     fetchTeamClient().then((members) => {
-      if (!cancelled) setTeam(members);
+      if (!cancelled && members.length) setTeam(members);
     });
     return () => {
       cancelled = true;

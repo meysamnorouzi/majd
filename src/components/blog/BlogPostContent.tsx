@@ -6,7 +6,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PageHero } from "@/components/layout/PageHero";
 import { Container } from "@/components/ui/Container";
-import { ContactForm } from "@/components/contact/ContactForm";
 import { BlogSidebar } from "@/components/blog/BlogSidebar";
 import { WpRichContent } from "@/components/content/WpRichContent";
 import { fetchPostBySlugClient, type BlogPost } from "@/lib/wordpress/client";
@@ -110,18 +109,11 @@ export function BlogPostContent() {
                   />
                 </div>
               )}
-              <WpRichContent html={post.content} />
-              <div className="mt-12 rounded-2xl border border-gold-400/30 bg-navy-900 p-6 sm:p-8">
-                <ContactForm
-                  variant="dark"
-                  title="نیاز به مشاوره تخصصی دارید؟"
-                  description="وکلای موسسه مجد آماده پاسخگویی به سوالات حقوقی شما هستند."
-                  defaultSubject="مشاوره حقوقی"
-                  defaultMessage={`پس از مطالعه مقاله «${post.title}»`}
-                  lawyerOptions={lawyerOptions}
-                  showLawyerPicker
-                />
-              </div>
+              <WpRichContent
+                html={post.content}
+                defaultContactMessage={`پس از مطالعه مقاله «${post.title}»`}
+                showTrailingContact
+              />
             </div>
 
             <div className="lg:col-span-4">

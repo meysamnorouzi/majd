@@ -66,17 +66,140 @@ body {
 }
 
 .prose-wp h2,
-.prose-wp h3 {
+.prose-wp h3,
+.prose-wp h4 {
   color: var(--navy-900);
   font-weight: 700;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
 }
 
+.prose-wp h2 {
+  font-size: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(212, 175, 55, 0.35);
+}
+
+.prose-wp h3 {
+  font-size: 1.25rem;
+}
+
+.prose-wp h4 {
+  font-size: 1.0625rem;
+  color: var(--navy-800);
+}
+
 .prose-wp p {
   line-height: 1.9;
   margin-bottom: 1em;
   color: #334155;
+}
+
+.prose-wp ul,
+.prose-wp ol {
+  margin: 1.25rem 0;
+  padding-right: 1.5rem;
+  color: #334155;
+  line-height: 1.9;
+}
+
+.prose-wp ul {
+  list-style-type: disc;
+}
+
+.prose-wp ol {
+  list-style-type: decimal;
+}
+
+.prose-wp li {
+  margin-bottom: 0.5em;
+}
+
+.prose-wp li::marker {
+  color: var(--gold-600);
+}
+
+.prose-wp blockquote {
+  margin: 1.75rem 0;
+  padding: 1.25rem 1.5rem;
+  border-right: 4px solid var(--gold-500);
+  border-radius: 0 1rem 1rem 0;
+  background: rgba(248, 246, 241, 0.9);
+  color: var(--navy-800);
+  font-style: normal;
+}
+
+.prose-wp blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* Section / callout boxes inside WP content */
+.prose-wp .wp-section,
+.prose-wp .wp-box {
+  margin: 1.75rem 0;
+  padding: 1.5rem 1.75rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(12, 31, 61, 0.1);
+  background: rgba(248, 246, 241, 0.85);
+  box-shadow:
+    0 1px 2px rgba(12, 31, 61, 0.04),
+    0 4px 16px rgba(12, 31, 61, 0.05);
+}
+
+.prose-wp .wp-section > :first-child,
+.prose-wp .wp-box > :first-child {
+  margin-top: 0;
+}
+
+.prose-wp .wp-section > :last-child,
+.prose-wp .wp-box > :last-child {
+  margin-bottom: 0;
+}
+
+.prose-wp .wp-section h2,
+.prose-wp .wp-section h3,
+.prose-wp .wp-box h2,
+.prose-wp .wp-box h3 {
+  margin-top: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Contact info callout (HTML-only — use [majd_contact] for live form) */
+.prose-wp .wp-contact-box {
+  margin: 1.75rem 0;
+  padding: 1.5rem 1.75rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  background: var(--navy-900);
+  color: #fff;
+  box-shadow:
+    0 1px 2px rgba(12, 31, 61, 0.08),
+    0 8px 24px rgba(12, 31, 61, 0.12);
+}
+
+.prose-wp .wp-contact-box p,
+.prose-wp .wp-contact-box li {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.prose-wp .wp-contact-box h2,
+.prose-wp .wp-contact-box h3,
+.prose-wp .wp-contact-box h4 {
+  color: var(--gold-400);
+  border-bottom: none;
+  margin-top: 0;
+}
+
+.prose-wp .wp-contact-box a {
+  color: var(--gold-400);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.prose-wp .wp-contact-box a:hover {
+  color: var(--gold-300);
+  text-decoration: underline;
 }
 
 .prose-wp a {

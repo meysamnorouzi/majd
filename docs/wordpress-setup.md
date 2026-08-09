@@ -17,14 +17,30 @@ This site is a **static Next.js frontend** (`output: "export"`) backed by **Word
 | [`plugins/wordpress-majd-account-api.php`](../plugins/wordpress-majd-account-api.php) | `wordpress-majd-account-api.php` |
 | [`plugins/wordpress-majd-contact-api.php`](../plugins/wordpress-majd-contact-api.php) | `wordpress-majd-contact-api.php` |
 | [`plugins/wordpress-majd-team-api.php`](../plugins/wordpress-majd-team-api.php) | `wordpress-majd-team-api.php` |
+| [`plugins/whitelist.php`](../plugins/whitelist.php) | `whitelist.php` |
 
 ### Server environment
 
-```bash
-MAJD_FRONTEND_ORIGIN=https://vakilmajd.com
+Add to **`wp-config.php`** on the WordPress host (above `/* That's all, stop editing! */`):
+
+```php
+define('MAJD_FRONTEND_ORIGIN', 'https://vakilmajd.com');
+
+// Build-time API key — must match WP_API_KEY in the Next.js .env (server-only, never NEXT_PUBLIC_*).
+// Generate: openssl rand -hex 32
+define('MAJD_WP_API_KEY', 'paste-your-long-random-secret-here');
 ```
 
-Set this to your Next.js production URL (also used for Zarinpal return redirect to `/checkout/success/`).
+| Constant / env | Purpose |
+|----------------|---------|
+| `MAJD_FRONTEND_ORIGIN` | CORS + Zarinpal return redirect to `/checkout/success/` |
+| `MAJD_WP_API_KEY` | Authenticates Next.js **build** requests via `X-Api-Key` header |
+
+**Rotate the key** if the old default was ever committed to git: generate a new secret, update `wp-config.php` and the Next.js `.env`, then redeploy both.
+
+The whitelist plugin (v3.0+) does **not** treat `Origin` / `Referer` as authentication. Browser users reach public headless endpoints (`/wp-json/wp/v2/*`, `/wp-json/wc/store/v1/*`, `/wp-json/majd/v1/*`) from any IP; CORS restricts which frontends can call them from JavaScript. Build servers must send `X-Api-Key: <WP_API_KEY>`.
+
+See also [`docs/IMPROVEMENTS.md`](IMPROVEMENTS.md) for the remaining security and quality backlog.
 
 ### Static hosting rewrites
 

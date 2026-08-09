@@ -2,10 +2,17 @@ import { normalizeWpSlug } from "@/lib/wordpress/categories";
 
 export type WpContentPart =
   | { type: "html"; html: string }
-  | { type: "blog"; slug: string };
+  | { type: "blog"; slug: string }
+  | { type: "contact"; attrs: Record<string, string> };
 
-const SHORTCODE_RE =
+const BLOG_SHORTCODE_RE =
   /(?:<p(?:\s[^>]*)?>\s*)?\[majd_blog\s+([^\]]*)\](?:\s*<\/p>)?/gi;
+
+const CONTACT_SHORTCODE_RE =
+  /(?:<p(?:\s[^>]*)?>\s*)?\[majd_contact(?:\s+([^\]]*))?\](?:\s*<\/p>)?/gi;
+
+const ANY_SHORTCODE_RE =
+  /(?:<p(?:\s[^>]*)?>\s*)?\[(majd_blog|majd_contact)(?:\s+([^\]]*))?\](?:\s*<\/p>)?/gi;
 
 function decodeAttrValue(value: string): string {
   return value
@@ -75,24 +82,33 @@ export function blogSlugFromShortcodeAttrs(
   return slugFromBlogRef(ref);
 }
 
-/** Split WP HTML into rich-text chunks and `[majd_blog]` embeds. */
+/** Split WP HTML into rich-text chunks, `[majd_blog]` embeds, and `[majd_contact]` forms. */
 export function splitWpContent(html: string): WpContentPart[] {
   if (!html) return [];
 
   const parts: WpContentPart[] = [];
   let lastIndex = 0;
 
-  for (const match of html.matchAll(SHORTCODE_RE)) {
+  for (const match of html.matchAll(ANY_SHORTCODE_RE)) {
     const index = match.index ?? 0;
     if (index > lastIndex) {
       const chunk = html.slice(lastIndex, index);
       if (chunk.trim()) parts.push({ type: "html", html: chunk });
     }
 
-    const attrs = parseShortcodeAttrs(match[1] ?? "");
-    const slug = blogSlugFromShortcodeAttrs(attrs);
-    if (slug) {
-      parts.push({ type: "blog", slug });
+    const tag = (match[1] ?? "").toLowerCase();
+    const rawAttrs = match[2] ?? "";
+
+    if (tag === "majd_blog") {
+      const attrs = parseShortcodeAttrs(rawAttrs);
+      const slug = blogSlugFromShortcodeAttrs(attrs);
+      if (slug) {
+        parts.push({ type: "blog", slug });
+      } else if (match[0].trim()) {
+        parts.push({ type: "html", html: match[0] });
+      }
+    } else if (tag === "majd_contact") {
+      parts.push({ type: "contact", attrs: parseShortcodeAttrs(rawAttrs) });
     } else if (match[0].trim()) {
       parts.push({ type: "html", html: match[0] });
     }
@@ -113,6 +129,11 @@ export function splitWpContent(html: string): WpContentPart[] {
 }
 
 export function contentHasBlogShortcode(html: string): boolean {
-  SHORTCODE_RE.lastIndex = 0;
-  return SHORTCODE_RE.test(html);
+  BLOG_SHORTCODE_RE.lastIndex = 0;
+  return BLOG_SHORTCODE_RE.test(html);
+}
+
+export function contentHasContactShortcode(html: string): boolean {
+  CONTACT_SHORTCODE_RE.lastIndex = 0;
+  return CONTACT_SHORTCODE_RE.test(html);
 }
