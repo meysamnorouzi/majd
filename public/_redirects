@@ -1,4 +1,9 @@
-/blog/post/*    /blog/post/index.html    200
+# Legacy blog URL redirects
+/blog/    /blogs/    301
+/blog/post/:slug    /blogs/:slug    301
+
+# SPA fallbacks for client-rendered detail routes (static Next.js export)
+/blogs/:slug    /blogs/view/index.html    200
 /services/*    /services/detail/index.html    200
 /shop/product/*    /shop/product/index.html    200
 /courses/view/*    /courses/view/index.html    200

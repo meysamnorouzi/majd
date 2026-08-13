@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ContactForm } from "@/components/contact/ContactForm";
@@ -8,7 +9,8 @@ import {
   fetchCategoriesClient,
   type BlogCategory,
 } from "@/lib/wordpress/client";
-import { siteConfig, services, stats } from "@/data/site";
+import { BLOG_LIST_PATH, blogCategoryPath } from "@/lib/blog-paths";
+import { portraitObjectPosition, siteConfig, services, stats } from "@/data/site";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
 import type { LawyerOption } from "@/components/contact/ContactForm";
 
@@ -63,7 +65,7 @@ function BlogSidebarInner({
         <ul className="divide-y divide-slate-50 p-2">
           <li>
             <Link
-              href="/blog/"
+              href={BLOG_LIST_PATH}
               className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition ${
                 !activeSlug
                   ? "bg-navy-900 font-semibold text-gold-400"
@@ -78,7 +80,7 @@ function BlogSidebarInner({
             return (
               <li key={cat.id}>
                 <Link
-                  href={`/blog/?category=${encodeURIComponent(cat.slug)}`}
+                  href={blogCategoryPath(cat.slug)}
                   className={`flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-sm transition ${
                     active
                       ? "bg-navy-900 font-semibold text-gold-400"
@@ -189,17 +191,35 @@ function BlogSidebarInner({
 
       {/* Founder / team */}
       {founder && (
-        <div className="rounded-2xl border border-slate-100 bg-cream/80 p-6">
-          <p className="text-xs font-semibold text-gold-600">مدیر موسسه</p>
-          <h3 className="mt-1 font-bold text-navy-900">{founder.name}</h3>
-          <p className="mt-1 text-sm text-slate-600">{founder.role}</p>
-          <Link
-            href={`/team/${founder.slug}/`}
-            className="mt-4 inline-flex text-sm font-semibold text-navy-900 transition hover:text-gold-600"
-          >
-            مشاهده پروفایل ←
-          </Link>
-        </div>
+        <Link
+          href={`/team/${founder.slug}/`}
+          className="group block overflow-hidden rounded-2xl border border-slate-100 bg-cream/80 shadow-sm transition hover:border-gold-400/40 hover:shadow-md"
+        >
+          <div className="relative aspect-[4/3] overflow-hidden">
+            <Image
+              src={founder.image}
+              alt={founder.name}
+              fill
+              className="object-cover transition duration-700 group-hover:scale-105"
+              style={{
+                objectPosition:
+                  portraitObjectPosition(founder.image) ?? "center 18%",
+              }}
+              sizes="320px"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-navy-950/70 via-transparent to-transparent" />
+          </div>
+          <div className="p-5">
+            <p className="text-xs font-semibold text-gold-600">مدیر موسسه</p>
+            <h3 className="mt-1 font-bold text-navy-900 group-hover:text-gold-600">
+              {founder.name}
+            </h3>
+            <p className="mt-1 text-sm text-slate-600">{founder.role}</p>
+            <span className="mt-3 inline-flex text-sm font-semibold text-navy-900 transition group-hover:text-gold-600">
+              مشاهده پروفایل ←
+            </span>
+          </div>
+        </Link>
       )}
     </aside>
   );

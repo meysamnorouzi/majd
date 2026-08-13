@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { assets, siteConfig } from "@/data/site";
+import { blogPostPath } from "@/lib/blog-paths";
 import type { Service, ServiceFAQ, TeamMember } from "@/types";
 
 export type PageSeoInput = {
@@ -218,7 +219,7 @@ export function articleJsonLd(post: {
     "@type": "Article",
     headline: post.title,
     description: post.excerpt,
-    url: absoluteUrl(`/blog/post/${post.slug}/`),
+    url: absoluteUrl(blogPostPath(post.slug)),
     datePublished: post.date,
     dateModified: post.date,
     inLanguage: "fa-IR",
@@ -238,7 +239,7 @@ export function articleJsonLd(post: {
         url: absoluteAssetUrl(assets.logo),
       },
     },
-    mainEntityOfPage: absoluteUrl(`/blog/post/${post.slug}/`),
+    mainEntityOfPage: absoluteUrl(blogPostPath(post.slug)),
   };
 }
 

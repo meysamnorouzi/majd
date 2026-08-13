@@ -6,6 +6,7 @@ import { Container } from "@/components/ui/Container";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { PostCard } from "@/components/blog/PostCard";
 import { fetchPostsClient, type BlogPost } from "@/lib/wordpress/client";
+import { BLOG_LIST_PATH } from "@/lib/blog-paths";
 
 export function LatestBlogSection({
   eyebrow = "مقالات حقوقی",
@@ -61,7 +62,7 @@ export function LatestBlogSection({
         </div>
         <div className="mt-10 text-center">
           <Link
-            href="/blog/"
+            href={BLOG_LIST_PATH}
             className="inline-flex items-center gap-2 rounded-lg border-2 border-navy-900 px-8 py-3 font-semibold text-navy-900 transition hover:bg-navy-900 hover:text-white"
           >
             همه مقالات

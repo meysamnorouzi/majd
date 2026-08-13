@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { assets } from "@/data/site";
+import { assets, portraitObjectPosition } from "@/data/site";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { FadeIn } from "@/components/motion/reveal";
@@ -14,10 +14,14 @@ export function FounderBanner() {
       <div className="relative min-h-[440px] md:min-h-[520px]">
         <Image
           src={assets.founderBoardroom}
-          alt="مسعود جوکار درزی در دفتر وکالت"
+          alt="مسعود جوکار درزی — گفتگو با رسانه‌ها"
           fill
           priority
-          className="ken-burns object-cover object-[center_30%] portrait-filter"
+          className="ken-burns object-cover portrait-filter"
+          style={{
+            objectPosition:
+              portraitObjectPosition(assets.founderBoardroom) ?? "center 20%",
+          }}
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-l from-navy-950/95 via-navy-950/72 to-navy-950/35" />

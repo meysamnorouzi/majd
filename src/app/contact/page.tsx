@@ -3,7 +3,7 @@ import { Container } from "@/components/ui/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { Reveal } from "@/components/motion/reveal";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { assets, siteConfig } from "@/data/site";
+import { assets, portraitObjectPosition, siteConfig } from "@/data/site";
 import { getTeam } from "@/lib/wordpress";
 import { toLawyerOptions } from "@/lib/wordpress/team";
 import {
@@ -45,7 +45,9 @@ export default async function ContactPage() {
         description="برای مشاوره حقوقی، پذیرش پرونده یا هرگونه سوال با ما در ارتباط باشید"
         breadcrumb={[{ label: "تماس با ما" }]}
         image={assets.founderBoardroom}
-        imagePosition="center 35%"
+        imagePosition={
+          portraitObjectPosition(assets.founderBoardroom) ?? "center 20%"
+        }
       />
 
       <section className="py-20">

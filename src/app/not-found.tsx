@@ -2,10 +2,11 @@ import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { siteConfig } from "@/data/site";
+import { BLOG_LIST_PATH } from "@/lib/blog-paths";
 
 const quickLinks = [
   { href: "/services/", label: "خدمات حقوقی" },
-  { href: "/blog/", label: "مقالات تخصصی" },
+  { href: BLOG_LIST_PATH, label: "مقالات تخصصی" },
   { href: "/team/", label: "اعضای تیم" },
   { href: "/contact/", label: "تماس با ما" },
 ] as const;

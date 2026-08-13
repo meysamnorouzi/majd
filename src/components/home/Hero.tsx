@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { assets, siteConfig, stats } from "@/data/site";
+import { assets, portraitObjectPosition, siteConfig, stats } from "@/data/site";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion/reveal";
@@ -56,7 +56,12 @@ export function Hero() {
                     src={assets.founderArchitecture}
                     alt="مسعود جوکار درزی — مدیر موسسه"
                     fill
-                    className="portrait-filter object-cover object-[center_20%]"
+                    className="portrait-filter object-cover"
+                    style={{
+                      objectPosition:
+                        portraitObjectPosition(assets.founderArchitecture) ??
+                        "center 18%",
+                    }}
                     sizes="100vw"
                     priority
                   />
@@ -99,7 +104,11 @@ export function Hero() {
                     alt="مسعود جوکار درزی — وکیل پایه یک و مدیر موسسه حقوقی مجد"
                     fill
                     className="portrait-filter object-cover"
-                    style={{ objectPosition: "-80px center" }}
+                    style={{
+                      objectPosition:
+                        portraitObjectPosition(assets.founderPortrait) ??
+                        "center 18%",
+                    }}
                     sizes="(max-width: 1280px) 50vw, 560px"
                     priority
                   />

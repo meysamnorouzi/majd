@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { assets } from "@/data/site";
+import { blogPostPath } from "@/lib/blog-paths";
 
 export function PostCard({
   slug,
@@ -17,7 +18,7 @@ export function PostCard({
 }) {
   return (
     <article className="group overflow-hidden rounded-2xl bg-white shadow-md transition hover:shadow-xl">
-      <Link href={`/blog/post/${slug}/`}>
+      <Link href={blogPostPath(slug)}>
         <div className="relative h-52 overflow-hidden">
           {image ? (
             <Image

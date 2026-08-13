@@ -11,6 +11,7 @@ import { ServiceRelatedServices } from "@/components/services/ServiceRelatedServ
 import { LatestBlogSection } from "@/components/blog/LatestBlogSection";
 import { WpRichContent } from "@/components/content/WpRichContent";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
+import { assets, portraitObjectPosition } from "@/data/site";
 import type { Service } from "@/types";
 
 function ServiceFeatures({ features }: { features: Service["features"] }) {
@@ -91,6 +92,10 @@ export function ServiceDetailView({
             : []),
           { label: service.title },
         ]}
+        image={assets.founderBanner}
+        imagePosition={
+          portraitObjectPosition(assets.founderBanner) ?? "center 28%"
+        }
       />
 
       <section className="py-12 lg:py-16">

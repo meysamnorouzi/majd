@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { assets } from "@/data/site";
+import { assets, portraitObjectPosition } from "@/data/site";
 import { coursesIntro, courseFormats } from "@/data/courses";
 import { Container } from "@/components/ui/Container";
 import { formatIcon } from "./FormatIcons";
@@ -75,9 +75,14 @@ export function CoursesHero() {
               <div className="relative aspect-[5/4]">
                 <Image
                   src={assets.founderReading}
-                  alt="آموزش حقوقی — موسسه مجد"
+                  alt="آموزش حقوقی — مسعود جوکار درزی"
                   fill
-                  className="portrait-filter object-cover object-[center_25%]"
+                  className="portrait-filter object-cover"
+                  style={{
+                    objectPosition:
+                      portraitObjectPosition(assets.founderReading) ??
+                      "78% 22%",
+                  }}
                   sizes="560px"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-transparent to-navy-950/20" />

@@ -5,9 +5,19 @@ import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { fetchServicesClient, megaTreesToMenuItems } from "@/lib/wordpress/client";
 import { ServiceIcon } from "@/components/icons/ServiceIcons";
+import { siteConfig } from "@/data/site";
 import type { Service } from "@/types";
 
 const SERVICES_HREF = "/services/";
+
+/** Static links shown in the fourth mega menu column */
+const CONSULTATION_COLUMN_LINKS = [
+  { href: "/contact/", label: "درخواست مشاوره رایگان" },
+  { href: "/services/moshavere-hoghooghi/", label: "مشاوره حقوقی تخصصی" },
+  { href: "/blogs/", label: "مقالات و راهنمای حقوقی" },
+  { href: "/team/", label: "معرفی وکلای موسسه" },
+  { href: "/about/", label: "درباره موسسه" },
+] as const;
 
 type MegaServiceItem = { service: Service; label: string };
 
@@ -24,193 +34,198 @@ function servicePathActive(pathname: string, service: Service): boolean {
   return service.children?.some((child) => servicePathActive(pathname, child)) ?? false;
 }
 
-function getThirdLayerItems(service: Service) {
-  return service.children ?? [];
-}
-
-function Chevron({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      className={`h-3.5 w-3.5 shrink-0 ${className}`}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M15.75 19.5 8.25 12l7.5-7.5"
-      />
-    </svg>
-  );
-}
-
-function MegaMenuSubItem({
-  child,
+function MegaMenuLink({
+  href,
+  label,
   pathname,
   onNavigate,
-  isHovered,
-  onHover,
+  nested = false,
 }: {
-  child: Service;
+  href: string;
+  label: string;
   pathname: string;
   onNavigate: () => void;
-  isHovered: boolean;
-  onHover: () => void;
+  nested?: boolean;
 }) {
-  const href = serviceHref(child.slug);
-  const thirdLayerItems = getThirdLayerItems(child);
-  const hasThirdLayer = thirdLayerItems.length > 0;
-  const active = servicePathActive(pathname, child);
-
-  const itemClass = `flex w-full items-center justify-between gap-2 border-b border-white/[0.06] px-4 py-2.5 text-start text-sm transition last:border-b-0 hover:bg-white/5 hover:text-gold-400 ${
-    isHovered
-      ? "bg-white/5 text-gold-400"
-      : active
-        ? "text-gold-400/80"
-        : "text-white/75"
-  }`;
+  const active = pathActive(pathname, href);
 
   return (
-    <li role="none" onMouseEnter={onHover}>
-      {hasThirdLayer ? (
-        <div
-          role="menuitem"
-          aria-haspopup="true"
-          aria-expanded={isHovered}
-          className={itemClass}
-        >
-          <span className="whitespace-nowrap">{child.title}</span>
-          <Chevron className={isHovered ? "text-gold-400/70" : "text-white/40"} />
-        </div>
-      ) : (
-        <Link
-          href={href}
-          onClick={onNavigate}
-          role="menuitem"
-          className={itemClass}
-        >
-          <span className="whitespace-nowrap">{child.title}</span>
-        </Link>
-      )}
-    </li>
+    <Link
+      href={href}
+      onClick={onNavigate}
+      role="menuitem"
+      className={`block rounded-lg transition hover:bg-white/5 hover:text-gold-400 ${
+        nested ? "px-2 py-1.5 text-xs" : "px-2 py-2 text-sm"
+      } ${
+        active ? "bg-white/5 font-medium text-gold-400" : "text-white/75"
+      }`}
+    >
+      {label}
+    </Link>
   );
 }
 
-function DesktopMegaMenu({
-  open,
+function MegaMenuColumn({
+  service,
+  label,
+  pathname,
   onNavigate,
-  megaServices,
 }: {
-  open: boolean;
+  service: Service;
+  label: string;
+  pathname: string;
   onNavigate: () => void;
-  megaServices: MegaServiceItem[];
 }) {
-  const pathname = usePathname();
-  const [activeSlug, setActiveSlug] = useState(
-    () => megaServices[0]?.service.slug ?? "",
-  );
-  const [hoveredChildSlug, setHoveredChildSlug] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (open && megaServices[0]) {
-      setActiveSlug(megaServices[0].service.slug);
-      setHoveredChildSlug(null);
-    }
-  }, [open, megaServices]);
-
-  const activeItem = megaServices.find(
-    ({ service }) => service.slug === activeSlug,
-  );
-  const activeService = activeItem?.service;
-  const hoveredChild = activeService?.children?.find(
-    (child) => child.slug === hoveredChildSlug,
-  );
-  const thirdLayerItems = hoveredChild ? getThirdLayerItems(hoveredChild) : [];
+  const columnActive = servicePathActive(pathname, service);
+  const rootHref = serviceHref(service.slug);
 
   return (
-    <div className="flex min-h-[12rem] w-[46rem] max-w-[calc(100vw-1.5rem)] shrink-0 divide-x divide-x-reverse divide-white/10">
-      <ul className="w-48 shrink-0 py-1" role="menu" aria-label="دسته‌بندی خدمات">
-        {megaServices.map(({ service, label }) => {
-          const isSelected = activeSlug === service.slug;
-          const isPathActive = servicePathActive(pathname, service);
+    <div className="min-w-0 flex-1 px-4 py-4">
+      <Link
+        href={rootHref}
+        onClick={onNavigate}
+        role="menuitem"
+        className={`mb-3 flex items-center gap-2.5 border-b border-white/10 pb-3 transition hover:text-gold-300 ${
+          columnActive ? "text-gold-400" : "text-white"
+        }`}
+      >
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold-500/15 text-gold-400 [&_svg]:h-4 [&_svg]:w-4">
+          <ServiceIcon name={service.icon} />
+        </span>
+        <span className="text-sm font-bold">{label}</span>
+      </Link>
+
+      <ul className="space-y-0.5" role="group" aria-label={label}>
+        {service.children?.map((child) => {
+          const hasGrandchildren = Boolean(child.children?.length);
+          const childActive = servicePathActive(pathname, child);
+
+          if (!hasGrandchildren) {
+            return (
+              <li key={child.slug}>
+                <MegaMenuLink
+                  href={serviceHref(child.slug)}
+                  label={child.title}
+                  pathname={pathname}
+                  onNavigate={onNavigate}
+                />
+              </li>
+            );
+          }
 
           return (
-            <li
-              key={service.slug}
-              role="none"
-              onMouseEnter={() => {
-                setActiveSlug(service.slug);
-                setHoveredChildSlug(null);
-              }}
-            >
-              <div
-                role="menuitem"
-                aria-current={isSelected ? "true" : undefined}
-                className={`flex w-full cursor-default items-center justify-between gap-2 border-b border-white/10 px-4 py-3 text-start text-sm transition last:border-b-0 hover:bg-white/5 hover:text-gold-400 ${
-                  isSelected
-                    ? "bg-white/5 text-gold-400"
-                    : isPathActive
-                      ? "text-gold-400/80"
-                      : "text-white/85"
+            <li key={child.slug} className="pt-1 first:pt-0">
+              <Link
+                href={serviceHref(child.slug)}
+                onClick={onNavigate}
+                className={`block px-2 py-1.5 text-xs font-semibold transition hover:text-gold-400 ${
+                  childActive ? "text-gold-400/90" : "text-white/45"
                 }`}
               >
-                <span className="whitespace-nowrap font-medium">{label}</span>
-                <Chevron
-                  className={isSelected ? "text-gold-400/70" : "text-white/40"}
-                />
-              </div>
+                {child.title}
+              </Link>
+              <ul className="mr-2 space-y-0.5 border-r border-white/10 pr-2">
+                {child.children!.map((grandchild) => (
+                  <li key={grandchild.slug}>
+                    <MegaMenuLink
+                      href={serviceHref(grandchild.slug)}
+                      label={grandchild.title}
+                      pathname={pathname}
+                      onNavigate={onNavigate}
+                      nested
+                    />
+                  </li>
+                ))}
+              </ul>
             </li>
           );
         })}
       </ul>
+    </div>
+  );
+}
 
-      {activeService?.children?.length ? (
-        <ul
-          className="min-w-[18rem] shrink-0 py-1"
-          role="menu"
-          aria-label={activeItem?.label}
-        >
-          {activeService.children.map((child) => (
-            <MegaMenuSubItem
-              key={child.slug}
-              child={child}
+function ConsultationColumn({
+  pathname,
+  onNavigate,
+}: {
+  pathname: string;
+  onNavigate: () => void;
+}) {
+  const columnActive = CONSULTATION_COLUMN_LINKS.some((link) =>
+    pathActive(pathname, link.href),
+  );
+
+  return (
+    <div className="min-w-0 flex-1 px-4 py-4">
+      <div
+        className={`mb-3 flex items-center gap-2.5 border-b border-white/10 pb-3 ${
+          columnActive ? "text-gold-400" : "text-white"
+        }`}
+      >
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold-500/15 text-gold-400 [&_svg]:h-4 [&_svg]:w-4">
+          <ServiceIcon name="chat" />
+        </span>
+        <span className="text-sm font-bold">مشاوره حقوقی</span>
+      </div>
+
+      <ul className="space-y-0.5" role="group" aria-label="مشاوره حقوقی">
+        {CONSULTATION_COLUMN_LINKS.map((link) => (
+          <li key={link.href}>
+            <MegaMenuLink
+              href={link.href}
+              label={link.label}
               pathname={pathname}
               onNavigate={onNavigate}
-              isHovered={hoveredChildSlug === child.slug}
-              onHover={() => setHoveredChildSlug(child.slug)}
             />
-          ))}
-        </ul>
-      ) : (
-        <div className="min-w-[18rem] shrink-0" aria-hidden />
-      )}
-
-      <ul
-        className="min-w-[16rem] shrink-0 py-1"
-        role="menu"
-        aria-label={hoveredChild?.title ?? activeItem?.label}
-        onMouseEnter={() => {
-          if (hoveredChild) setHoveredChildSlug(hoveredChild.slug);
-        }}
-      >
-        {thirdLayerItems.length > 0 && hoveredChild
-          ? thirdLayerItems.map((post) => (
-              <li key={post.slug} role="none">
-                <Link
-                  href={serviceHref(post.slug)}
-                  onClick={onNavigate}
-                  role="menuitem"
-                  className="block whitespace-nowrap border-b border-white/[0.06] px-4 py-2.5 text-sm transition last:border-b-0 hover:bg-white/5 hover:text-gold-400 text-white/75"
-                >
-                  {post.title}
-                </Link>
-              </li>
-            ))
-          : null}
+          </li>
+        ))}
       </ul>
+
+      <div className="mt-4 rounded-xl bg-white/5 p-3">
+        <p className="text-xs leading-relaxed text-white/55">
+          مشاوره تخصصی حضوری و تلفنی
+        </p>
+        <a
+          href={`tel:${siteConfig.phonesTel[0]}`}
+          className="mt-2 block text-sm font-bold text-gold-400 transition hover:text-gold-300"
+          dir="ltr"
+        >
+          {siteConfig.phones[0]}
+        </a>
+        <Link
+          href="/contact/"
+          onClick={onNavigate}
+          className="mt-3 block rounded-lg bg-gold-500 px-3 py-2 text-center text-xs font-semibold text-navy-950 transition hover:bg-gold-400"
+        >
+          درخواست مشاوره
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function DesktopMegaMenu({
+  onNavigate,
+  megaServices,
+}: {
+  onNavigate: () => void;
+  megaServices: MegaServiceItem[];
+}) {
+  const pathname = usePathname();
+
+  return (
+    <div className="grid min-h-[14rem] grid-cols-4 divide-x divide-x-reverse divide-white/10">
+      {megaServices.map(({ service, label }) => (
+        <MegaMenuColumn
+          key={service.slug}
+          service={service}
+          label={label}
+          pathname={pathname}
+          onNavigate={onNavigate}
+        />
+      ))}
+      <ConsultationColumn pathname={pathname} onNavigate={onNavigate} />
     </div>
   );
 }
@@ -397,6 +412,21 @@ export function NavServicesDropdown({
               onNavigate={onNavigate}
             />
           ))}
+          <div className="mt-2 border-t border-white/10 pt-2">
+            <p className="px-4 py-2 text-xs font-semibold text-gold-400/80">
+              مشاوره حقوقی
+            </p>
+            {CONSULTATION_COLUMN_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={onNavigate}
+                className="block rounded-lg px-4 py-2 text-sm text-white/70 hover:bg-white/5 hover:text-white"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -454,14 +484,13 @@ export function NavServicesDropdown({
         id={menuId}
         role="menu"
         aria-label="خدمات حقوقی"
-        className={`absolute left-1/2 top-full z-50 mt-1 w-[46rem] max-w-[calc(100vw-1.5rem)] origin-top rounded-xl border border-white/10 bg-navy-900 py-1 shadow-2xl shadow-black/40 transition-all duration-200 ${
+        className={`absolute left-1/2 top-full z-50 mt-1 w-[58rem] max-w-[calc(100vw-1.5rem)] origin-top rounded-xl border border-white/10 bg-navy-900 py-1 shadow-2xl shadow-black/40 transition-all duration-200 ${
           open
             ? "pointer-events-auto -translate-x-1/2 translate-y-0 opacity-100 visible"
             : "pointer-events-none -translate-x-1/2 -translate-y-1 opacity-0 invisible"
         }`}
       >
         <DesktopMegaMenu
-          open={open}
           onNavigate={handleNavigate}
           megaServices={megaServices}
         />

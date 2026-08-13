@@ -25,7 +25,6 @@ function GalleryLightbox({
 }) {
   const item = items[index];
   if (!item) return null;
-  const objectPosition = portraitObjectPosition(item.src) ?? "center";
 
   return (
     <motion.div
@@ -84,8 +83,7 @@ function GalleryLightbox({
           src={item.src}
           alt={item.alt}
           fill
-          className="object-cover"
-          style={{ objectPosition }}
+          className="object-contain"
           sizes="(max-width: 1024px) 100vw, 896px"
           priority
         />
@@ -104,10 +102,6 @@ export function TeamMemberGallery({ member }: { member: TeamMember }) {
 
   if (gallery.length === 0) return null;
 
-  const [featured, ...rest] = gallery;
-  const featuredPosition =
-    featured ? portraitObjectPosition(featured.src) ?? "center" : "center";
-
   return (
     <section className="bg-cream-dark/40 py-16 lg:py-20">
       <Container>
@@ -120,70 +114,70 @@ export function TeamMemberGallery({ member }: { member: TeamMember }) {
           </p>
         </Reveal>
 
-        <div className="mt-8 grid gap-4 lg:grid-cols-12">
-          {featured && (
-            <Reveal className="lg:col-span-7" variant="right">
-              <button
-                type="button"
-                onClick={() => setActive(0)}
-                className="group relative block w-full overflow-hidden rounded-2xl text-right shadow-lg ring-1 ring-navy-900/5"
+        <Stagger
+          className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4"
+          stagger={0.06}
+        >
+          {gallery.map((item, i) => {
+            const isFeatured = i === 0;
+            const objectPosition =
+              portraitObjectPosition(item.src) ?? "center";
+            return (
+              <StaggerItem
+                key={item.src}
+                variant={isFeatured ? "right" : "up"}
+                className={isFeatured ? "col-span-2 lg:row-span-2" : undefined}
               >
-                <div className="relative aspect-[16/11]">
-                  <Image
-                    src={featured.src}
-                    alt={featured.alt}
-                    fill
-                    className="portrait-warm object-cover"
-                    style={{ objectPosition: featuredPosition }}
-                    sizes="(max-width: 1024px) 100vw, 58vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy-950/60 via-transparent to-transparent opacity-80 transition duration-500 group-hover:opacity-95" />
-                  <div className="absolute inset-x-0 bottom-0 p-5">
-                    <span className="text-sm font-medium text-white/90 transition group-hover:text-gold-400">
-                      {featured.alt}
-                    </span>
-                  </div>
-                </div>
-              </button>
-            </Reveal>
-          )}
-
-          <Stagger
-            className="grid grid-cols-2 gap-4 lg:col-span-5"
-            stagger={0.08}
-          >
-            {rest.map((item, i) => {
-              const objectPosition =
-                portraitObjectPosition(item.src) ?? "center";
-              return (
-                <StaggerItem key={item.src} variant="left">
-                  <button
-                    type="button"
-                    onClick={() => setActive(i + 1)}
-                    className="group relative block h-full w-full overflow-hidden rounded-2xl text-right shadow-md ring-1 ring-navy-900/5"
+                <button
+                  type="button"
+                  onClick={() => setActive(i)}
+                  className="group relative block h-full w-full overflow-hidden rounded-2xl text-right shadow-md ring-1 ring-navy-900/5"
+                >
+                  <div
+                    className={
+                      isFeatured
+                        ? "relative aspect-[16/11] h-full min-h-[220px] lg:aspect-auto lg:min-h-0"
+                        : "relative aspect-square"
+                    }
                   >
-                    <div className="relative aspect-square sm:aspect-[4/5]">
-                      <Image
-                        src={item.src}
-                        alt={item.alt}
-                        fill
-                        className="portrait-warm object-cover"
-                        style={{ objectPosition }}
-                        sizes="(max-width: 1024px) 50vw, 20vw"
-                      />
-                      <div className="absolute inset-0 bg-navy-950/0 transition duration-500 group-hover:bg-navy-950/30" />
+                    <Image
+                      src={item.src}
+                      alt={item.alt}
+                      fill
+                      className="portrait-warm object-cover"
+                      style={{ objectPosition }}
+                      sizes={
+                        isFeatured
+                          ? "(max-width: 1024px) 100vw, 50vw"
+                          : "(max-width: 1024px) 50vw, 25vw"
+                      }
+                    />
+                    <div
+                      className={
+                        isFeatured
+                          ? "absolute inset-0 bg-gradient-to-t from-navy-950/60 via-transparent to-transparent opacity-80 transition duration-500 group-hover:opacity-95"
+                          : "absolute inset-0 bg-navy-950/0 transition duration-500 group-hover:bg-navy-950/30"
+                      }
+                    />
+                    {isFeatured ? (
+                      <div className="absolute inset-x-0 bottom-0 p-5">
+                        <span className="text-sm font-medium text-white/90 transition group-hover:text-gold-400">
+                          {item.alt}
+                        </span>
+                      </div>
+                    ) : (
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 transition duration-500 group-hover:opacity-100">
                         <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
                           بزرگ‌نمایی
                         </span>
                       </div>
-                    </div>
-                  </button>
-                </StaggerItem>
-              );
-            })}
-          </Stagger>
-        </div>
+                    )}
+                  </div>
+                </button>
+              </StaggerItem>
+            );
+          })}
+        </Stagger>
       </Container>
 
       <AnimatePresence>

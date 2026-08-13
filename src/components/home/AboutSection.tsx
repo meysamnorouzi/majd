@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { aboutContent, assets, practiceAreas } from "@/data/site";
+import { aboutContent, assets, portraitObjectPosition, practiceAreas } from "@/data/site";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/motion/reveal";
@@ -17,7 +17,12 @@ export function AboutSection() {
                 src={assets.founderArchitecture}
                 alt="مسعود جوکار درزی — مدیر موسسه حقوقی مجد"
                 fill
-                className="portrait-warm object-cover object-[center_15%]"
+                className="portrait-warm object-cover"
+                style={{
+                  objectPosition:
+                    portraitObjectPosition(assets.founderArchitecture) ??
+                    "center 12%",
+                }}
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-navy-950/40 via-transparent to-transparent opacity-60" />

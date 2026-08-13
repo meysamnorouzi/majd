@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createPageMetadata } from "@/lib/seo";
 import { getServices } from "@/lib/wordpress";
+import { assets, portraitObjectPosition } from "@/data/site";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = createPageMetadata({
@@ -30,6 +31,10 @@ export default async function ServicesPage() {
         title="خدمات حقوقی"
         description="طیف کامل خدمات حقوقی و مشاوره تخصصی موسسه مجد وکیل الرعایا"
         breadcrumb={[{ label: "خدمات" }]}
+        image={assets.founderBanner}
+        imagePosition={
+          portraitObjectPosition(assets.founderBanner) ?? "center 28%"
+        }
       />
       <section className="py-20">
         <Container>

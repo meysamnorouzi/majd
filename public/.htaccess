@@ -14,10 +14,14 @@
   RewriteCond %{REQUEST_URI} !\.[a-zA-Z0-9]{2,5}$
   RewriteRule ^(.*)$ /$1/ [R=301,L]
 
-  # Blog post shell: /blog/post/<slug>/ → /blog/post/index.html
+  # Legacy blog URLs
+  RewriteRule ^blog/post/(.+)/?$ /blogs/$1/ [R=301,L]
+  RewriteRule ^blog/?$ /blogs/ [R=301,L]
+
+  # Blog post shell: /blogs/<slug>/ → /blogs/view/index.html
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^blog/post/.+$ /blog/post/index.html [L]
+  RewriteRule ^blogs/[^/]+/?$ /blogs/view/index.html [L]
 
   # Service detail shell: /services/<slug>/ → /services/detail/index.html
   RewriteCond %{REQUEST_FILENAME} !-f

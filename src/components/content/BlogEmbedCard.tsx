@@ -8,6 +8,7 @@ import {
   fetchPostBySlugClient,
   type BlogPost,
 } from "@/lib/wordpress/client";
+import { blogPostPath } from "@/lib/blog-paths";
 
 export function BlogEmbedCard({ slug }: { slug: string }) {
   const [post, setPost] = useState<BlogPost | null>(null);
@@ -56,7 +57,7 @@ export function BlogEmbedCard({ slug }: { slug: string }) {
 
   return (
     <Link
-      href={`/blog/post/${post.slug}/`}
+      href={blogPostPath(post.slug)}
       className="group my-6 flex overflow-hidden rounded-2xl border border-navy-900/10 bg-white shadow-md transition hover:border-gold-500/40 hover:shadow-xl"
     >
       <div className="relative h-28 w-32 shrink-0 overflow-hidden sm:h-32 sm:w-44">

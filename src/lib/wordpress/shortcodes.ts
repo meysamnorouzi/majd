@@ -48,7 +48,7 @@ export function parseShortcodeAttrs(raw: string): Record<string, string> {
 
 /**
  * Resolve a blog slug from a shortcode URL, link, or slug attribute.
- * Supports `/blog/post/{slug}/` and bare permalink path segments.
+ * Supports `/blogs/{slug}/`, legacy `/blog/post/{slug}/`, and bare permalink path segments.
  */
 export function slugFromBlogRef(ref: string): string | null {
   const trimmed = ref.trim();
@@ -62,7 +62,9 @@ export function slugFromBlogRef(ref: string): string | null {
     const url = new URL(trimmed, "https://vakilmajd.com");
     const path = normalizeWpSlug(url.pathname);
 
-    const blogPost = path.match(/\/blog\/post\/([^/]+)\/?/i);
+    const blogPost =
+      path.match(/\/blogs\/([^/]+)\/?/i) ??
+      path.match(/\/blog\/post\/([^/]+)\/?/i);
     if (blogPost?.[1]) return normalizeWpSlug(blogPost[1]);
 
     const parts = path.split("/").filter(Boolean);

@@ -9,19 +9,12 @@ import { Container } from "@/components/ui/Container";
 import { BlogSidebar } from "@/components/blog/BlogSidebar";
 import { WpRichContent } from "@/components/content/WpRichContent";
 import { fetchPostBySlugClient, type BlogPost } from "@/lib/wordpress/client";
+import { BLOG_LIST_PATH, blogPostSlugFromPathname } from "@/lib/blog-paths";
 import { useLawyerOptions } from "@/hooks/useTeamMembers";
-
-function slugFromPathname(pathname: string): string {
-  const base = "/blog/post";
-  const normalized = pathname.replace(/\/$/, "");
-  if (!normalized.startsWith(base)) return "";
-  const rest = normalized.slice(base.length).replace(/^\//, "");
-  return decodeURIComponent(rest);
-}
 
 export function BlogPostContent() {
   const pathname = usePathname();
-  const slug = slugFromPathname(pathname);
+  const slug = blogPostSlugFromPathname(pathname);
   const lawyerOptions = useLawyerOptions();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,7 +62,7 @@ export function BlogPostContent() {
       <Container>
         <div className="py-24 text-center">
           <h1 className="text-2xl font-bold text-navy-900">مقاله یافت نشد</h1>
-          <Link href="/blog/" className="mt-6 inline-block text-gold-600">
+          <Link href={BLOG_LIST_PATH} className="mt-6 inline-block text-gold-600">
             بازگشت به مقالات
           </Link>
         </div>
@@ -82,7 +75,7 @@ export function BlogPostContent() {
       <PageHero
         title={post.title}
         breadcrumb={[
-          { label: "مقالات", href: "/blog/" },
+          { label: "مقالات", href: BLOG_LIST_PATH },
           { label: post.title },
         ]}
       />

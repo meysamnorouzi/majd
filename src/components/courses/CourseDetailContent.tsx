@@ -109,6 +109,8 @@ export function CourseDetailContent() {
           { label: format.badge, href: `/courses/${format.slug}/` },
           { label: product.name },
         ]}
+        image={heroImage}
+        imagePosition={objectPosition ?? "center 18%"}
       />
 
       <section className="py-16">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
+import { BLOG_LIST_PATH, blogPostPath } from "@/lib/blog-paths";
 
 interface BlogPost {
   id: number;
@@ -28,7 +29,7 @@ export function BlogSection({ posts }: { posts: BlogPost[] }) {
           {posts.slice(0, 3).map((post) => (
             <StaggerItem key={post.id} as="article" variant="up">
               <div className="group h-full overflow-hidden rounded-2xl bg-white shadow-md transition hover:shadow-xl">
-                <Link href={`/blog/post/${post.slug}/`}>
+                <Link href={blogPostPath(post.slug)}>
                   <div className="relative h-48 overflow-hidden">
                     {post.image && (
                       <Image
@@ -61,7 +62,7 @@ export function BlogSection({ posts }: { posts: BlogPost[] }) {
         </Stagger>
         <Reveal className="mt-10 text-center" delay={0.1}>
           <Link
-            href="/blog/"
+            href={BLOG_LIST_PATH}
             className="inline-flex items-center gap-2 rounded-lg border-2 border-navy-900 px-8 py-3 font-semibold text-navy-900 transition hover:bg-navy-900 hover:text-white"
           >
             همه مقالات

@@ -1,3 +1,5 @@
+import { enhanceWpContentHtml } from "@/lib/wordpress/content-html";
+
 export const WP_URL =
   process.env.NEXT_PUBLIC_WP_URL ?? "https://admin.vakilmajd.com";
 
@@ -28,8 +30,8 @@ export function rewriteWpMediaUrl(url: string): string {
 }
 
 /**
- * Fix Word/WordPress RTL export quirks (reversed "5." → ".5", LTR-wrapped periods)
- * and rewrite media URLs to the WP host.
+ * Fix Word/WordPress RTL export quirks (reversed "5." → ".5", LTR-wrapped periods),
+ * rewrite media URLs to the WP host, and wrap inline contact callout blocks.
  */
 export function normalizeWpContentHtml(html: string): string {
   let out = rewriteWpMediaUrl(html);
@@ -52,10 +54,8 @@ export function normalizeWpContentHtml(html: string): string {
     "$1$2</span>",
   );
 
-  return out;
+  return enhanceWpContentHtml(out);
 }
-
-/** @deprecated Prefer normalizeWpContentHtml — kept as alias for media-only rewrites. */
 export function rewriteWpMediaInHtml(html: string): string {
   return normalizeWpContentHtml(html);
 }

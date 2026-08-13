@@ -1,6 +1,6 @@
 "use client";
 
-import { siteConfig, assets } from "@/data/site";
+import { siteConfig, assets, portraitObjectPosition } from "@/data/site";
 import { Container } from "@/components/ui/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { Reveal } from "@/components/motion/reveal";
@@ -16,9 +16,11 @@ export function CTASection() {
     >
       <div className="absolute inset-0 opacity-10">
         <div
-          className="h-full w-full bg-cover bg-center"
+          className="h-full w-full bg-cover"
           style={{
             backgroundImage: `url(${assets.founderBanner})`,
+            backgroundPosition:
+              portraitObjectPosition(assets.founderBanner) ?? "center 28%",
           }}
         />
       </div>

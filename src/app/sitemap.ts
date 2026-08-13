@@ -5,6 +5,7 @@ import {
   getTeam,
 } from "@/lib/wordpress";
 import { absoluteUrl } from "@/lib/seo";
+import { BLOG_LIST_PATH, blogPostPath } from "@/lib/blog-paths";
 
 export const dynamic = "force-static";
 
@@ -41,7 +42,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry("/contact/", { changeFrequency: "monthly", priority: 0.8 }),
     entry("/services/", { changeFrequency: "weekly", priority: 0.9 }),
     entry("/team/", { changeFrequency: "monthly", priority: 0.8 }),
-    entry("/blog/", { changeFrequency: "daily", priority: 0.9 }),
+    entry(BLOG_LIST_PATH, { changeFrequency: "daily", priority: 0.9 }),
   ];
 
   const serviceRoutes = serviceSlugs.map((slug) =>
@@ -59,7 +60,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   const postRoutes = postSlugs.map((slug) =>
-    entry(`/blog/post/${slug}/`, {
+    entry(blogPostPath(slug), {
       changeFrequency: "weekly",
       priority: 0.7,
     }),

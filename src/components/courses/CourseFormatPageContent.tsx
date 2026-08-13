@@ -64,6 +64,10 @@ export function CourseFormatPageContent({ slug }: { slug: string }) {
 
         ]}
 
+        image={format.image}
+
+        imagePosition={objectPosition ?? "center 18%"}
+
       />
 
 

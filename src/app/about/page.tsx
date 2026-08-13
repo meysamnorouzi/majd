@@ -4,7 +4,7 @@ import { SectionTitle } from "@/components/ui/SectionTitle";
 import { CTASection } from "@/components/home/CTASection";
 import { FounderBanner } from "@/components/home/FounderBanner";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
-import { aboutContent, assets, practiceAreas, stats } from "@/data/site";
+import { aboutContent, assets, portraitObjectPosition, practiceAreas, stats } from "@/data/site";
 import { createPageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
@@ -24,14 +24,31 @@ export default function AboutPage() {
         <Container>
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <Reveal variant="left">
-              <div className="relative aspect-square overflow-hidden rounded-2xl shadow-xl ring-1 ring-gold-500/20">
-                <Image
-                  src={assets.logo}
-                  alt="لوگوی موسسه حقوقی مجد وکیل الرعایا"
-                  fill
-                  className="object-contain bg-navy-950 p-10"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
+              <div className="relative pb-8">
+                <div className="relative aspect-[4/5] overflow-hidden rounded-2xl shadow-xl ring-1 ring-gold-500/20">
+                  <Image
+                    src={assets.founderArchitecture}
+                    alt="مسعود جوکار درزی — مدیر موسسه حقوقی مجد"
+                    fill
+                    className="portrait-warm object-cover"
+                    style={{
+                      objectPosition:
+                        portraitObjectPosition(assets.founderArchitecture) ??
+                        "center 12%",
+                    }}
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy-950/50 via-transparent to-transparent" />
+                </div>
+                <div className="absolute -bottom-5 -left-5 flex h-24 w-24 items-center justify-center rounded-2xl bg-navy-950 p-2 shadow-xl ring-2 ring-gold-500/40 sm:h-28 sm:w-28">
+                  <Image
+                    src={assets.logo}
+                    alt="لوگوی موسسه حقوقی مجد وکیل الرعایا"
+                    width={96}
+                    height={96}
+                    className="rounded-xl object-cover"
+                  />
+                </div>
               </div>
             </Reveal>
             <Reveal variant="right" delay={0.1}>
@@ -43,6 +60,43 @@ export default function AboutPage() {
             </Reveal>
           </div>
         </Container>
+      </section>
+
+      <section className="bg-navy-950 py-4">
+        <div className="grid grid-cols-2 gap-1 sm:grid-cols-4">
+          {[
+            {
+              src: assets.founderBanner,
+              alt: "مسعود جوکار درزی — سخنرانی",
+            },
+            {
+              src: assets.founderBoardroom,
+              alt: "مسعود جوکار درزی — گفتگو با رسانه",
+            },
+            {
+              src: assets.founderAward,
+              alt: "مسعود جوکار درزی — تندیس",
+            },
+            {
+              src: assets.founderConversation,
+              alt: "مسعود جوکار درزی — همایش",
+            },
+          ].map((photo) => (
+            <div key={photo.src} className="relative aspect-[16/11] overflow-hidden">
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                className="object-cover"
+                style={{
+                  objectPosition:
+                    portraitObjectPosition(photo.src) ?? "center",
+                }}
+                sizes="(max-width: 640px) 50vw, 25vw"
+              />
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="bg-navy-900 py-16">

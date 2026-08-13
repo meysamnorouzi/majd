@@ -21,13 +21,14 @@ import {
   defaultBlogPostSort,
   type BlogPostSortOption,
 } from "@/lib/wordpress/posts-query";
+import { BlogCategoryGrid } from "@/components/blog/BlogCategoryGrid";
 import {
   FadeIn,
   Reveal,
   Stagger,
   StaggerItem,
 } from "@/components/motion/reveal";
-import { useLawyerOptions, useTeamMembers } from "@/hooks/useTeamMembers";
+import { useLawyerOptions } from "@/hooks/useTeamMembers";
 
 function BlogLayoutShell({
   children,
@@ -309,12 +310,17 @@ function BlogPageContentInner({
     };
   }, [categoryIdProp, categoryNameProp, categorySlug]);
 
+  const showCategoryHub =
+    !categorySlug && !categoryIdProp && resolved.slug == null;
+
   return (
     <BlogLayoutShell activeCategorySlug={resolved.slug}>
       {resolving ? (
         <div className="flex justify-center py-20">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-gold-500 border-t-transparent" />
         </div>
+      ) : showCategoryHub ? (
+        <BlogCategoryGrid />
       ) : (
         <PostsBody
           categoryId={

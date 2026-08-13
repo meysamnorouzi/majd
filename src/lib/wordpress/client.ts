@@ -1,10 +1,10 @@
 import { fallbackPosts, fallbackProducts } from "@/data/site";
+import { normalizeWpSlug } from "@/lib/wordpress/categories";
 import {
   normalizeWpContentHtml,
   rewriteWpMediaUrl,
   wpApiUrl,
 } from "@/lib/wordpress/config";
-import { normalizeWpSlug } from "@/lib/wordpress/categories";
 import {
   applyFallbackBlogPosts,
   applyPostsListOptions,

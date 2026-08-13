@@ -7,12 +7,17 @@ import {
   fetchCategoriesClient,
   type BlogCategory,
 } from "@/lib/wordpress/client";
+import {
+  BLOG_LIST_PATH,
+  blogCategoryPath,
+  isBlogPath,
+} from "@/lib/blog-paths";
 
-const BLOG_HREF = "/blog/";
+const BLOG_HREF = BLOG_LIST_PATH;
 
 /** Query-param URLs avoid static-export missing-param errors in next dev */
 function categoryHref(slug: string) {
-  return `/blog/?category=${encodeURIComponent(slug)}`;
+  return blogCategoryPath(slug);
 }
 
 function categoryLabel(name: string) {
@@ -251,10 +256,7 @@ function NavBlogDropdownInner({
   const containerRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const isBlogActive =
-    pathname === "/blog" ||
-    pathname === "/blog/" ||
-    pathname.startsWith("/blog/");
+  const isBlogActive = isBlogPath(pathname);
 
   useEffect(() => {
     let cancelled = false;
@@ -321,7 +323,7 @@ function NavBlogDropdownInner({
           href={BLOG_HREF}
           onClick={onNavigate}
           className={`block rounded-lg px-4 py-3 text-sm font-medium ${
-            pathname === BLOG_HREF || pathname === "/blog"
+            pathname === BLOG_HREF || pathname === "/blogs"
               ? "bg-white/10 text-gold-400"
               : "text-white/80"
           }`}

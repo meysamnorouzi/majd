@@ -3,13 +3,19 @@ import type { Service, TeamMember } from "@/types";
 /** Local assets in /public/images */
 export const assets = {
   logo: "/images/logo.png",
-  /** Primary portrait — standing by office window */
-  founderPortrait: "/images/founder-standing-window.png",
-  /** Wide cinematic banners (copy space) */
-  founderBanner: "/images/founder-office-desk.png",
-  founderBoardroom: "/images/founder-boardroom.png",
-  founderArchitecture: "/images/founder-architecture.png",
-  founderReading: "/images/founder-reading.png",
+  /** Primary portrait — team cards, hero, profile sidebar */
+  founderPortrait: "/images/jokar/jokar-award-portrait.jpg",
+  /** Press interview still (gallery) */
+  founderPressPortrait: "/images/jokar/jokar-portrait.jpg",
+  /** Wide cinematic banners */
+  founderBanner: "/images/jokar/jokar-podium.jpg",
+  founderBoardroom: "/images/jokar/jokar-interview.jpg",
+  founderArchitecture: "/images/jokar/jokar-award-portrait.jpg",
+  founderReading: "/images/jokar/jokar-speaking.jpg",
+  founderAward: "/images/jokar/jokar-award.jpg",
+  founderSeated: "/images/jokar/jokar-seated.jpg",
+  founderConversation: "/images/jokar/IMG_20240207_130217_159.jpg",
+  founderNetworking: "/images/jokar/jokar-networking.jpg",
   /** Legacy still used as fallback / secondary */
   founderPortraitLegacy: "/images/Masoud-Jokar-Darzi.jpg",
   webinarBanner: "/images/banner-webinar.jpg",
@@ -28,30 +34,50 @@ export const assets = {
 
 const founderGallery = [
   {
-    src: assets.founderPortrait,
-    alt: "مسعود جوکار درزی — ایستاده در دفتر وکالت",
+    src: assets.founderBanner,
+    alt: "مسعود جوکار درزی — سخنرانی در همایش",
+  },
+  {
+    src: assets.founderPressPortrait,
+    alt: "مسعود جوکار درزی — گفتگوی رسانه‌ای",
   },
   {
     src: assets.founderBoardroom,
-    alt: "مسعود جوکار درزی — جلسه مشاوره در اتاق کنفرانس",
+    alt: "مسعود جوکار درزی — گفتگو با رسانه‌ها",
   },
   {
-    src: assets.founderArchitecture,
-    alt: "مسعود جوکار درزی — پرتره حرفه‌ای",
+    src: assets.founderAward,
+    alt: "مسعود جوکار درزی — جایزه و لوح تقدیر",
   },
   {
     src: assets.founderReading,
-    alt: "مسعود جوکار درزی — مطالعه پرونده حقوقی",
+    alt: "مسعود جوکار درزی — پشت تریبون",
   },
   {
-    src: assets.founderBanner,
-    alt: "مسعود جوکار درزی — در دفتر کار",
+    src: assets.founderConversation,
+    alt: "مسعود جوکار درزی — گفتگو در همایش",
+  },
+  {
+    src: assets.founderSeated,
+    alt: "مسعود جوکار درزی — حضور در نشست تخصصی",
+  },
+  {
+    src: assets.founderNetworking,
+    alt: "مسعود جوکار درزی — دیدار رسمی",
   },
 ] as const;
 
-/** Standing-window portrait: subject sits on the left — nudge ~50px further left */
+/** Crop so Jokar’s face stays in frame across portrait and landscape stills */
 export function portraitObjectPosition(src: string): string | undefined {
-  if (src.includes("founder-standing-window")) return "-80px center";
+  if (src.includes("jokar-portrait")) return "center 18%";
+  if (src.includes("jokar-award-portrait")) return "center 12%";
+  if (src.includes("jokar-networking")) return "72% 18%";
+  if (src.includes("jokar-speaking")) return "78% 22%";
+  if (src.includes("130217") || src.includes("jokar-conversation")) return "58% 32%";
+  if (src.includes("jokar-seated")) return "38% 28%";
+  if (src.includes("jokar-interview")) return "center 20%";
+  if (src.includes("jokar-award")) return "center 18%";
+  if (src.includes("jokar-podium")) return "center 28%";
   return undefined;
 }
 
@@ -646,7 +672,7 @@ export const navLinks = [
   // Temporarily hidden — no payment gateway yet
   // { href: "/courses/", label: "دوره‌های آموزشی" },
   { href: "/team/", label: "اعضای تیم" },
-  { href: "/blog/", label: "مقالات" },
+  { href: "/blogs/", label: "مقالات" },
   // Temporarily hidden — no payment gateway yet
   // { href: "/shop/", label: "فروشگاه" },
   { href: "/about/", label: "درباره ما" },

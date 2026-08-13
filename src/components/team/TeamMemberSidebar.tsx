@@ -76,7 +76,7 @@ export function TeamMemberSidebar({
   const phoneTel = siteConfig.phonesTel[0];
   const email = member.email ?? siteConfig.email;
   const location = member.location ?? siteConfig.address;
-  const portrait = member.gallery?.[3]?.src ?? member.image;
+  const portrait = member.image;
   const objectPosition =
     portraitObjectPosition(portrait) ?? "center 18%";
 

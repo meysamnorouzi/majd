@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { BlogPost } from "@/lib/wordpress/client";
-import { assets } from "@/data/site";
+import { blogPostPath } from "@/lib/blog-paths";
+import { assets, portraitObjectPosition } from "@/data/site";
 
 export function BlogFeaturedPost({ post }: { post: BlogPost }) {
   return (
     <Link
-      href={`/blog/post/${post.slug}/`}
+      href={blogPostPath(post.slug)}
       className="group relative mb-12 block overflow-hidden rounded-2xl shadow-2xl shadow-navy-900/20"
     >
       <div className="relative aspect-[21/9] min-h-[220px] sm:min-h-[280px]">
@@ -55,7 +56,8 @@ export function BlogInlineBanner() {
         style={{
           backgroundImage: `url(${assets.founderReading})`,
           backgroundSize: "cover",
-          backgroundPosition: "center 30%",
+          backgroundPosition:
+            portraitObjectPosition(assets.founderReading) ?? "78% 22%",
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-l from-navy-950/80 via-navy-950/60 to-transparent" />

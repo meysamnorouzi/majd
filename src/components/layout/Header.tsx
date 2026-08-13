@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { navLinks, siteConfig } from "@/data/site";
+import { BLOG_LIST_PATH, isBlogPath } from "@/lib/blog-paths";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
 import { NavServicesDropdown } from "@/components/layout/NavServicesDropdown";
@@ -14,7 +15,7 @@ import { NavBlogDropdown } from "@/components/layout/NavBlogDropdown";
 // import { useAuth } from "@/components/providers/AuthProvider";
 
 const SERVICES_NAV_HREF = "/services/";
-const BLOG_NAV_HREF = "/blog/";
+const BLOG_NAV_HREF = BLOG_LIST_PATH;
 // const COURSES_NAV_HREF = "/courses/";
 
 // function AccountLink() {
@@ -56,7 +57,7 @@ export function Header() {
       return pathname === SERVICES_NAV_HREF || pathname.startsWith("/services");
     }
     if (href === BLOG_NAV_HREF) {
-      return pathname === BLOG_NAV_HREF || pathname.startsWith("/blog");
+      return isBlogPath(pathname);
     }
     // if (href === COURSES_NAV_HREF) {
     //   return pathname === COURSES_NAV_HREF || pathname.startsWith("/courses");
