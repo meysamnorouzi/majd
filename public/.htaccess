@@ -19,6 +19,11 @@
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^blog/post/.+$ /blog/post/index.html [L]
 
+  # Service detail shell: /services/<slug>/ → /services/detail/index.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^services/.+$ /services/detail/index.html [L]
+
   # Shop product shell
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d

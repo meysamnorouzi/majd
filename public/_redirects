@@ -1,3 +1,4 @@
 /blog/post/*    /blog/post/index.html    200
+/services/*    /services/detail/index.html    200
 /shop/product/*    /shop/product/index.html    200
 /courses/view/*    /courses/view/index.html    200

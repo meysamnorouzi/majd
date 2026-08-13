@@ -1,16 +1,14 @@
 "use client";
 
-import { siteConfig, teamMembers, assets } from "@/data/site";
+import { siteConfig, assets } from "@/data/site";
 import { Container } from "@/components/ui/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { Reveal } from "@/components/motion/reveal";
-
-const lawyerOptions = teamMembers.map((m) => ({
-  slug: m.slug,
-  name: m.name,
-}));
+import { useLawyerOptions } from "@/hooks/useTeamMembers";
 
 export function CTASection() {
+  const lawyerOptions = useLawyerOptions();
+
   return (
     <section
       id="consultation"

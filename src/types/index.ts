@@ -102,6 +102,36 @@ export interface TeamMember {
   social?: TeamMemberSocial;
 }
 
+/** WordPress REST team member (`/wp/v2/team`) */
+export interface WpTeamMemberMeta {
+  role?: string;
+  specialty?: string;
+  fullBio?: string[];
+  bannerImage?: string;
+  gallery?: TeamMemberGalleryItem[];
+  education?: string;
+  experienceYears?: string;
+  areasOfPractice?: string[];
+  achievements?: string[];
+  phone?: string;
+  email?: string;
+  location?: string;
+  social?: TeamMemberSocial;
+  menuOrder?: number;
+}
+
+export interface WpTeamMember {
+  id: number;
+  slug: string;
+  title: { rendered: string };
+  excerpt: { rendered: string };
+  menu_order?: number;
+  majd_team?: WpTeamMemberMeta;
+  _embedded?: {
+    "wp:featuredmedia"?: WpFeaturedMedia[];
+  };
+}
+
 export interface ServiceFAQ {
   q: string;
   a: string;
@@ -138,6 +168,8 @@ export interface Service {
   processSteps?: ServiceProcessStep[];
   cases?: string[];
   faqs?: ServiceFAQ[];
+  /** Remaining WordPress HTML body after majd:service meta block */
+  contentHtml?: string;
 }
 
 export type CourseFormatSlug =

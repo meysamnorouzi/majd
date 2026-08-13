@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { PostCard } from "@/components/blog/PostCard";
 import { BlogSidebar } from "@/components/blog/BlogSidebar";
+import { BlogListToolbar } from "@/components/blog/BlogListToolbar";
 import {
   BlogFeaturedPost,
   BlogInlineBanner,
@@ -17,18 +18,16 @@ import {
   type BlogPost,
 } from "@/lib/wordpress/client";
 import {
+  defaultBlogPostSort,
+  type BlogPostSortOption,
+} from "@/lib/wordpress/posts-query";
+import {
   FadeIn,
   Reveal,
   Stagger,
   StaggerItem,
 } from "@/components/motion/reveal";
-import { teamMembers } from "@/data/site";
-import type { LawyerOption } from "@/components/contact/ContactForm";
-
-const lawyerOptions: LawyerOption[] = teamMembers.map((m) => ({
-  slug: m.slug,
-  name: m.name,
-}));
+import { useLawyerOptions, useTeamMembers } from "@/hooks/useTeamMembers";
 
 function BlogLayoutShell({
   children,
@@ -37,6 +36,8 @@ function BlogLayoutShell({
   children: ReactNode;
   activeCategorySlug?: string | null;
 }) {
+  const lawyerOptions = useLawyerOptions();
+
   return (
     <section className="py-16 lg:py-20">
       <Container>
@@ -70,6 +71,16 @@ function PostsBody({
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [sort, setSort] = useState<BlogPostSortOption>(defaultBlogPostSort);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
   useEffect(() => {
     let cancelled = false;
@@ -77,10 +88,11 @@ function PostsBody({
     setError("");
     (async () => {
       try {
-        const data = await fetchPostsClient(
-          24,
-          categoryId ? { categoryId } : undefined,
-        );
+        const data = await fetchPostsClient(24, {
+          categoryId,
+          search: debouncedSearch,
+          sort,
+        });
         if (!cancelled) setPosts(data);
       } catch {
         if (!cancelled) setError("بارگذاری مقالات انجام نشد.");
@@ -91,10 +103,12 @@ function PostsBody({
     return () => {
       cancelled = true;
     };
-  }, [categoryId]);
+  }, [categoryId, debouncedSearch, sort]);
 
-  const featuredPost = posts[0];
-  const gridPosts = posts.slice(1);
+  const hasActiveFilters = Boolean(debouncedSearch.trim()) || sort !== defaultBlogPostSort;
+  const showFeaturedLayout = !categoryId && !hasActiveFilters;
+  const featuredPost = showFeaturedLayout ? posts[0] : undefined;
+  const gridPosts = showFeaturedLayout ? posts.slice(1) : posts;
   const midIndex = Math.floor(gridPosts.length / 2);
   const splitAt = midIndex - (midIndex % 2);
   const firstHalf = gridPosts.slice(0, splitAt || midIndex);
@@ -109,48 +123,86 @@ function PostsBody({
 
   if (loading) {
     return (
-      <div className="flex justify-center py-20">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gold-500 border-t-transparent" />
-      </div>
+      <>
+        <BlogListToolbar
+          search={search}
+          sort={sort}
+          resultCount={posts.length}
+          onSearchChange={setSearch}
+          onSortChange={setSort}
+        />
+        <div className="flex justify-center py-20">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-gold-500 border-t-transparent" />
+        </div>
+      </>
     );
   }
 
   if (error) {
-    return <p className="py-12 text-center text-red-600">{error}</p>;
+    return (
+      <>
+        <BlogListToolbar
+          search={search}
+          sort={sort}
+          resultCount={0}
+          onSearchChange={setSearch}
+          onSortChange={setSort}
+        />
+        <p className="py-12 text-center text-red-600">{error}</p>
+      </>
+    );
   }
 
   if (posts.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
-        <p className="text-lg font-semibold text-navy-900">
-          مقاله‌ای در این دسته‌بندی یافت نشد
-        </p>
-        <p className="mt-2 text-sm text-slate-600">
-          از سایدبار دسته‌بندی دیگری را انتخاب کنید یا همه مقالات را ببینید.
-        </p>
-      </div>
+      <>
+        <BlogListToolbar
+          search={search}
+          sort={sort}
+          resultCount={0}
+          onSearchChange={setSearch}
+          onSortChange={setSort}
+        />
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
+          <p className="text-lg font-semibold text-navy-900">
+            {hasActiveFilters
+              ? "مقاله‌ای با این جستجو یافت نشد"
+              : "مقاله‌ای در این دسته‌بندی یافت نشد"}
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            {hasActiveFilters
+              ? "عبارت جستجو یا مرتب‌سازی را تغییر دهید."
+              : "از سایدبار دسته‌بندی دیگری را انتخاب کنید یا همه مقالات را ببینید."}
+          </p>
+        </div>
+      </>
     );
   }
 
   return (
     <>
-      {featuredPost && !categoryId && (
+      {featuredPost && (
         <FadeIn>
           <BlogFeaturedPost post={featuredPost} />
         </FadeIn>
       )}
+
+      <BlogListToolbar
+        search={search}
+        sort={sort}
+        resultCount={posts.length}
+        onSearchChange={setSearch}
+        onSortChange={setSort}
+      />
 
       <FadeIn className="mb-8 flex items-end justify-between border-b border-slate-200 pb-4">
         <div>
           <h2 className="text-xl font-bold text-navy-900">{heading}</h2>
           <p className="mt-1 text-sm text-slate-600">{subheading}</p>
         </div>
-        <span className="hidden text-sm text-slate-500 sm:block">
-          {posts.length.toLocaleString("fa-IR")} مقاله
-        </span>
       </FadeIn>
 
-      {categoryId ? (
+      {categoryId || hasActiveFilters ? (
         <Stagger
           className="grid grid-cols-2 gap-4 sm:gap-8"
           stagger={0.08}

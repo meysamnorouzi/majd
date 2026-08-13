@@ -41,19 +41,21 @@ export function TeamMemberCard({
 
   return (
     <Link href={href} className="group block">
-      <article className="overflow-hidden rounded-2xl bg-white shadow-md transition duration-500 hover:-translate-y-1 hover:shadow-xl">
+      <article className="overflow-hidden rounded-2xl bg-white shadow-md transition-[transform,box-shadow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-xl">
         <div className="relative aspect-[3/4] overflow-hidden">
-          <Image
-            src={member.image}
-            alt={member.name}
-            fill
-            className="portrait-filter object-cover will-change-transform group-hover:scale-105"
-            style={{
-              objectPosition: objectPosition ?? "center 18%",
-            }}
-            sizes="(max-width: 768px) 50vw, 25vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-navy-950/90 via-navy-950/20 to-transparent opacity-85 transition duration-500 group-hover:opacity-95" />
+          <div className="absolute inset-0 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105">
+            <Image
+              src={member.image}
+              alt={member.name}
+              fill
+              className="portrait-filter object-cover"
+              style={{
+                objectPosition: objectPosition ?? "center 18%",
+              }}
+              sizes="(max-width: 768px) 50vw, 25vw"
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-navy-950/90 via-navy-950/20 to-transparent opacity-85 transition-opacity duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-95" />
           <div className="absolute bottom-0 p-5 text-white">
             <h3 className="font-bold">{member.name}</h3>
             <p className="mt-1 text-xs text-gold-400">{member.role}</p>

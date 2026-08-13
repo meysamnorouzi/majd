@@ -16,8 +16,8 @@ export const metadata: Metadata = createPageMetadata({
   keywords: ["وکیل پایه یک", "تیم حقوقی مجد", "وکلای تهران"],
 });
 
-export default function TeamPage() {
-  const team = getTeam();
+export default async function TeamPage() {
+  const team = await getTeam();
 
   return (
     <>

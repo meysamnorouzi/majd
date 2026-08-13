@@ -1,13 +1,12 @@
+"use client";
+
 import { ContactForm } from "@/components/contact/ContactForm";
-import { teamMembers } from "@/data/site";
+import { useLawyerOptions } from "@/hooks/useTeamMembers";
 import type { Service } from "@/types";
 
-const lawyerOptions = teamMembers.map((m) => ({
-  slug: m.slug,
-  name: m.name,
-}));
-
 export function ServiceSidebar({ service }: { service: Service }) {
+  const lawyerOptions = useLawyerOptions();
+
   return (
     <aside
       id="consultation"

@@ -109,7 +109,7 @@ export function Hero() {
               <div className="absolute right-0 bottom-0 left-0 border-t border-gold-500/20 bg-navy-950/80 p-6 backdrop-blur-md">
                 <p className="text-xl font-bold text-white">مسعود جوکار درزی</p>
                 <p className="mt-1 text-sm text-gold-400">
-                  وکیل پایه یک دادگستری · وکیل الرعایا
+                  مدیر موسسه حقوقی مجد · وکیل الرعایا
                 </p>
               </div>
             </div>

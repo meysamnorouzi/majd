@@ -1,10 +1,7 @@
 import {
   fallbackPosts,
   fallbackProducts,
-  services,
-  teamMembers,
 } from "@/data/site";
-import { enrichService } from "@/data/services-detail";
 import {
   buildCategoryTree,
   findCategoryBySlug,
@@ -17,6 +14,25 @@ import {
   wpApiUrl,
   wpServerHeaders,
 } from "@/lib/wordpress/config";
+import { wpFetch } from "@/lib/wordpress/fetch";
+import {
+  applyFallbackBlogPosts,
+  applyPostsListOptions,
+  buildPostsQuery,
+  hasPostsQueryFilters,
+  postsFetchLimitWhenSearching,
+  type FetchPostsOptions,
+} from "@/lib/wordpress/posts-query";
+import {
+  getAllServiceSlugsFromWp,
+  getServiceBySlugFromWp,
+  getServicesFromWp,
+} from "@/lib/wordpress/services";
+import {
+  getAllTeamSlugsFromWp,
+  getTeamFromWp,
+  getTeamMemberBySlugFromWp,
+} from "@/lib/wordpress/team";
 import type { BlogCategory, WpCategory, WpPost, WpProduct } from "@/types";
 
 function apiUrl(path: string): string {
@@ -24,12 +40,12 @@ function apiUrl(path: string): string {
 }
 
 async function fetchJson<T>(url: string): Promise<T | null> {
+  const res = await wpFetch(url, {
+    cache: "force-cache",
+    headers: wpServerHeaders(),
+  });
+  if (!res?.ok) return null;
   try {
-    const res = await fetch(url, {
-      cache: "force-cache",
-      headers: wpServerHeaders(),
-    });
-    if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
     return null;
@@ -75,7 +91,7 @@ export async function getCategoryBySlug(
 
 export async function getPosts(
   limit = 12,
-  options?: { categoryId?: number },
+  options?: FetchPostsOptions,
 ): Promise<
   {
     id: number;
@@ -87,15 +103,14 @@ export async function getPosts(
     image?: string;
   }[]
 > {
-  const categoryQuery = options?.categoryId
-    ? `&categories=${options.categoryId}`
-    : "";
+  const searching = Boolean(options?.search?.trim());
+  const fetchLimit = searching ? postsFetchLimitWhenSearching : limit;
   const data = await fetchJson<WpPost[]>(
-    apiUrl(`/wp-json/wp/v2/posts?per_page=${limit}&_embed${categoryQuery}`),
+    apiUrl(`/wp-json/wp/v2/posts?${buildPostsQuery(fetchLimit, options)}`),
   );
 
   if (data?.length) {
-    return data.map((p) => ({
+    const posts = data.map((p) => ({
       id: p.id,
       slug: normalizeWpSlug(p.slug),
       title: stripHtml(p.title.rendered),
@@ -104,9 +119,15 @@ export async function getPosts(
       date: p.date,
       image: getFeaturedImage(p),
     }));
+
+    return searching
+      ? applyPostsListOptions(posts, options, limit)
+      : posts;
   }
 
-  return options?.categoryId ? [] : fallbackPosts;
+  if (hasPostsQueryFilters(options)) return [];
+
+  return applyFallbackBlogPosts(fallbackPosts, options).slice(0, limit);
 }
 
 export async function getPostBySlug(slug: string) {
@@ -226,45 +247,28 @@ export async function getAllProductSlugs(): Promise<string[]> {
   return fallbackProducts.map((p) => p.slug);
 }
 
-export function getServices() {
-  return services;
+export async function getServices() {
+  const { services: wpServices } = await getServicesFromWp();
+  return wpServices;
 }
 
-export function getAllServiceSlugs(): string[] {
-  const slugs: string[] = [];
-  for (const service of services) {
-    slugs.push(service.slug);
-    for (const child of service.children ?? []) {
-      slugs.push(child.slug);
-    }
-  }
-  return slugs;
+export async function getAllServiceSlugs(): Promise<string[]> {
+  return getAllServiceSlugsFromWp();
 }
 
-export function getServiceBySlug(slug: string) {
-  const top = services.find((s) => s.slug === slug);
-  if (top) return enrichService(top);
-
-  for (const parent of services) {
-    const child = parent.children?.find((c) => c.slug === slug);
-    if (child) {
-      return enrichService({
-        ...child,
-        icon: child.icon || parent.icon,
-        image: child.image || parent.image,
-        parentSlug: parent.slug,
-        parentTitle: parent.title,
-      });
-    }
-  }
-
-  return null;
+export async function getServiceBySlug(slug: string) {
+  return getServiceBySlugFromWp(slug);
 }
 
-export function getTeam() {
-  return teamMembers;
+export async function getTeam() {
+  const { team } = await getTeamFromWp();
+  return team;
 }
 
-export function getTeamMemberBySlug(slug: string) {
-  return teamMembers.find((m) => m.slug === slug) ?? null;
+export async function getTeamMemberBySlug(slug: string) {
+  return getTeamMemberBySlugFromWp(slug);
+}
+
+export async function getAllTeamSlugs(): Promise<string[]> {
+  return getAllTeamSlugsFromWp();
 }
