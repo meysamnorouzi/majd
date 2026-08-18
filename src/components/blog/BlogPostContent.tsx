@@ -110,7 +110,10 @@ export function BlogPostContent() {
             </div>
 
             <div className="lg:col-span-4">
-              <BlogSidebar lawyerOptions={lawyerOptions} />
+              <BlogSidebar
+                lawyerOptions={lawyerOptions}
+                contentHtml={post.content}
+              />
             </div>
           </div>
         </Container>

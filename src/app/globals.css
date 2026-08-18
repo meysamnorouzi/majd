@@ -31,6 +31,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
   overflow-x: clip;
 }
 
@@ -80,6 +81,7 @@ body {
   font-weight: 700;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
+  scroll-margin-top: 6rem;
 }
 
 .prose-wp h2 {

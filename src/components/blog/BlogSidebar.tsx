@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ContactForm } from "@/components/contact/ContactForm";
+import { BlogPostToc } from "@/components/blog/BlogPostToc";
 import {
   fetchCategoriesClient,
   type BlogCategory,
@@ -30,9 +31,11 @@ function categoryLabel(name: string) {
 function BlogSidebarInner({
   lawyerOptions,
   activeCategorySlug,
+  contentHtml,
 }: {
   lawyerOptions?: LawyerOption[];
   activeCategorySlug?: string | null;
+  contentHtml?: string;
 }) {
   const searchParams = useSearchParams();
   const urlCategory = searchParams.get("category");
@@ -53,7 +56,9 @@ function BlogSidebarInner({
   }, []);
 
   return (
-    <aside className="space-y-6 lg:sticky lg:top-8">
+    <aside className="space-y-6 lg:sticky lg:top-24">
+      {contentHtml ? <BlogPostToc html={contentHtml} /> : null}
+
       {/* Categories */}
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
         <div className="border-b border-slate-100 bg-cream/60 px-5 py-4">
@@ -228,15 +233,18 @@ function BlogSidebarInner({
 export function BlogSidebar({
   lawyerOptions,
   activeCategorySlug,
+  contentHtml,
 }: {
   lawyerOptions?: LawyerOption[];
   /** Optional override; falls back to ?category= from URL */
   activeCategorySlug?: string | null;
+  /** Article HTML — when set, a nested heading outline is shown above categories */
+  contentHtml?: string;
 }) {
   return (
     <Suspense
       fallback={
-        <aside className="space-y-6 lg:sticky lg:top-8">
+        <aside className="space-y-6 lg:sticky lg:top-24">
           <div className="h-64 animate-pulse rounded-2xl bg-slate-100" />
           <div className="h-40 animate-pulse rounded-2xl bg-slate-100" />
         </aside>
@@ -245,6 +253,7 @@ export function BlogSidebar({
       <BlogSidebarInner
         lawyerOptions={lawyerOptions}
         activeCategorySlug={activeCategorySlug}
+        contentHtml={contentHtml}
       />
     </Suspense>
   );

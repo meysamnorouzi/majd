@@ -1,3 +1,5 @@
+import { ensureHeadingIds } from "@/lib/wordpress/headings";
+
 /** Detect and wrap inline WordPress contact callouts (centered text + phone numbers). */
 
 const CENTERED_P_BLOCK_RE =
@@ -98,6 +100,6 @@ export function wrapWpContactCallouts(html: string): string {
 
 export function enhanceWpContentHtml(html: string): string {
   return wrapWpContactCallouts(
-    isolatePhoneNumbers(fixSplitPersianWords(html)),
+    ensureHeadingIds(isolatePhoneNumbers(fixSplitPersianWords(html))),
   );
 }
