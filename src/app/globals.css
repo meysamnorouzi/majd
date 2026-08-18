@@ -57,13 +57,20 @@ body {
 /* Keep LTR islands (numbers like "5.") from flipping to ".5" in RTL */
 .prose-wp [dir="ltr"],
 .prose-wp [dir="LTR"],
-.prose-wp .wp-ltr-num {
+.prose-wp .wp-ltr-num,
+.prose-wp .wp-phone {
   direction: ltr;
   unicode-bidi: isolate;
 }
 
-.prose-wp .wp-ltr-num {
+.prose-wp .wp-ltr-num,
+.prose-wp .wp-phone {
   display: inline-block;
+}
+
+.prose-wp a[href^="tel:" i] {
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 
 .prose-wp h2,
@@ -220,7 +227,8 @@ body {
   text-decoration: none;
 }
 
-.prose-wp .wp-contact-box a[href^="tel:"] {
+.prose-wp .wp-contact-box a[href^="tel:" i],
+.prose-wp .wp-contact-box .wp-phone {
   display: inline-block;
   font-size: 1.125rem;
   letter-spacing: 0.02em;

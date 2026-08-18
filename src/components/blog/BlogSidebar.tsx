@@ -210,7 +210,7 @@ function BlogSidebarInner({
             <div className="absolute inset-0 bg-gradient-to-t from-navy-950/70 via-transparent to-transparent" />
           </div>
           <div className="p-5">
-            <p className="text-xs font-semibold text-gold-600">مدیر موسسه</p>
+            <p className="text-xs font-semibold text-gold-600">مدیر عامل موسسه</p>
             <h3 className="mt-1 font-bold text-navy-900 group-hover:text-gold-600">
               {founder.name}
             </h3>

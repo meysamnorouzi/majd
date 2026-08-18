@@ -54,7 +54,7 @@ export function Hero() {
                 <div className="relative aspect-[4/3]">
                   <Image
                     src={assets.founderArchitecture}
-                    alt="مسعود جوکار درزی — مدیر موسسه"
+                    alt="مسعود جوکار درزی — مدیر عامل موسسه"
                     fill
                     className="portrait-filter object-cover"
                     style={{
@@ -69,7 +69,7 @@ export function Hero() {
                 </div>
                 <div className="absolute right-0 bottom-0 left-0 p-5">
                   <p className="font-bold text-white">مسعود جوکار درزی</p>
-                  <p className="text-sm text-gold-400">وکیل پایه یک — مدیر موسسه</p>
+                  <p className="text-sm text-gold-400">وکیل پایه یک — مدیر عامل موسسه</p>
                 </div>
               </div>
             </FadeIn>
@@ -101,7 +101,7 @@ export function Hero() {
               <div className="relative aspect-[4/5] w-full">
                   <Image
                     src={assets.founderPortrait}
-                    alt="مسعود جوکار درزی — وکیل پایه یک و مدیر موسسه حقوقی مجد"
+                    alt="مسعود جوکار درزی — وکیل پایه یک و مدیر عامل موسسه حقوقی مجد"
                     fill
                     className="portrait-filter object-cover"
                     style={{
@@ -118,7 +118,7 @@ export function Hero() {
               <div className="absolute right-0 bottom-0 left-0 border-t border-gold-500/20 bg-navy-950/80 p-6 backdrop-blur-md">
                 <p className="text-xl font-bold text-white">مسعود جوکار درزی</p>
                 <p className="mt-1 text-sm text-gold-400">
-                  مدیر موسسه حقوقی مجد · وکیل الرعایا
+                  مدیر عامل موسسه حقوقی مجد · وکیل الرعایا
                 </p>
               </div>
             </div>

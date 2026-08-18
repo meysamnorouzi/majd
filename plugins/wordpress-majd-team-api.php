@@ -238,7 +238,7 @@ class Majd_Team_API {
                 <td>
                     <input type="text" class="large-text" id="majd_team_role" name="majd_team_role"
                         value="<?php echo esc_attr($fields['role']); ?>"
-                        placeholder="مثال: مدیر موسسه حقوقی مجد" />
+                        placeholder="مثال: مدیر عامل موسسه حقوقی مجد" />
                 </td>
             </tr>
             <tr>

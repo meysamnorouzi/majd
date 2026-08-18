@@ -33,7 +33,7 @@ export function FounderBanner() {
             <FadeIn delay={0.05}>
               <span className="inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-white/5 px-4 py-1.5 text-sm font-semibold tracking-wide text-gold-400 backdrop-blur-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
-                مدیر موسسه
+                مدیر عامل موسسه
               </span>
             </FadeIn>
             <FadeIn delay={0.15}>
@@ -44,7 +44,7 @@ export function FounderBanner() {
             </FadeIn>
             <FadeIn delay={0.25}>
               <p className="mt-5 leading-relaxed text-white/80">
-                و مدیر موسسه حقوقی مجد  با بیش از دو دهه تجربه در پرونده‌های حقوقی و
+                و مدیر عامل موسسه حقوقی مجد  با بیش از دو دهه تجربه در پرونده‌های حقوقی و
                 کیفری. همراهی شما از اولین جلسه مشاوره تا نتیجه نهایی پرونده.
               </p>
             </FadeIn>
@@ -55,8 +55,8 @@ export function FounderBanner() {
                   href="/team/masoud-jokar-darzi/"
                   className="inline-flex items-center justify-center rounded-lg border-2 border-white/30 px-6 py-3 font-semibold text-white transition hover:border-gold-400/50 hover:bg-white/10"
                 >
-                  پروفایل وکیل
-                </Link>
+                  پروفایل مدیرعامل
+                </Link> 
               </div>
             </FadeIn>
           </div>

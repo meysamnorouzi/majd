@@ -132,7 +132,9 @@ export default async function TeamMemberPage({
         <Container>
           <Reveal className="text-center">
             <h3 className="text-xl font-bold text-gold-400">
-              حوزه‌های فعالیت {member.name}
+              {member.slug === "masoud-jokar-darzi"
+                ? "حوزه‌های فعالیت موسسه حقوقی مجد وکیل الرعایا با مدیریت مسعود جوکار درزی"
+                : `حوزه‌های فعالیت ${member.name}`}
             </h3>
             <p className="mt-2 text-sm text-white/60">
               زمینه‌های تخصصی که در آن‌ها فعالیت دارد

@@ -539,7 +539,7 @@ export const fallbackTeamMembers: TeamMember[] = [
     id: "1",
     slug: "masoud-jokar-darzi",
     name: "مسعود جوکار درزی",
-    role: "مدیر موسسه حقوقی مجد",
+    role: "مدیر عامل موسسه حقوقی مجد",
     specialty: "حقوق کیفری و بین‌الملل",
     bio: "بیش از دو دهه تجربه در پرونده‌های کیفری پیچیده و همکاری با سفارتخانه‌ها و اتاق‌های بازرگانی.",
     fullBio: [

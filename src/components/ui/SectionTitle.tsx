@@ -8,17 +8,22 @@ export function SectionTitle({
   description,
   align = "center",
   light = false,
+  wide = false,
 }: {
   eyebrow?: string;
   title: string;
   description?: string;
   align?: "center" | "right";
   light?: boolean;
+  wide?: boolean;
 }) {
   const alignClass = align === "center" ? "text-center mx-auto" : "text-right";
 
   return (
-    <Reveal className={`mb-12 max-w-2xl ${alignClass}`} variant="up">
+    <Reveal
+      className={`mb-12 ${wide ? "max-w-4xl" : "max-w-2xl"} ${alignClass}`}
+      variant="up"
+    >
       {eyebrow && (
         <span
           className={`mb-3 inline-block text-sm font-semibold tracking-wide ${

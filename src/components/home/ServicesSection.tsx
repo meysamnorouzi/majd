@@ -32,8 +32,9 @@ export function ServicesSection() {
       <Container>
         <SectionTitle
           eyebrow="خدمات تخصصی"
-          title="حوزه‌های حقوقی موسسه مجد"
+          title="حوزه‌های فعالیت موسسه حقوقی مجد وکیل الرعایا با مدیریت مسعود جوکار درزی"
           description="از دعاوی کیفری تا خانواده و ملکی — تیم ما در تمامی شعب قضایی تهران در کنار شماست."
+          wide
         />
         <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" stagger={0.09}>
           {services.map((service) => (

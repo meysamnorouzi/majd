@@ -28,7 +28,7 @@ export default function AboutPage() {
                 <div className="relative aspect-[4/5] overflow-hidden rounded-2xl shadow-xl ring-1 ring-gold-500/20">
                   <Image
                     src={assets.founderArchitecture}
-                    alt="مسعود جوکار درزی — مدیر موسسه حقوقی مجد"
+                    alt="مسعود جوکار درزی — مدیر عامل موسسه حقوقی مجد"
                     fill
                     className="portrait-warm object-cover"
                     style={{
