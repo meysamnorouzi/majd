@@ -586,6 +586,30 @@ export function categoryHubSlugs(megaTrees: Service[]): string[] {
   return slugs;
 }
 
+/**
+ * Category IDs behind the mega menu roots and their children — i.e. every
+ * category that makes a WordPress post a *service* rather than an article.
+ * Returns an empty array when WordPress is unreachable, so callers can fall
+ * back to unfiltered behaviour instead of publishing an empty list.
+ */
+export async function getServiceCategoryIdsFromWp(): Promise<number[]> {
+  const categoriesFlat = await fetchJson<import("@/types").WpCategory[]>(
+    wpApiUrl(
+      "/wp-json/wp/v2/categories?per_page=100&hide_empty=false&orderby=name&order=asc",
+    ),
+    { headers: wpServerHeaders(), cache: "force-cache" },
+  );
+  if (!categoriesFlat?.length) return [];
+
+  const tree = buildCategoryTree(categoriesFlat);
+  const ids: number[] = [];
+  for (const root of SERVICE_MEGA_ROOTS) {
+    const matched = findCategoriesBySlugs(tree, [root.slug, ...root.mergeSlugs]);
+    ids.push(...collectCategoryIds(matched));
+  }
+  return [...new Set(ids)];
+}
+
 export function getHomeServices(services: Service[], limit = 6): Service[] {
   return services.slice(0, limit);
 }

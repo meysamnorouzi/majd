@@ -26,6 +26,7 @@ import {
 import {
   getAllServiceSlugsFromWp,
   getServiceBySlugFromWp,
+  getServiceCategoryIdsFromWp,
   getServicesFromWp,
 } from "@/lib/wordpress/services";
 import {
@@ -170,6 +171,43 @@ export async function getAllPostSlugs(): Promise<string[]> {
   );
   if (data?.length) return data.map((p) => normalizeWpSlug(p.slug));
   return fallbackPosts.map((p) => p.slug);
+}
+
+/**
+ * Article slugs only — posts in a service category are landing pages served at
+ * `/services/<slug>/`, and listing them again under `/blogs/<slug>/` publishes
+ * a second URL for the same content.
+ *
+ * Falls back to every post when the service categories cannot be resolved
+ * (WordPress unreachable), so a failed lookup never empties the sitemap.
+ */
+export async function getBlogPostSlugs(): Promise<string[]> {
+  const serviceCategoryIds = await getServiceCategoryIdsFromWp();
+  if (!serviceCategoryIds.length) return getAllPostSlugs();
+
+  const slugs: string[] = [];
+  let fetchedAnyPage = false;
+  let page = 1;
+  let totalPages = 1;
+
+  while (page <= totalPages && page <= 20) {
+    const res = await wpFetch(
+      apiUrl(
+        `/wp-json/wp/v2/posts?per_page=100&page=${page}&_fields=slug&categories_exclude=${serviceCategoryIds.join(",")}`,
+      ),
+      { cache: "force-cache", headers: wpServerHeaders() },
+    );
+    if (!res?.ok) break;
+
+    const batch = (await res.json()) as { slug: string }[];
+    fetchedAnyPage = true;
+    slugs.push(...batch.map((p) => normalizeWpSlug(p.slug)));
+    totalPages = Number(res.headers.get("X-WP-TotalPages") || "1");
+    page += 1;
+    if (!batch.length) break;
+  }
+
+  return fetchedAnyPage ? slugs : getAllPostSlugs();
 }
 
 export async function getProducts(limit = 12) {

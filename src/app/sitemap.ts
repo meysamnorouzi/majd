@@ -1,20 +1,25 @@
 import type { MetadataRoute } from "next";
 import {
-  getAllPostSlugs,
   getAllServiceSlugs,
+  getBlogPostSlugs,
   getTeam,
 } from "@/lib/wordpress";
 import { absoluteUrl } from "@/lib/seo";
 import { BLOG_LIST_PATH, blogPostPath } from "@/lib/blog-paths";
 import {
+  findLegacyRedirect,
   isRestoredPageWpSlug,
-  isRetiredServiceSlug,
   restoredPages,
 } from "@/data/legacy-redirects";
 
 export const dynamic = "force-static";
 
 type SitemapEntry = MetadataRoute.Sitemap[number];
+
+/** Never advertise a URL the host 301s away (src/data/legacy-redirects.json). */
+function isRedirected(path: string): boolean {
+  return findLegacyRedirect(path) !== null;
+}
 
 function entry(
   path: string,
@@ -36,7 +41,7 @@ function entry(
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [postSlugs, serviceSlugs] = await Promise.all([
-    getAllPostSlugs(),
+    getBlogPostSlugs(),
     getAllServiceSlugs(),
   ]);
   const team = await getTeam();
@@ -50,12 +55,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry(BLOG_LIST_PATH, { changeFrequency: "daily", priority: 0.9 }),
   ];
 
-  const serviceRoutes = serviceSlugs.map((slug) =>
-    entry(`/services/${slug}/`, {
-      changeFrequency: "monthly",
-      priority: 0.8,
-    }),
-  );
+  const serviceRoutes = serviceSlugs
+    .filter((slug) => !isRedirected(`/services/${slug}/`))
+    .map((slug) =>
+      entry(`/services/${slug}/`, {
+        changeFrequency: "monthly",
+        priority: 0.8,
+      }),
+    );
 
   const teamRoutes = team.map((member) =>
     entry(`/team/${member.slug}/`, {
@@ -65,7 +72,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   const postRoutes = postSlugs
-    .filter((slug) => !isRetiredServiceSlug(slug) && !isRestoredPageWpSlug(slug))
+    .filter(
+      (slug) =>
+        !isRedirected(blogPostPath(slug)) && !isRestoredPageWpSlug(slug),
+    )
     .map((slug) =>
       entry(blogPostPath(slug), {
         changeFrequency: "weekly",
