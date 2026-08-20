@@ -55,8 +55,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry(BLOG_LIST_PATH, { changeFrequency: "daily", priority: 0.9 }),
   ];
 
+  // A restored page's WordPress post is served at its own root path — listing
+  // it again under /services/ would advertise both URLs for the same content.
   const serviceRoutes = serviceSlugs
-    .filter((slug) => !isRedirected(`/services/${slug}/`))
+    .filter(
+      (slug) =>
+        !isRedirected(`/services/${slug}/`) && !isRestoredPageWpSlug(slug),
+    )
     .map((slug) =>
       entry(`/services/${slug}/`, {
         changeFrequency: "monthly",

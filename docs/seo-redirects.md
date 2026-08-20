@@ -55,9 +55,9 @@ WordPress host, which also removes the `NODE_TLS_REJECT_UNAUTHORIZED` shim in
 
 | از | به | یادداشت ممیزی |
 |---|---|---|
-| `/services/وکیل-ملک-ورثه-ای/` | `/services/وکیل-تقسیم-ترکه/` | ریدایرکت روی صفحه تقسیم ترکه و حذف از زیرمنو ملکی |
-| `/services/وکیل-تصرف-عدوانی/` | `/services/وکیل-خلع-ید-و-تخلیه/` | ریدایرکت روی صفحه وکیل خلع ید و تخلیه |
-| `/services/وکیل-تخلیه-ملک-در-تهران/` | `/services/وکیل-خلع-ید-و-تخلیه/` | ریدایرکت روی صفحه وکیل خلع ید و تخلیه |
+| `/services/وکیل-ملک-ورثه-ای/` | `/services/بهترین-وکیل-تقسیم-ترکه/` | ریدایرکت روی صفحه تقسیم ترکه و حذف از زیرمنو ملکی |
+| `/services/وکیل-تصرف-عدوانی/` | `/وکیل-خلع-ید/` | ریدایرکت روی صفحه وکیل خلع ید و تخلیه |
+| `/services/وکیل-تخلیه-ملک-در-تهران/` | `/وکیل-خلع-ید/` | ریدایرکت روی صفحه وکیل خلع ید و تخلیه |
 | `/services/وکیل-متخصص-املاک/` | `/services/ملکی/` | ریدایرکت ۳۰۱ روی صفحه هاب ملکی |
 | `/services/وکیل-ملکی-در-تهرانپارس/` | `/services/ملکی/` | ریدایرکت ۳۰۱ روی صفحه هاب ملکی |
 | `/services/وکیل-زمین-در-شرق-تهران/` | `/services/ملکی/` | ریدایرکت ۳۰۱ روی صفحه هاب ملکی |
@@ -87,14 +87,14 @@ every other root path a 404.
 The frontend is headless — content, categories and slugs all come from
 `admin.vakilmajd.com`. These four items cannot be done from this repo.
 
-### 1. Republish the three deleted posts *(required — otherwise the restored pages render empty)*
+### 1. Republish one deleted post *(required — otherwise that restored page renders empty)*
 
-Create/restore a published post for each slug below (Settings → Permalink →
-slug must match **exactly**, including the hyphens):
+Verified against the live service list (Aug 2026): posts already exist for
+`وکیل-خلع-ید` and `وکیل-متخصص-سرقفلی`, so those two restored pages fill
+themselves in with no WordPress work. Only one is missing:
 
-- `وکیل-خلع-ید`
-- `وکیل-متخصص-سرقفلی`
-- `وکیل-حقوقی`
+- `وکیل-حقوقی` — no post with this slug. Restore it from the backup, with the
+  permalink slug matching **exactly**.
 
 Use the old content from the WordPress backup. Keep them **out of** the
 `ملکی` / `خانواده` / `کیفری` service categories — the mega menu and the
@@ -129,12 +129,11 @@ the data honest.
 `npm run check:redirects` queries WordPress for every target slug and reports
 anything missing. The targets that must resolve:
 
-- `وکیل-تقسیم-ترکه` (post)
-- `وکیل-خلع-ید-و-تخلیه` (post)
-- `ملکی` (category — rendered as a hub page by `resolveCategoryHub`)
-- `moshavere-hoghooghi` (post)
+All targets were verified against the live service list in August 2026:
+`بهترین-وکیل-تقسیم-ترکه`, `ملکی`, `moshavere-hoghooghi`, and the two restored
+root paths. Re-run the checker after any slug change in WordPress.
 
-If any of them comes back missing, fix the slug in
+If a target comes back missing, fix the slug in
 `src/data/legacy-redirects.json` and re-run `npm run generate:redirects`.
 
 ---
