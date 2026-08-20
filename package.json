@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/generate-redirects.mjs --check",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "generate:redirects": "node scripts/generate-redirects.mjs",
+    "check:redirects": "node scripts/check-redirects.mjs",
     "generate:favicon": "node scripts/generate-favicon.mjs"
   },
   "dependencies": {

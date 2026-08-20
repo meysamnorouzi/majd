@@ -6,6 +6,11 @@ import {
 } from "@/lib/wordpress";
 import { absoluteUrl } from "@/lib/seo";
 import { BLOG_LIST_PATH, blogPostPath } from "@/lib/blog-paths";
+import {
+  isRestoredPageWpSlug,
+  isRetiredServiceSlug,
+  restoredPages,
+} from "@/data/legacy-redirects";
 
 export const dynamic = "force-static";
 
@@ -59,16 +64,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  const postRoutes = postSlugs.map((slug) =>
-    entry(blogPostPath(slug), {
-      changeFrequency: "weekly",
-      priority: 0.7,
-    }),
+  const postRoutes = postSlugs
+    .filter((slug) => !isRetiredServiceSlug(slug) && !isRestoredPageWpSlug(slug))
+    .map((slug) =>
+      entry(blogPostPath(slug), {
+        changeFrequency: "weekly",
+        priority: 0.7,
+      }),
+    );
+
+  // Legacy URLs restored at the root (see src/data/legacy-redirects.json)
+  const restoredRoutes = restoredPages.map((page) =>
+    entry(page.path, { changeFrequency: "monthly", priority: 0.8 }),
   );
 
   return [
     ...staticRoutes,
     ...serviceRoutes,
+    ...restoredRoutes,
     ...teamRoutes,
     ...postRoutes,
   ];
