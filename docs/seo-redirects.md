@@ -36,6 +36,10 @@ npm run check:redirects      # verify every target exists in WordPress
 node scripts/check-redirects.mjs --live   # after deploy: confirm the 301s
 ```
 
+The checker reads `WP_API_KEY` from `.env` / `.env.local` and sends it as
+`X-Api-Key`, which is what gets past `plugins/whitelist.php`. Without it the
+plugin answers 403 from any IP that is not on its allowlist.
+
 If the checker reports `fetch failed (UNABLE_TO_VERIFY_LEAF_SIGNATURE)`, the
 WordPress host is serving an incomplete certificate chain — browsers accept it,
 Node does not. Re-run as `npm run check:redirects -- --insecure` to skip

@@ -22,11 +22,33 @@ if (process.argv.includes("--insecure")) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 }
 
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+/**
+ * Next.js loads `.env` itself; a plain `node scripts/…` run does not, so
+ * WP_API_KEY would silently go unsent and every request would come back 403.
+ * Real environment variables win over file values.
+ */
+function loadEnvFile(name) {
+  const path = resolve(root, name);
+  if (!existsSync(path)) return;
+
+  for (const line of readFileSync(path, "utf8").split("\n")) {
+    const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
+    if (!match) continue;
+    const [, key, rawValue] = match;
+    if (process.env[key] !== undefined) continue;
+    process.env[key] = rawValue.trim().replace(/^["']|["']$/g, "");
+  }
+}
+
+loadEnvFile(".env.local");
+loadEnvFile(".env");
+
 const { redirects, restoredPages } = JSON.parse(
   readFileSync(resolve(root, "src/data/legacy-redirects.json"), "utf8"),
 );
@@ -39,6 +61,7 @@ const headers = process.env.WP_API_KEY
 
 let failures = 0;
 const seenErrorCodes = new Set();
+let blockedByWhitelist = false;
 
 const TLS_CODES = new Set([
   "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
@@ -63,6 +86,16 @@ function describeError(error) {
 }
 
 function connectionHint() {
+  if (blockedByWhitelist) {
+    return [
+      "WordPress answered, but plugins/whitelist.php refused the request.",
+      "",
+      "  • Set WP_API_KEY in .env to the same value as MAJD_WP_API_KEY in",
+      "    wp-config.php — the checker sends it as X-Api-Key.",
+      "  • Or add this machine's IP to the plugin's allowlist.",
+    ].join("\n");
+  }
+
   const codes = [...seenErrorCodes];
   if (!codes.length) return null;
   if (codes.some((code) => TLS_CODES.has(code))) {
@@ -122,6 +155,10 @@ async function wpCount(endpoint, slug) {
   const url = `${WP}/wp-json/wp/v2/${endpoint}?slug=${encodeURIComponent(slug)}&_fields=id`;
   try {
     const res = await fetch(url, { headers });
+    if (res.status === 401 || res.status === 403) {
+      blockedByWhitelist = true;
+      return { error: `blocked by the WordPress whitelist plugin (HTTP ${res.status})` };
+    }
     if (!res.ok) return { error: `HTTP ${res.status}` };
     const body = await res.json();
     return { count: Array.isArray(body) ? body.length : 0 };
@@ -145,7 +182,12 @@ async function checkTarget(path) {
 }
 
 async function checkWordPress() {
-  console.log(`WordPress: ${WP}\n`);
+  console.log(`WordPress: ${WP}`);
+  console.log(
+    process.env.WP_API_KEY
+      ? "Auth:       X-Api-Key from WP_API_KEY\n"
+      : "Auth:       none — set WP_API_KEY if the whitelist plugin blocks this IP\n",
+  );
 
   const targets = [...new Set(redirects.map((r) => r.to))];
   console.log("Redirect targets:");
