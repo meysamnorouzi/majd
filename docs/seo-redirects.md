@@ -36,6 +36,13 @@ npm run check:redirects      # verify every target exists in WordPress
 node scripts/check-redirects.mjs --live   # after deploy: confirm the 301s
 ```
 
+If the checker reports `fetch failed (UNABLE_TO_VERIFY_LEAF_SIGNATURE)`, the
+WordPress host is serving an incomplete certificate chain — browsers accept it,
+Node does not. Re-run as `npm run check:redirects -- --insecure` to skip
+verification for that run; the real fix is installing the full chain on the
+WordPress host, which also removes the `NODE_TLS_REJECT_UNAUTHORIZED` shim in
+`next.config.ts`.
+
 ---
 
 ## The audit rows

@@ -2,8 +2,9 @@
 /**
  * Verifies the SEO redirect map in `src/data/legacy-redirects.json`.
  *
- *   node scripts/check-redirects.mjs          # every 301 target exists in WordPress
- *   node scripts/check-redirects.mjs --live   # after deploy: old URLs really 301
+ *   node scripts/check-redirects.mjs             # every 301 target exists in WordPress
+ *   node scripts/check-redirects.mjs --live      # after deploy: old URLs really 301
+ *   node scripts/check-redirects.mjs --insecure  # WP host has an incomplete TLS chain
  *
  * The redirect targets were written from the SEO audit sheet, not read back off
  * the live site — run this before deploying so a typo in a Persian slug does not
@@ -13,6 +14,13 @@
  *      NEXT_PUBLIC_SITE_URL (default https://vakilmajd.com)
  *      WP_API_KEY (optional, sent as X-Api-Key)
  */
+
+// The WordPress host serves an incomplete certificate chain that browsers
+// tolerate and Node does not — the same reason next.config.ts relaxes
+// verification in development. Opt in explicitly; never on by default.
+if (process.argv.includes("--insecure")) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+}
 
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -30,6 +38,56 @@ const headers = process.env.WP_API_KEY
   : { Accept: "application/json" };
 
 let failures = 0;
+const seenErrorCodes = new Set();
+
+const TLS_CODES = new Set([
+  "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+  "SELF_SIGNED_CERT_IN_CHAIN",
+  "DEPTH_ZERO_SELF_SIGNED_CERT",
+  "CERT_HAS_EXPIRED",
+  "ERR_TLS_CERT_ALTNAME_INVALID",
+  "UNABLE_TO_GET_ISSUER_CERT_LOCALLY",
+]);
+
+/**
+ * Node's fetch reports every failure as "fetch failed" — the code lives on
+ * `cause`, or inside `cause.errors` when a host resolves to several addresses.
+ */
+function describeError(error) {
+  const cause = error?.cause;
+  const code =
+    cause?.code ?? cause?.errors?.find((e) => e?.code)?.code ?? error?.code;
+  if (code) seenErrorCodes.add(code);
+  const detail = code ?? cause?.message;
+  return detail ? `${error.message} (${detail})` : error.message;
+}
+
+function connectionHint() {
+  const codes = [...seenErrorCodes];
+  if (!codes.length) return null;
+  if (codes.some((code) => TLS_CODES.has(code))) {
+    return [
+      "The WordPress host is reachable but its TLS chain is incomplete —",
+      "browsers accept it, Node does not (same issue next.config.ts works",
+      "around in development).",
+      "",
+      "  Re-run with:  npm run check:redirects -- --insecure",
+      "",
+      "The real fix is installing the full certificate chain on the WordPress host.",
+    ].join("\n");
+  }
+  if (codes.some((code) => code === "ENOTFOUND" || code === "EAI_AGAIN")) {
+    return "DNS could not resolve the host — check NEXT_PUBLIC_WP_URL.";
+  }
+  if (
+    codes.some((code) =>
+      ["ECONNREFUSED", "ECONNRESET", "ETIMEDOUT", "UND_ERR_CONNECT_TIMEOUT"].includes(code),
+    )
+  ) {
+    return "The connection was refused or timed out — a firewall, VPN or proxy is blocking this machine.";
+  }
+  return null;
+}
 
 function report(ok, label, detail) {
   if (!ok) failures += 1;
@@ -68,7 +126,7 @@ async function wpCount(endpoint, slug) {
     const body = await res.json();
     return { count: Array.isArray(body) ? body.length : 0 };
   } catch (error) {
-    return { error: error.message };
+    return { error: describeError(error) };
   }
 }
 
@@ -126,7 +184,7 @@ async function status(path) {
     const res = await fetch(`${SITE}${encodePath(path)}`, { redirect: "manual" });
     return { code: res.status, location: res.headers.get("location") };
   } catch (error) {
-    return { error: error.message };
+    return { error: describeError(error) };
   }
 }
 
@@ -161,7 +219,9 @@ async function checkLive() {
 await (process.argv.includes("--live") ? checkLive() : checkWordPress());
 
 if (failures) {
+  const hint = connectionHint();
   console.error(`\n${failures} check(s) failed.`);
+  if (hint) console.error(`\n${hint}`);
   process.exit(1);
 }
 console.log("\nAll checks passed.");
