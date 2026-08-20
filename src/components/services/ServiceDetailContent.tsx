@@ -25,9 +25,14 @@ function slugFromPathname(pathname: string): string {
   return decodeURIComponent(rest);
 }
 
-export function ServiceDetailContent() {
+/**
+ * Client shell for a service post. `slug` is passed explicitly by routes that do
+ * not live under `/services/` (restored legacy URLs); everything else reads it
+ * back off the pathname the host rewrote to this shell.
+ */
+export function ServiceDetailContent({ slug: slugProp }: { slug?: string }) {
   const pathname = usePathname();
-  const slug = slugFromPathname(pathname);
+  const slug = slugProp ?? slugFromPathname(pathname);
   const [service, setService] = useState<Service | null>(null);
   const [relatedServices, setRelatedServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);

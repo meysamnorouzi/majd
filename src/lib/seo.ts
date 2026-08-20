@@ -152,13 +152,14 @@ export function breadcrumbJsonLd(
   };
 }
 
-export function serviceJsonLd(service: Service) {
+/** `path` overrides the canonical URL for services served outside `/services/`. */
+export function serviceJsonLd(service: Service, path?: string) {
   return {
     "@context": "https://schema.org",
     "@type": "Service",
     name: service.title,
     description: service.excerpt || service.description,
-    url: absoluteUrl(`/services/${service.slug}/`),
+    url: absoluteUrl(path ?? `/services/${service.slug}/`),
     provider: { "@id": `${absoluteUrl("/")}#organization` },
     areaServed: {
       "@type": "Country",
