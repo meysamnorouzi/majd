@@ -40,11 +40,10 @@ export function FounderBanner() {
               <h2 className="mt-4 text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
                 مسعود جوکار درزی
               </h2>
-              <p className="mt-2 text-lg text-gold-400/90">وکیل الرعایا</p>
             </FadeIn>
             <FadeIn delay={0.25}>
               <p className="mt-5 leading-relaxed text-white/80">
-                و مدیر عامل موسسه حقوقی مجد  با بیش از دو دهه تجربه در پرونده‌های حقوقی و
+                مدیر عامل موسسه حقوقی مجد با بیش از دو دهه تجربه در پرونده‌های حقوقی و
                 کیفری. همراهی شما از اولین جلسه مشاوره تا نتیجه نهایی پرونده.
               </p>
             </FadeIn>

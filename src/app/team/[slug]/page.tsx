@@ -137,7 +137,7 @@ export default async function TeamMemberPage({
                 : `حوزه‌های فعالیت ${member.name}`}
             </h3>
             <p className="mt-2 text-sm text-white/60">
-              زمینه‌های تخصصی که در آن‌ها فعالیت دارد
+              زمینه‌های تخصصی که در آن‌ها فعالیت داریم
             </p>
           </Reveal>
           <Stagger

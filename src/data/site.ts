@@ -99,11 +99,11 @@ export const siteConfig = {
   mapEmbedUrl:
     "https://maps.google.com/maps?q=PGM9%2BGCG%20District%204%2C%20Tehran%2C%20Tehran%20Province%2C%20Iran&t=m&z=18&output=embed&iwloc=near",
   mapTitle: "موقعیت موسسه حقوقی مجد — تهرانپارس، بزرگراه شهید باقری",
-  workingHours: "شنبه تا چهارشنبه ۹ تا ۱۸ — پنجشنبه ۹ تا ۱۳",
+  workingHours: "شنبه تا چهارشنبه ۹ تا ۱۸",
   contactCta: "برای دریافت مشاوره هم‌اکنون تماس بگیرید",
   award: {
     year: "۱۴۰۱",
-    title: "برترین موسسه حقوقی تهران",
+    title: "تندیس برترین موسسه حقوقی کشور",
     image: assets.awardBadge,
   },
   enamad: {
@@ -124,7 +124,7 @@ export const stats = [
   { value: "۱۵+", label: "سال تجربه" },
   { value: "۵۰۰+", label: "پرونده موفق" },
   { value: "۲۰+", label: "وکیل متخصص" },
-  { value: "۱", label: "تندیس برتر موسسه حقوقی" },
+  { value: "۱", label: "تندیس برترین موسسه حقوقی کشور در سال ۱۴۰۱" },
 ];
 
 export const practiceAreas = [
@@ -557,10 +557,9 @@ export const fallbackTeamMembers: TeamMember[] = [
       "جرایم اقتصادی",
       "حقوق بین‌الملل",
       "مشاوره حقوقی",
-      "وکالت در دیوان عالی کشور",
     ],
     achievements: [
-      "دریافت برترین تندیس موسسه حقوقی کشور",
+      "دریافت تندیس برترین موسسه حقوقی کشور در سال ۱۴۰۱",
       "همکاری با سفارتخانه‌های سوئد، دانمارک و اسپانیا",
       "دفاع موفق در صدها پرونده کیفری و حقوقی",
       "مدرس دوره‌های تخصصی وکالت کیفری",
