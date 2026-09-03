@@ -1,5 +1,6 @@
 import { fallbackTeamMembers } from "@/data/site";
 import { normalizeWpSlug } from "@/lib/wordpress/categories";
+import { pickFeaturedImageUrl } from "@/lib/media/featured-image";
 import {
   rewriteWpMediaUrl,
   wpApiUrl,
@@ -10,10 +11,11 @@ import type {
   TeamMember,
   TeamMemberGalleryItem,
   TeamMemberSocial,
+  TeamMemberVideoItem,
   WpTeamMember,
 } from "@/types";
 
-/** WordPress team CPT — off by default; static founder data in site.ts is used instead */
+/** WordPress team CPT — enable with NEXT_PUBLIC_USE_WP_TEAM=true */
 export const USE_WP_TEAM = process.env.NEXT_PUBLIC_USE_WP_TEAM === "true";
 
 function stripHtml(html: string): string {
@@ -26,9 +28,7 @@ function stripHtml(html: string): string {
 }
 
 function getFeaturedImage(post: WpTeamMember): string | undefined {
-  const media = post._embedded?.["wp:featuredmedia"]?.[0];
-  const url = media?.source_url;
-  return url ? rewriteWpMediaUrl(url) : undefined;
+  return pickFeaturedImageUrl(post._embedded?.["wp:featuredmedia"]?.[0], 800);
 }
 
 function normalizeSocial(
@@ -55,6 +55,22 @@ function normalizeGallery(
   return gallery.length ? gallery : undefined;
 }
 
+function normalizeVideoGallery(
+  items: TeamMemberVideoItem[] | undefined,
+): TeamMemberVideoItem[] | undefined {
+  if (!items?.length) return undefined;
+  const videos = items
+    .filter((item) => item?.src?.trim())
+    .map((item) => ({
+      src: rewriteWpMediaUrl(item.src.trim()),
+      title: item.title?.trim() || "",
+      poster: item.poster?.trim()
+        ? rewriteWpMediaUrl(item.poster.trim())
+        : undefined,
+    }));
+  return videos.length ? videos : undefined;
+}
+
 export function mapWpTeamMember(post: WpTeamMember): TeamMember {
   const meta = post.majd_team ?? {};
   const slug = normalizeWpSlug(post.slug);
@@ -78,7 +94,9 @@ export function mapWpTeamMember(post: WpTeamMember): TeamMember {
     image,
     bannerImage,
     gallery: normalizeGallery(meta.gallery),
+    videoGallery: normalizeVideoGallery(meta.videoGallery),
     education: meta.education?.trim() || "",
+    birthDate: meta.birthDate?.trim() || undefined,
     experienceYears: meta.experienceYears?.trim() || "",
     areasOfPractice: meta.areasOfPractice ?? [],
     achievements: meta.achievements ?? [],

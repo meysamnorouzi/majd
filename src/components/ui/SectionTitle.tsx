@@ -1,7 +1,3 @@
-"use client";
-
-import { Reveal } from "@/components/motion/reveal";
-
 export function SectionTitle({
   eyebrow,
   title,
@@ -20,9 +16,8 @@ export function SectionTitle({
   const alignClass = align === "center" ? "text-center mx-auto" : "text-right";
 
   return (
-    <Reveal
+    <div
       className={`mb-12 ${wide ? "max-w-4xl" : "max-w-2xl"} ${alignClass}`}
-      variant="up"
     >
       {eyebrow && (
         <span
@@ -54,6 +49,6 @@ export function SectionTitle({
           align === "center" ? "mx-auto" : "ms-auto"
         }`}
       />
-    </Reveal>
+    </div>
   );
 }

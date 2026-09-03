@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Script from "next/script";
-import "@fontsource-variable/vazirmatn";
+import { Vazirmatn } from "next/font/google";
 import { SiteLayout } from "@/components/layout/SiteLayout";
+import { DeferredGoftino } from "@/components/analytics/DeferredGoftino";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { assets, siteConfig } from "@/data/site";
 import {
@@ -55,36 +55,28 @@ export const metadata: Metadata = {
   category: "legal",
 };
 
+const vazirmatn = Vazirmatn({
+  subsets: ["arabic", "latin"],
+  display: "swap",
+  adjustFontFallback: true,
+  variable: "--font-vazirmatn",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl" className="h-full">
-      <body className="flex min-h-full flex-col antialiased">
+    <html
+      lang="fa"
+      dir="rtl"
+      className={`h-full ${vazirmatn.variable} ${vazirmatn.className}`}
+    >
+      <body className={`${vazirmatn.className} flex min-h-full flex-col antialiased`}>
         <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
         <SiteLayout>{children}</SiteLayout>
-        <Script
-          id="goftino-widget"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              !function(){var i="x2AETb",a=window,d=document;function g(){var g=d.createElement("script"),s="https://www.goftino.com/widget/"+i,l=localStorage.getItem("goftino_"+i);g.async=!0,g.src=l?s+"?o="+l:s;d.getElementsByTagName("head")[0].appendChild(g);}"complete"===d.readyState?g():a.attachEvent?a.attachEvent("onload",g):a.addEventListener("load",g,!1);}();
-              window.addEventListener("goftino_ready", function () {
-                window.Goftino.setWidget({
-                  marginLeft: 24,
-                  marginBottom: 24,
-                });
-                var el = document.getElementById("goftino_w");
-                if (el) {
-                  el.style.setProperty("left", "24px", "important");
-                  el.style.setProperty("right", "auto", "important");
-                }
-              });
-            `,
-          }}
-        />
+        <DeferredGoftino />
       </body>
     </html>
   );

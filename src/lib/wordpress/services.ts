@@ -2,14 +2,22 @@ import { services as fallbackServices } from "@/data/site";
 import { isRetiredServiceSlug } from "@/data/legacy-redirects";
 import { enrichService } from "@/data/services-detail";
 import {
+  FALLBACK_PARENT_TO_PREFIX,
+  getPillarLeavesFromTree,
+  getRelatedServices,
+  isServiceCategoryNode,
+  prefixForWpRootSlug,
+  type ServiceCategoryPrefix,
+} from "@/lib/service-paths";
+import {
   buildCategoryTree,
   findCategoryBySlug,
   flattenCategories,
   normalizeWpSlug,
 } from "@/lib/wordpress/categories";
+import { pickFeaturedImageUrl } from "@/lib/media/featured-image";
 import {
   normalizeWpContentHtml,
-  rewriteWpMediaUrl,
   wpApiUrl,
   wpServerHeaders,
 } from "@/lib/wordpress/config";
@@ -26,27 +34,40 @@ function stripHtml(html: string): string {
 }
 
 function getFeaturedImage(post: WpPost): string | undefined {
-  const media = post._embedded?.["wp:featuredmedia"]?.[0];
-  const url = media?.source_url;
-  return url ? rewriteWpMediaUrl(url) : undefined;
+  return pickFeaturedImageUrl(post._embedded?.["wp:featuredmedia"]?.[0]);
 }
 
-/** Mega menu roots — خانواده-fa merges into خانواده */
+/** Mega menu roots — پنج پیلار اصلی */
 export const SERVICE_MEGA_ROOTS = [
   {
-    slug: "ملکی",
-    label: "وکیل ملکی",
-    mergeSlugs: [] as string[],
-  },
-  {
     slug: "خانواده",
+    prefix: "family-lawyer" as const,
     label: "وکیل خانواده",
     mergeSlugs: ["khanavade-fa", "خانواده-fa"],
   },
   {
+    slug: "ملکی",
+    prefix: "property-lawyer" as const,
+    label: "وکیل ملکی",
+    mergeSlugs: [] as string[],
+  },
+  {
     slug: "کیفری",
+    prefix: "criminal-defense-lawyer" as const,
     label: "وکیل کیفری",
     mergeSlugs: [] as string[],
+  },
+  {
+    slug: "مشاوره-حقوقی",
+    prefix: "legal-consultation" as const,
+    label: "مشاوره حقوقی",
+    mergeSlugs: ["مشاوره", "moshavere"],
+  },
+  {
+    slug: "اداری",
+    prefix: "administrative-lawyer" as const,
+    label: "وکیل اداری",
+    mergeSlugs: ["وکیل-اداری", "دیوان-عدالت"],
   },
 ] as const;
 
@@ -55,9 +76,17 @@ const FALLBACK_PARENT_SLUG: Record<
   (typeof SERVICE_MEGA_ROOTS)[number]["slug"],
   string
 > = {
-  ملکی: "vakalat-melki",
   خانواده: "vakalat-khanavade",
+  ملکی: "vakalat-melki",
   کیفری: "vakalat-keyfari",
+  "مشاوره-حقوقی": "moshavere-hoghooghi",
+  اداری: "vakalat-hoghooghi",
+};
+
+/** Public ranking slugs that still use the static fallback tree when WP has no post. */
+const FALLBACK_SLUG_ALIASES: Record<string, string> = {
+  "وکیل-خلع-ید": "khale-yad",
+  "وکیل-متخصص-سرقفلی": "malek-mostajer",
 };
 
 export interface MegaMenuItem {
@@ -144,9 +173,14 @@ function mapPostToService(
   post: WpPost,
   categories: BlogCategory[],
   parent?: BlogCategory,
+  categoryPrefix?: ServiceCategoryPrefix,
 ): Service {
   const { meta, bodyHtml } = parseServiceContentMeta(post.content.rendered);
   const slug = normalizeWpSlug(post.slug);
+  const prefix =
+    categoryPrefix ??
+    prefixForWpRootSlug(parent?.slug) ??
+    undefined;
   const base: Service = {
     id: String(post.id),
     slug,
@@ -160,6 +194,7 @@ function mapPostToService(
     image: getFeaturedImage(post),
     parentSlug: parent?.slug,
     parentTitle: parent?.name,
+    categoryPrefix: prefix,
     longDescription: meta.longDescription,
     whyNeed: meta.whyNeed,
     highlights: meta.highlights,
@@ -173,8 +208,12 @@ function mapPostToService(
   return enrichService(base);
 }
 
-function mapPostToMenuItem(post: WpPost, parent?: BlogCategory): Service {
-  return mapPostToService(post, [], parent);
+function mapPostToMenuItem(
+  post: WpPost,
+  parent?: BlogCategory,
+  categoryPrefix?: ServiceCategoryPrefix,
+): Service {
+  return mapPostToService(post, [], parent, categoryPrefix);
 }
 
 function postInCategory(post: WpPost, categoryId: number): boolean {
@@ -185,6 +224,7 @@ function buildRootMegaTree(
   rootCategories: BlogCategory[],
   allPosts: WpPost[],
   canonicalSlug: string,
+  categoryPrefix: ServiceCategoryPrefix,
 ): Service {
   const primary = rootCategories[0];
   const childCategories = new Map<number, BlogCategory>();
@@ -204,7 +244,7 @@ function buildRootMegaTree(
   const layer2: Service[] = childCatList.map((cat) => {
     const posts = allPosts
       .filter((p) => postInCategory(p, cat.id))
-      .map((p) => mapPostToMenuItem(p, cat))
+      .map((p) => mapPostToMenuItem(p, cat, categoryPrefix))
       .filter((s) => !isRetiredServiceSlug(s.slug));
 
     return {
@@ -214,6 +254,7 @@ function buildRootMegaTree(
       excerpt: cat.description,
       description: cat.description,
       icon: "scale",
+      categoryPrefix,
       children: posts,
     };
   });
@@ -224,7 +265,7 @@ function buildRootMegaTree(
       const inChild = [...childIds].some((id) => postInCategory(p, id));
       return inRoot && !inChild;
     })
-    .map((p) => mapPostToMenuItem(p, primary))
+    .map((p) => mapPostToMenuItem(p, primary, categoryPrefix))
     .filter((s) => !isRetiredServiceSlug(s.slug));
 
   return {
@@ -234,6 +275,7 @@ function buildRootMegaTree(
     excerpt: primary.description,
     description: primary.description,
     icon: "scale",
+    categoryPrefix,
     children: [...layer2, ...directPosts],
   };
 }
@@ -244,14 +286,24 @@ export function buildServiceMenuData(
 ): ServiceMenuData {
   const megaMenu: MegaMenuItem[] = [];
   const megaTrees: Service[] = [];
+  const fallback = getFallbackMenuData();
 
   for (const root of SERVICE_MEGA_ROOTS) {
     const slugs = [root.slug, ...root.mergeSlugs];
     const matched = findCategoriesBySlugs(categoryTree, slugs);
-    if (!matched.length) continue;
-
     megaMenu.push({ slug: root.slug, label: root.label });
-    megaTrees.push(buildRootMegaTree(matched, posts, root.slug));
+
+    if (matched.length) {
+      megaTrees.push(
+        buildRootMegaTree(matched, posts, root.slug, root.prefix),
+      );
+      continue;
+    }
+
+    const fallbackTree = fallback.megaTrees.find((tree) =>
+      slugMatches(tree.slug, root.slug),
+    );
+    if (fallbackTree) megaTrees.push(fallbackTree);
   }
 
   const serviceCategoryIds = new Set<number>();
@@ -267,11 +319,64 @@ export function buildServiceMenuData(
     .filter((p) => p.categories?.some((id) => serviceCategoryIds.has(id)))
     .map((p) => {
       const parentCat = findParentCategoryForPost(p, categoryTree);
-      return mapPostToService(p, flattenCategories(categoryTree), parentCat);
+      const prefix = findCategoryPrefixForPost(p, categoryTree);
+      return mapPostToService(
+        p,
+        flattenCategories(categoryTree),
+        parentCat,
+        prefix,
+      );
     })
     .filter((s) => !isRetiredServiceSlug(s.slug));
 
+  const presentPrefixes = new Set(
+    servicePosts
+      .map((s) => s.categoryPrefix)
+      .filter((prefix): prefix is ServiceCategoryPrefix => Boolean(prefix)),
+  );
+  for (const root of SERVICE_MEGA_ROOTS) {
+    if (presentPrefixes.has(root.prefix)) continue;
+    servicePosts.push(
+      ...fallback.posts.filter(
+        (s) =>
+          s.categoryPrefix === root.prefix &&
+          !isServiceCategoryNode(s) &&
+          !s.children?.length,
+      ),
+    );
+  }
+
   return { megaMenu, megaTrees, posts: servicePosts };
+}
+
+function findMegaRootForPost(
+  post: WpPost,
+  tree: BlogCategory[],
+): (typeof SERVICE_MEGA_ROOTS)[number] | undefined {
+  const ids = post.categories ?? [];
+
+  for (const root of SERVICE_MEGA_ROOTS) {
+    const slugs = [root.slug, ...root.mergeSlugs];
+    const roots = findCategoriesBySlugs(tree, slugs);
+    const rootIds = new Set(roots.map((r) => r.id));
+    const descendantIds = new Set<number>();
+    for (const r of roots) {
+      for (const id of collectCategoryIds([r])) descendantIds.add(id);
+    }
+
+    if (ids.some((id) => descendantIds.has(id) || rootIds.has(id))) {
+      return root;
+    }
+  }
+
+  return undefined;
+}
+
+function findCategoryPrefixForPost(
+  post: WpPost,
+  tree: BlogCategory[],
+): ServiceCategoryPrefix | undefined {
+  return findMegaRootForPost(post, tree)?.prefix;
 }
 
 function findParentCategoryForPost(
@@ -380,34 +485,98 @@ async function loadServiceData(
   return buildServiceMenuData(tree, posts);
 }
 
+function annotateFallbackTree(
+  service: Service,
+  inheritedPrefix?: ServiceCategoryPrefix,
+): Service {
+  const prefix =
+    inheritedPrefix ?? FALLBACK_PARENT_TO_PREFIX[service.slug];
+  const enriched = enrichService({
+    ...service,
+    categoryPrefix: prefix,
+  });
+  return {
+    ...enriched,
+    categoryPrefix: prefix,
+    children: service.children?.map((child) =>
+      annotateFallbackTree(
+        {
+          ...child,
+          parentSlug: service.slug,
+          parentTitle: service.title,
+        },
+        prefix,
+      ),
+    ),
+  };
+}
+
+function flattenFallbackServices(
+  service: Service,
+  inheritedPrefix?: ServiceCategoryPrefix,
+): Service[] {
+  const annotated = annotateFallbackTree(service, inheritedPrefix);
+  return [
+    annotated,
+    ...(annotated.children?.flatMap((child) =>
+      flattenFallbackServices(child, annotated.categoryPrefix),
+    ) ?? []),
+  ];
+}
+
 function getFallbackMenuData(): ServiceMenuData {
-  const enriched = fallbackServices.map((s) => enrichService(s));
   const megaMenu = SERVICE_MEGA_ROOTS.map((r) => ({
     slug: r.slug,
     label: r.label,
   }));
   const megaTrees = SERVICE_MEGA_ROOTS.map((root) => {
     const parentSlug = FALLBACK_PARENT_SLUG[root.slug];
-    const parent = enriched.find((s) => s.slug === parentSlug);
+    const parent = fallbackServices.find((s) => s.slug === parentSlug);
+    const annotated = parent
+      ? annotateFallbackTree(parent, root.prefix)
+      : undefined;
+    let children = annotated?.children ?? [];
+
+    if (root.prefix === "legal-consultation") {
+      const collections = fallbackServices.find(
+        (s) => s.slug === "vosool-matalabat",
+      );
+      if (collections?.children?.length) {
+        children = [
+          ...children,
+          ...collections.children.map((child) =>
+            annotateFallbackTree(
+              {
+                ...child,
+                parentSlug: collections.slug,
+                parentTitle: collections.title,
+              },
+              root.prefix,
+            ),
+          ),
+        ];
+      }
+    }
 
     return {
       id: root.slug,
       slug: root.slug,
       title: root.label,
-      excerpt: parent?.excerpt ?? "",
-      description: parent?.description ?? "",
-      icon: parent?.icon ?? "scale",
-      image: parent?.image,
-      children: parent?.children?.map((item) => enrichService(item)) ?? [],
+      excerpt: annotated?.excerpt ?? "",
+      description: annotated?.description ?? "",
+      icon: annotated?.icon ?? "scale",
+      image: annotated?.image,
+      categoryPrefix: root.prefix,
+      children,
     };
   });
+
+  const posts = fallbackServices.flatMap(flattenFallbackServices);
 
   return {
     megaMenu,
     megaTrees,
-    posts: enriched.flatMap(function flatten(s): Service[] {
-      return [s, ...(s.children?.flatMap(flatten) ?? [])];
-    }),
+    posts,
   };
 }
 
@@ -425,9 +594,13 @@ export function megaTreesToMenuItems(
     );
 }
 
+let servicesClientPromise: Promise<ServiceMenuData> | null = null;
+
 export async function fetchServicesClient(): Promise<ServiceMenuData> {
-  const data = await loadServiceData();
-  return data ?? getFallbackMenuData();
+  servicesClientPromise ??= loadServiceData().then(
+    (data) => data ?? getFallbackMenuData(),
+  );
+  return servicesClientPromise;
 }
 
 export async function fetchServiceBySlugClient(
@@ -448,15 +621,13 @@ export async function fetchServiceBySlugClient(
       ? buildCategoryTree(categoriesFlat)
       : [];
     const parent = findParentCategoryForPost(post[0], tree);
-    return mapPostToService(post[0], flattenCategories(tree), parent);
+    const prefix = findCategoryPrefixForPost(post[0], tree);
+    return mapPostToService(post[0], flattenCategories(tree), parent, prefix);
   }
 
   const menu = await fetchServicesClient();
   const found = menu.posts.find((s) => slugMatches(s.slug, normalized));
   if (found) return found;
-
-  const hub = resolveCategoryHub(normalized, menu.posts, menu.megaTrees);
-  if (hub) return hub;
 
   return resolveFallbackService(slug);
 }
@@ -500,90 +671,85 @@ export async function getServiceBySlugFromWp(
       ? buildCategoryTree(categoriesFlat)
       : [];
     const parent = findParentCategoryForPost(post[0], tree);
+    const prefix = findCategoryPrefixForPost(post[0], tree);
     return mapPostToService(
       post[0],
       flattenCategories(tree),
       parent,
+      prefix,
     );
   }
 
-  const { services, megaTrees } = await getServicesFromWp();
+  const { services } = await getServicesFromWp();
   const found = services.find(
     (s) => s.slug === normalized || s.slug === slug,
   );
   if (found) return found;
 
-  const hub = resolveCategoryHub(normalized, services, megaTrees);
-  if (hub) return hub;
-
   return resolveFallbackService(slug);
-}
-
-/**
- * Category landing ("hub") pages — `/services/ملکی/`, `/services/<child-cat>/`.
- * WordPress has no post at those slugs, only a category, so without this the
- * mega-menu column headers and the 301 targets from the SEO audit would 404.
- */
-function resolveCategoryHub(
-  slug: string,
-  services: Service[],
-  megaTrees: Service[],
-): Service | null {
-  const root = megaTrees.find((tree) => slugMatches(tree.slug, slug));
-  if (root) return root;
-
-  const children = services.filter(
-    (s) => s.parentSlug && slugMatches(s.parentSlug, slug),
-  );
-  if (!children.length) return null;
-
-  const title = children[0].parentTitle || slug;
-  return {
-    id: `cat-${slug}`,
-    slug,
-    title,
-    excerpt: `خدمات تخصصی موسسه حقوقی مجد در حوزه ${title}`,
-    description: `خدمات تخصصی موسسه حقوقی مجد در حوزه ${title}`,
-    icon: children[0].icon || "scale",
-    children,
-  };
 }
 
 function resolveFallbackService(slug: string): Service | null {
   const normalized = normalizeWpSlug(slug);
+  const aliased = FALLBACK_SLUG_ALIASES[normalized] ?? normalized;
   for (const parent of fallbackServices) {
-    if (parent.slug === normalized) return enrichService(parent);
-    const child = parent.children?.find((c) => c.slug === normalized);
+    const parentPrefix = FALLBACK_PARENT_TO_PREFIX[parent.slug];
+    if (parent.slug === aliased) {
+      return annotateFallbackTree(parent, parentPrefix);
+    }
+    const child = parent.children?.find((c) => c.slug === aliased);
     if (child) {
-      return enrichService({
-        ...child,
-        icon: child.icon || parent.icon,
-        image: child.image || parent.image,
-        parentSlug: parent.slug,
-        parentTitle: parent.title,
-      });
+      return annotateFallbackTree(
+        {
+          ...child,
+          icon: child.icon || parent.icon,
+          image: child.image || parent.image,
+          parentSlug: parent.slug,
+          parentTitle: parent.title,
+        },
+        parentPrefix,
+      );
     }
   }
   return null;
 }
 
 export async function getAllServiceSlugsFromWp(): Promise<string[]> {
-  const { services, megaTrees } = await getServicesFromWp();
+  const { services } = await getServicesFromWp();
   return [
-    ...new Set([...services.map((s) => s.slug), ...categoryHubSlugs(megaTrees)]),
+    ...new Set(
+      services.filter((s) => !isServiceCategoryNode(s)).map((s) => s.slug),
+    ),
   ];
 }
 
-/** Root and child category slugs that `resolveCategoryHub` can render. */
-export function categoryHubSlugs(megaTrees: Service[]): string[] {
-  const slugs: string[] = [];
+export async function getAllServiceRouteParamsFromWp(): Promise<
+  { category: ServiceCategoryPrefix; slug: string }[]
+> {
+  const { megaTrees } = await getServicesFromWp();
+  const params: { category: ServiceCategoryPrefix; slug: string }[] = [];
   for (const tree of megaTrees) {
-    slugs.push(tree.slug);
-    for (const child of tree.children ?? []) {
-      if (child.id.startsWith("cat-")) slugs.push(child.slug);
+    if (!tree.categoryPrefix) continue;
+    for (const leaf of getPillarLeavesFromTree(tree)) {
+      params.push({ category: tree.categoryPrefix, slug: leaf.slug });
     }
   }
-  return slugs;
+  return params;
+}
+
+/**
+ * Leaf service posts under the five pillar prefixes.
+ */
+export async function getUncategorizedServiceSlugsFromWp(): Promise<string[]> {
+  return [];
+}
+
+export function getHomeServices(services: Service[], limit = 6): Service[] {
+  return services.filter((s) => !s.children?.length && !isServiceCategoryNode(s)).slice(0, limit);
+}
+
+export function getTopLevelServices(services: Service[]): Service[] {
+  return getRelatedServices(services, { slug: "" }, 6);
 }
 
 /**
@@ -610,18 +776,3 @@ export async function getServiceCategoryIdsFromWp(): Promise<number[]> {
   return [...new Set(ids)];
 }
 
-export function getHomeServices(services: Service[], limit = 6): Service[] {
-  return services.slice(0, limit);
-}
-
-export function getTopLevelServices(services: Service[]): Service[] {
-  const top = services.filter((s) =>
-    SERVICE_MEGA_ROOTS.some(
-      (r) =>
-        slugMatches(s.slug, r.slug) ||
-        r.mergeSlugs.some((m) => slugMatches(s.slug, m)),
-    ),
-  );
-  if (top.length) return top;
-  return services.filter((s) => !s.parentSlug).slice(0, 6);
-}

@@ -13,7 +13,6 @@
   --cream-dark: #ebe6dc;
   --foreground: #0f172a;
   --muted: #64748b;
-  --font-vazirmatn: "Vazirmatn Variable", system-ui, sans-serif;
 }
 
 @theme inline {
@@ -26,7 +25,7 @@
   --color-gold-600: var(--gold-600);
   --color-cream: var(--cream);
   --color-cream-dark: var(--cream-dark);
-  --font-sans: var(--font-vazirmatn), system-ui, sans-serif;
+  --font-sans: var(--font-vazirmatn), ui-sans-serif, system-ui, sans-serif;
 }
 
 html {
@@ -452,6 +451,26 @@ body {
   animation: fade-up 0.7s ease-out forwards;
 }
 
+.hero-enter {
+  animation: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-enter-d1 {
+  animation-delay: 0.08s;
+}
+
+.hero-enter-d2 {
+  animation-delay: 0.16s;
+}
+
+.hero-enter-d3 {
+  animation-delay: 0.24s;
+}
+
+.hero-enter-d4 {
+  animation-delay: 0.32s;
+}
+
 @keyframes ken-burns {
   from {
     transform: scale(1.05);
@@ -495,7 +514,8 @@ body {
     scroll-behavior: auto;
   }
 
-  .animate-fade-up {
+  .animate-fade-up,
+  .hero-enter {
     animation: none;
   }
 

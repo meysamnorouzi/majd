@@ -1,14 +1,11 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import { assets, portraitObjectPosition } from "@/data/site";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
-import { FadeIn } from "@/components/motion/reveal";
 
 /** Full-width cinematic banner featuring the institute director */
-export function FounderBanner() {
+export function FounderBanner({ priority = false }: { priority?: boolean }) {
   return (
     <section className="relative overflow-hidden">
       <div className="relative min-h-[440px] md:min-h-[520px]">
@@ -16,7 +13,8 @@ export function FounderBanner() {
           src={assets.founderBoardroom}
           alt="مسعود جوکار درزی — گفتگو با رسانه‌ها"
           fill
-          priority
+          priority={priority}
+          fetchPriority={priority ? "high" : "auto"}
           className="ken-burns object-cover portrait-filter"
           style={{
             objectPosition:
@@ -30,34 +28,26 @@ export function FounderBanner() {
 
         <Container className="relative flex min-h-[440px] items-center py-16 md:min-h-[520px]">
           <div className="max-w-xl">
-            <FadeIn delay={0.05}>
-              <span className="inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-white/5 px-4 py-1.5 text-sm font-semibold tracking-wide text-gold-400 backdrop-blur-sm">
-                <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
-                مدیر عامل موسسه
-              </span>
-            </FadeIn>
-            <FadeIn delay={0.15}>
-              <h2 className="mt-4 text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
-                مسعود جوکار درزی
-              </h2>
-            </FadeIn>
-            <FadeIn delay={0.25}>
-              <p className="mt-5 leading-relaxed text-white/80">
-                مدیر عامل موسسه حقوقی مجد با بیش از دو دهه تجربه در پرونده‌های حقوقی و
-                کیفری. همراهی شما از اولین جلسه مشاوره تا نتیجه نهایی پرونده.
-              </p>
-            </FadeIn>
-            <FadeIn delay={0.35}>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Button href="#consultation">رزرو وقت مشاوره</Button>
-                <Link
-                  href="/team/masoud-jokar-darzi/"
-                  className="inline-flex items-center justify-center rounded-lg border-2 border-white/30 px-6 py-3 font-semibold text-white transition hover:border-gold-400/50 hover:bg-white/10"
-                >
-                  پروفایل مدیرعامل
-                </Link> 
-              </div>
-            </FadeIn>
+            <span className="inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-white/5 px-4 py-1.5 text-sm font-semibold tracking-wide text-gold-400 backdrop-blur-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
+              مدیر عامل موسسه
+            </span>
+            <h2 className="mt-4 text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
+              مسعود جوکار درزی
+            </h2>
+            <p className="mt-5 leading-relaxed text-white/80">
+              مدیر عامل موسسه حقوقی مجد با بیش از دو دهه تجربه در پرونده‌های حقوقی و
+              کیفری. همراهی شما از اولین جلسه مشاوره تا نتیجه نهایی پرونده.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Button href="#consultation">رزرو وقت مشاوره</Button>
+              <Link
+                href="/team/masoud-jokar-darzi/"
+                className="inline-flex items-center justify-center rounded-lg border-2 border-white/30 px-6 py-3 font-semibold text-white transition hover:border-gold-400/50 hover:bg-white/10"
+              >
+                پروفایل مدیرعامل
+              </Link>
+            </div>
           </div>
         </Container>
       </div>

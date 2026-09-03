@@ -6,7 +6,7 @@ import { ServicesSection } from "@/components/home/ServicesSection";
 import { AboutSection } from "@/components/home/AboutSection";
 import { FounderBanner } from "@/components/home/FounderBanner";
 import { TeamSection } from "@/components/home/TeamSection";
-import { BlogSectionLive } from "@/components/home/BlogSectionLive";
+import { BlogSection } from "@/components/home/BlogSection";
 import { CTASection } from "@/components/home/CTASection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { siteConfig } from "@/data/site";
@@ -42,7 +42,7 @@ export default function HomePage() {
       <AboutSection />
       <FounderBanner />
       <TeamSection />
-      <BlogSectionLive />
+      <BlogSection />
       <CTASection />
     </>
   );

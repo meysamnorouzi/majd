@@ -7,12 +7,18 @@ import {
   faqJsonLd,
   serviceJsonLd,
 } from "@/lib/seo";
+import { getPillar } from "@/data/pillars";
+import { hubPath, servicePath } from "@/lib/service-paths";
 import { getAllServiceSlugs, getServiceBySlug } from "@/lib/wordpress";
 
 /**
  * SPA shell for service detail URLs not pre-rendered at build time.
- * Apache / Cloudflare rewrite `/services/<slug>/` → `/services/detail/index.html`
- * when no static folder exists — same pattern as `/blog/post/*`.
+ * Apache / Cloudflare rewrite:
+ *   `/{family-lawyer|property-lawyer|criminal-defense-lawyer|legal-consultation|administrative-lawyer}/<slug>/`
+ *     → `/services/detail/index.html`
+ * when no static folder exists — same pattern as `/blogs/<slug>/`.
+ * Leftover `/services/<slug>/` bookmarks also land here and client-canonicalize.
+ * This path is not a public URL (noindex).
  */
 export async function generateStaticParams() {
   const slugs = await getAllServiceSlugs();
@@ -44,7 +50,7 @@ export async function generateMetadata({
     return createPageMetadata({
       title: "خدمت یافت نشد",
       description: "خدمت مورد نظر یافت نشد",
-      path: `/services/${slug}/`,
+      path: "/services/detail/",
       noIndex: true,
     });
   }
@@ -52,7 +58,7 @@ export async function generateMetadata({
   return createPageMetadata({
     title: service.title,
     description: service.excerpt,
-    path: `/services/${service.slug}/`,
+    path: servicePath(service),
     image: service.image,
     keywords: [service.title, "خدمات حقوقی", "موسسه حقوقی مجد"],
   });
@@ -66,25 +72,28 @@ export default async function ServiceDetailShellPage({
   const { slug: parts } = await params;
   const slug = parts?.[0];
   const service = slug ? await getServiceBySlug(slug) : null;
+  const path = service ? servicePath(service) : undefined;
+  const pillar = service?.categoryPrefix
+    ? getPillar(service.categoryPrefix)
+    : undefined;
 
   return (
     <>
-      {service ? (
+      {service && path ? (
         <JsonLd
           data={[
-            serviceJsonLd(service),
+            serviceJsonLd(service, path),
             breadcrumbJsonLd([
               { name: "خانه", path: "/" },
-              { name: "خدمات", path: "/services/" },
-              ...(service.parentSlug && service.parentTitle
+              ...(pillar && service.categoryPrefix
                 ? [
                     {
-                      name: service.parentTitle,
-                      path: `/services/${service.parentSlug}/`,
+                      name: pillar.title,
+                      path: hubPath(service.categoryPrefix),
                     },
                   ]
                 : []),
-              { name: service.title, path: `/services/${service.slug}/` },
+              { name: service.title, path },
             ]),
             ...(service.faqs?.length ? [faqJsonLd(service.faqs)] : []),
           ]}

@@ -100,6 +100,20 @@ export function wrapWpContactCallouts(html: string): string {
 
 export function enhanceWpContentHtml(html: string): string {
   return wrapWpContactCallouts(
-    ensureHeadingIds(isolatePhoneNumbers(fixSplitPersianWords(html))),
+    ensureHeadingIds(
+      isolatePhoneNumbers(fixSplitPersianWords(lazyLoadWpImages(html))),
+    ),
   );
+}
+
+/** Defer offscreen WordPress images so they don't compete with LCP. */
+export function lazyLoadWpImages(html: string): string {
+  if (!html) return html;
+  return html.replace(/<img\b([^>]*)>/gi, (full, attrs: string) => {
+    if (/\bloading\s*=/i.test(attrs)) return full;
+    let next = attrs;
+    if (!/\bdecoding\s*=/i.test(next)) next += ' decoding="async"';
+    next += ' loading="lazy"';
+    return `<img${next}>`;
+  });
 }

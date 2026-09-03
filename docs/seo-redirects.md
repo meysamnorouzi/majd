@@ -23,12 +23,15 @@ that one file. Change a slug there, run `npm run generate:redirects`, commit.
 | Generator (`--check` fails a stale build) | `scripts/generate-redirects.mjs` |
 | Pre-deploy / post-deploy verifier | `scripts/check-redirects.mjs` |
 | Client-side safety net for in-app links | `src/components/layout/LegacyRedirectGuard.tsx` |
-| Restored root URLs (`/وکیل-خلع-ید/` …) | `src/app/[legacySlug]/page.tsx` |
-| Category hub pages (`/services/ملکی/`) | `resolveCategoryHub` in `src/lib/wordpress/services.ts` |
+| Restored root URLs (`/وکیل-حقوقی/` …) | `src/app/[legacySlug]/page.tsx` |
+| Categorized service pages | `/{family-lawyer\|property-lawyer\|criminal-defense-lawyer\|legal-consultation\|administrative-lawyer}/<slug>/` |
+| Pillar hub pages | `/family-lawyer/`, `/property-lawyer/`, `/criminal-defense-lawyer/`, `/legal-consultation/`, `/administrative-lawyer/` |
 
-Retired slugs are filtered out of the mega menu, the `/services/` index, the
-related-services rails and `sitemap.xml`, so nothing on the site links into a
-301 any more.
+Retired slugs are filtered out of the mega menu, related-service rails and `sitemap.xml`, so nothing on the site links into a 301 any more.
+
+Moved service URLs must **301 to the new path**, not `noindex`. `noindex` on `/services/<slug>/` tells Google to drop a ranking URL instead of transferring it. The empty `/services/detail/` shell stays `noindex` because it is not a public URL.
+
+`/services/` itself 301s to `/`. Civil/administrative posts now live under `/administrative-lawyer/<slug>/`. Consultation lives at `/legal-consultation/`.
 
 ```bash
 npm run generate:redirects   # rewrite the generated blocks from the JSON
@@ -44,15 +47,30 @@ node scripts/check-redirects.mjs --live   # after deploy: confirm the 301s
 
 | از | به | یادداشت ممیزی |
 |---|---|---|
-| `/services/وکیل-ملک-ورثه-ای/` | `/services/وکیل-تقسیم-ترکه/` | ریدایرکت روی صفحه تقسیم ترکه و حذف از زیرمنو ملکی |
-| `/services/وکیل-تصرف-عدوانی/` | `/services/وکیل-خلع-ید-و-تخلیه/` | ریدایرکت روی صفحه وکیل خلع ید و تخلیه |
-| `/services/وکیل-تخلیه-ملک-در-تهران/` | `/services/وکیل-خلع-ید-و-تخلیه/` | ریدایرکت روی صفحه وکیل خلع ید و تخلیه |
-| `/services/وکیل-متخصص-املاک/` | `/services/ملکی/` | ریدایرکت ۳۰۱ روی صفحه هاب ملکی |
-| `/services/وکیل-ملکی-در-تهرانپارس/` | `/services/ملکی/` | ریدایرکت ۳۰۱ روی صفحه هاب ملکی |
-| `/services/وکیل-زمین-در-شرق-تهران/` | `/services/ملکی/` | ریدایرکت ۳۰۱ روی صفحه هاب ملکی |
-| `/services/وکیل-ملکی-شرق-تهران/` | `/services/ملکی/` | ریدایرکت ۳۰۱ روی صفحه هاب ملکی |
-| `/services/وکیل-سرقفلی/` | `/وکیل-متخصص-سرقفلی/` | ریدایرکت روی وکیل سرقفلی |
-| `/services/بهترین-وکیل/` | `/services/moshavere-hoghooghi/` | ریدایرکت روی مشاوره حقوقی |
+| `/وکیل-خلع-ید/` | `/property-lawyer/وکیل-خلع-ید/` | آدرس ریشه‌ای رنک‌دار به ساختار جدید خدمات ملکی |
+| `/وکیل-متخصص-سرقفلی/` | `/property-lawyer/وکیل-متخصص-سرقفلی/` | آدرس ریشه‌ای سرقفلی به ساختار جدید خدمات ملکی |
+| `/وکیل-امور-خانواده/` | `/family-lawyer/وکیل-متخصص-دعاوی-خانواده/` | آدرس ریشه‌ای امور خانواده به صفحه وکیل متخصص دعاوی خانواده |
+| `/services/وکیل-ملک-ورثه-ای/` | `/property-lawyer/وکیل-تقسیم-ترکه/` | ریدایرکت روی صفحه تقسیم ترکه و حذف از زیرمنو ملکی |
+| `/services/وکیل-تصرف-عدوانی/` | `/property-lawyer/وکیل-خلع-ید-و-تخلیه/` | ریدایرکت روی صفحه وکیل خلع ید و تخلیه |
+| `/services/وکیل-تخلیه-ملک-در-تهران/` | `/property-lawyer/وکیل-خلع-ید-و-تخلیه/` | ریدایرکت روی صفحه وکیل خلع ید و تخلیه |
+| `/services/وکیل-متخصص-املاک/` | `/property-lawyer/` | هاب ملکی به پیلار وکیل ملکی |
+| `/services/وکیل-ملکی-در-تهرانپارس/` | `/property-lawyer/` | هاب ملکی به پیلار وکیل ملکی |
+| `/services/وکیل-زمین-در-شرق-تهران/` | `/property-lawyer/` | هاب ملکی به پیلار وکیل ملکی |
+| `/services/وکیل-ملکی-شرق-تهران/` | `/property-lawyer/` | هاب ملکی به پیلار وکیل ملکی |
+| `/services/وکیل-سرقفلی/` | `/property-lawyer/وکیل-متخصص-سرقفلی/` | ریدایرکت روی وکیل متخصص سرقفلی |
+| `/services/وکیل-قتل/` | `/criminal-defense-lawyer/وکیل-قتل/` | انتقال ساختار؛ ۳۰۱ بدون noindex |
+| `/services/وکیل-متخصص-سرقفلی/` | `/property-lawyer/وکیل-متخصص-سرقفلی/` | انتقال ساختار؛ ۳۰۱ بدون noindex |
+| `/services/وکیل-ملکی/` | `/property-lawyer/` | هاب ملکی به پیلار وکیل ملکی |
+| `/services/وکیل-خانواده/` | `/family-lawyer/وکیل-متخصص-دعاوی-خانواده/` | انتقال ساختار؛ ۳۰۱ بدون noindex |
+| `/services/وکیل-رابطه-نامشروع/` | `/criminal-defense-lawyer/وکیل-رابطه-نامشروع/` | انتقال ساختار؛ ۳۰۱ بدون noindex |
+| `/services/وکیل-خلع-ید/` | `/property-lawyer/وکیل-خلع-ید/` | انتقال ساختار؛ ۳۰۱ بدون noindex |
+| `/services/وکیل-جنایی/` | `/criminal-defense-lawyer/وکیل-جنایی/` | انتقال ساختار؛ ۳۰۱ بدون noindex |
+| `/services/وکیل-خیانت-در-امانت/` | `/criminal-defense-lawyer/وکیل-خیانت-در-امانت/` | انتقال ساختار؛ ۳۰۱ بدون noindex |
+| `/services/وکیل-مواد-مخدر/` | `/criminal-defense-lawyer/وکیل-مواد-مخدر/` | انتقال ساختار؛ ۳۰۱ بدون noindex |
+| `/services/کیفری/` | `/criminal-defense-lawyer/` | هاب کیفری به پیلار وکیل کیفری |
+| `/services/بهترین-وکیل/` | `/legal-consultation/` | ریدایرکت روی پیلار مشاوره حقوقی |
+| `/services/` | `/` | فهرست خدمات حذف شد |
+| `/services/moshavere-hoghooghi/` | `/legal-consultation/` | مشاوره حقوقی صفحه پیلار مستقل دارد |
 | `/services/سگی-که-خانه-میلیاردی-به-نام-وی-شد/` | `/blogs/…/` | تبدیل به بلاگ پست |
 | `/services/احکام-صادره-برای-املاک-خاص/` | `/blogs/…/` | تبدیل به بلاگ پست |
 | `/services/اصل-۴۹-قانون-اساسی/` | `/blogs/…/` | تبدیل به بلاگ پست |
@@ -61,8 +79,6 @@ node scripts/check-redirects.mjs --live   # after deploy: confirm the 301s
 
 | مسیر | اسلاگ وردپرس | یادداشت |
 |---|---|---|
-| `/وکیل-خلع-ید/` | `وکیل-خلع-ید` | روی کلمه کلیدی «وکیل خلع ید» رنک دارد |
-| `/وکیل-متخصص-سرقفلی/` | `وکیل-متخصص-سرقفلی` | بازگردانی صفحه |
 | `/وکیل-حقوقی/` | `وکیل-حقوقی` | بازگردانی صفحه |
 
 Each renders at its original path with a self-referencing canonical, pulling its
@@ -76,19 +92,20 @@ every other root path a 404.
 The frontend is headless — content, categories and slugs all come from
 `admin.vakilmajd.com`. These four items cannot be done from this repo.
 
-### 1. Republish the three deleted posts *(required — otherwise the restored pages render empty)*
+### 1. Republish the remaining restored post *(required — otherwise `/وکیل-حقوقی/` renders empty)*
 
-Create/restore a published post for each slug below (Settings → Permalink →
-slug must match **exactly**, including the hyphens):
+Create/restore a published post for this slug (Settings → Permalink → slug must
+match **exactly**, including the hyphens):
 
-- `وکیل-خلع-ید`
-- `وکیل-متخصص-سرقفلی`
 - `وکیل-حقوقی`
 
-Use the old content from the WordPress backup. Keep them **out of** the
-`ملکی` / `خانواده` / `کیفری` service categories — the mega menu and the
-`/services/` index are built from those categories, and adding them there would
+Use the old content from the WordPress backup. Keep it **out of** the
+`ملکی` / `خانواده` / `کیفری` / `مشاوره-حقوقی` / `اداری` service categories — the mega menu and pillar hubs are built from those categories, and adding it there would
 publish a second URL for the same content.
+
+`وکیل-خلع-ید` and `وکیل-متخصص-سرقفلی` now live at
+`/property-lawyer/<slug>/`. Assign those posts to the `ملکی` category (or a
+child of it) so the new URLs have a page.
 
 Verify with `npm run check:redirects` — it reports each slug as found or missing.
 
@@ -101,7 +118,7 @@ Verify with `npm run check:redirects` — it reports each slug as found or missi
 Remove the service categories (`ملکی` and its children) and assign a blog
 category. The slug must not change — the 301s point at `/blogs/<same-slug>/`.
 Once the service category is gone the post drops out of the mega menu and the
-`/services/` index on its own.
+pillar hub cards on its own.
 
 ### 3. Fix the category of `وکیل-ملک-ورثه-ای` *(حذف از زیرمنو ملکی)*
 
@@ -120,8 +137,8 @@ anything missing. The targets that must resolve:
 
 - `وکیل-تقسیم-ترکه` (post)
 - `وکیل-خلع-ید-و-تخلیه` (post)
-- `ملکی` (category — rendered as a hub page by `resolveCategoryHub`)
-- `moshavere-hoghooghi` (post)
+- `/property-lawyer/` and the other four pillar hubs (static pages)
+- `/legal-consultation/` (consultation hub)
 
 If any of them comes back missing, fix the slug in
 `src/data/legacy-redirects.json` and re-run `npm run generate:redirects`.

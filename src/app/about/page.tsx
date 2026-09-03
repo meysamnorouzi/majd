@@ -18,7 +18,7 @@ export const metadata: Metadata = createPageMetadata({
 export default function AboutPage() {
   return (
     <>
-      <FounderBanner />
+      <FounderBanner priority />
 
       <section className="py-20">
         <Container>

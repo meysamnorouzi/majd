@@ -97,12 +97,17 @@ async function fetchJson<T>(url: string): Promise<T | null> {
 }
 
 /** Client-side: fetch categories and return a nested tree */
+let categoriesClientPromise: Promise<BlogCategory[]> | null = null;
+
 export async function fetchCategoriesClient(): Promise<BlogCategory[]> {
-  const data = await fetchJson<WpCategory[]>(
-    wpApiUrl(
-      "/wp-json/wp/v2/categories?per_page=100&hide_empty=true&orderby=name&order=asc",
-    ),
-  );
-  if (!data?.length) return [];
-  return buildCategoryTree(data);
+  categoriesClientPromise ??= (async () => {
+    const data = await fetchJson<WpCategory[]>(
+      wpApiUrl(
+        "/wp-json/wp/v2/categories?per_page=100&hide_empty=true&orderby=name&order=asc",
+      ),
+    );
+    if (!data?.length) return [];
+    return buildCategoryTree(data);
+  })();
+  return categoriesClientPromise;
 }

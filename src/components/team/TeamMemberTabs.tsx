@@ -49,9 +49,47 @@ function ExpertiseCard({ area }: { area: string }) {
   );
 }
 
+function educationItems(education: string): string[] {
+  return education
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function bioParagraphKind(
+  text: string,
+  member: TeamMember,
+): "heading" | "list" | "body" {
+  if (
+    member.areasOfPractice.includes(text) ||
+    member.achievements.includes(text) ||
+    educationItems(member.education).includes(text)
+  ) {
+    return "list";
+  }
+  if (text.length <= 80 && !/[.،؛:]/.test(text) && !text.includes("–")) {
+    return "heading";
+  }
+  return "body";
+}
+
 export function TeamMemberTabs({ member }: { member: TeamMember }) {
-  const [activeTab, setActiveTab] = useState<TabId>("bio");
+  const visibleTabs = TAB_ITEMS.filter((tab) => {
+    if (tab.id === "bio") {
+      return member.fullBio.length > 0 || Boolean(member.education.trim());
+    }
+    if (tab.id === "expertise") return member.areasOfPractice.length > 0;
+    return member.achievements.length > 0;
+  });
+  const [activeTab, setActiveTab] = useState<TabId>(
+    visibleTabs[0]?.id ?? "bio",
+  );
   const reduced = useReducedMotion();
+  const currentTab = visibleTabs.some((tab) => tab.id === activeTab)
+    ? activeTab
+    : (visibleTabs[0]?.id ?? "bio");
+
+  if (visibleTabs.length === 0) return null;
 
   return (
     <div>
@@ -59,14 +97,14 @@ export function TeamMemberTabs({ member }: { member: TeamMember }) {
         role="tablist"
         className="flex gap-2 overflow-x-auto rounded-xl bg-cream/80 p-2"
       >
-        {TAB_ITEMS.map((tab) => (
+        {visibleTabs.map((tab) => (
           <button
             key={tab.id}
             role="tab"
-            aria-selected={activeTab === tab.id}
+            aria-selected={currentTab === tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`relative flex shrink-0 items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition ${
-              activeTab === tab.id
+              currentTab === tab.id
                 ? "bg-navy-900 text-gold-400 shadow-md"
                 : "text-slate-600 hover:bg-white hover:text-navy-900"
             }`}
@@ -80,37 +118,71 @@ export function TeamMemberTabs({ member }: { member: TeamMember }) {
       <div className="mt-8" role="tabpanel">
         <AnimatePresence mode="wait">
           <motion.div
-            key={activeTab}
+            key={currentTab}
             initial={reduced ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={reduced ? undefined : { opacity: 0, y: -8 }}
             transition={{ duration: reduced ? 0.01 : 0.35, ease: EASE }}
           >
-            {activeTab === "bio" && (
+            {currentTab === "bio" && (
               <div className="space-y-5">
-                {member.fullBio.map((paragraph, i) => (
-                  <p
-                    key={i}
-                    className="leading-relaxed text-slate-600 first:text-lg first:font-medium first:text-slate-700"
-                  >
-                    {paragraph}
-                  </p>
-                ))}
-                <div className="flex items-center gap-4 rounded-xl bg-cream/80 p-5">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-navy-900 text-gold-400">
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342" />
-                    </svg>
+                {member.fullBio.map((paragraph, i) => {
+                  const kind = bioParagraphKind(paragraph, member);
+                  if (kind === "heading") {
+                    return (
+                      <h3
+                        key={`${paragraph}-${i}`}
+                        className="pt-2 text-base font-bold text-navy-900"
+                      >
+                        {paragraph}
+                      </h3>
+                    );
+                  }
+                  if (kind === "list") {
+                    return (
+                      <p
+                        key={`${paragraph}-${i}`}
+                        className="flex gap-3 text-sm leading-relaxed text-slate-700"
+                      >
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gold-500" />
+                        {paragraph}
+                      </p>
+                    );
+                  }
+                  return (
+                    <p
+                      key={`${paragraph}-${i}`}
+                      className={`leading-relaxed text-slate-600 ${
+                        i === 0 ? "text-lg font-medium text-slate-700" : ""
+                      }`}
+                    >
+                      {paragraph}
+                    </p>
+                  );
+                })}
+                {member.education ? (
+                  <div className="flex items-start gap-4 rounded-xl bg-cream/80 p-5">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-navy-900 text-gold-400">
+                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.906 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-navy-900">تحصیلات</p>
+                      <ul className="mt-1 space-y-1">
+                        {educationItems(member.education).map((item) => (
+                          <li key={item} className="text-sm text-slate-600">
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-navy-900">تحصیلات</p>
-                    <p className="mt-0.5 text-sm text-slate-600">{member.education}</p>
-                  </div>
-                </div>
+                ) : null}
               </div>
             )}
 
-            {activeTab === "expertise" && (
+            {currentTab === "expertise" && (
               <div className="grid gap-4 sm:grid-cols-2">
                 {member.areasOfPractice.map((area) => (
                   <ExpertiseCard key={area} area={area} />
@@ -118,7 +190,7 @@ export function TeamMemberTabs({ member }: { member: TeamMember }) {
               </div>
             )}
 
-            {activeTab === "achievements" && (
+            {currentTab === "achievements" && (
               <ul className="space-y-3">
                 {member.achievements.map((item) => (
                   <li

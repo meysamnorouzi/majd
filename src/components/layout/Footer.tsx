@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { navLinks, practiceAreas, siteConfig } from "@/data/site";
+import { navLinks, siteConfig } from "@/data/site";
+import { PILLARS } from "@/data/pillars";
+import { hubPath } from "@/lib/service-paths";
 import {
   InstagramIcon,
   SocialIconLink,
@@ -52,9 +54,14 @@ export function Footer() {
           <div>
             <h3 className="mb-4 font-bold text-gold-400">حوزه‌های تخصصی</h3>
             <ul className="space-y-2">
-              {practiceAreas.map((area) => (
-                <li key={area} className="text-sm text-white/70">
-                  {area}
+              {PILLARS.map((pillar) => (
+                <li key={pillar.prefix}>
+                  <Link
+                    href={hubPath(pillar.prefix)}
+                    className="text-sm text-white/70 transition hover:text-gold-400"
+                  >
+                    {pillar.title}
+                  </Link>
                 </li>
               ))}
             </ul>

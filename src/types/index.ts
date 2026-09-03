@@ -3,9 +3,22 @@ export interface WpMedia {
   alt_text: string;
 }
 
+export interface WpMediaSize {
+  source_url?: string;
+  width?: number;
+  height?: number;
+  mime_type?: string;
+}
+
 export interface WpFeaturedMedia {
   source_url?: string;
   alt_text?: string;
+  mime_type?: string;
+  media_details?: {
+    width?: number;
+    height?: number;
+    sizes?: Record<string, WpMediaSize>;
+  };
 }
 
 export interface WpPost {
@@ -79,6 +92,12 @@ export interface TeamMemberGalleryItem {
   alt: string;
 }
 
+export interface TeamMemberVideoItem {
+  src: string;
+  title: string;
+  poster?: string;
+}
+
 export interface TeamMember {
   id: string;
   slug: string;
@@ -92,7 +111,11 @@ export interface TeamMember {
   bannerImage?: string;
   /** Extra portraits shown in the detail gallery */
   gallery?: TeamMemberGalleryItem[];
+  /** Videos shown below the image gallery */
+  videoGallery?: TeamMemberVideoItem[];
   education: string;
+  /** Optional birth date shown on the profile (e.g. ۲۲ بهمن ۱۳۶۱) */
+  birthDate?: string;
   experienceYears: string;
   areasOfPractice: string[];
   achievements: string[];
@@ -109,7 +132,9 @@ export interface WpTeamMemberMeta {
   fullBio?: string[];
   bannerImage?: string;
   gallery?: TeamMemberGalleryItem[];
+  videoGallery?: TeamMemberVideoItem[];
   education?: string;
+  birthDate?: string;
   experienceYears?: string;
   areasOfPractice?: string[];
   achievements?: string[];
@@ -161,6 +186,16 @@ export interface Service {
   /** Set when this item is a child of another service */
   parentSlug?: string;
   parentTitle?: string;
+  /**
+   * Public URL prefix for pillar services.
+   * Unset only when a post is not in any mega-root category.
+   */
+  categoryPrefix?:
+    | "family-lawyer"
+    | "property-lawyer"
+    | "criminal-defense-lawyer"
+    | "legal-consultation"
+    | "administrative-lawyer";
   longDescription?: string[];
   whyNeed?: { title: string; paragraphs: string[] };
   highlights?: string[];

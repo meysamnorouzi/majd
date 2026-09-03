@@ -6,6 +6,7 @@ import { TeamMemberCard } from "@/components/team/TeamMemberCard";
 import { TeamMemberTabs } from "@/components/team/TeamMemberTabs";
 import { TeamMemberSidebar } from "@/components/team/TeamMemberSidebar";
 import { TeamMemberGallery } from "@/components/team/TeamMemberGallery";
+import { TeamMemberVideoGallery } from "@/components/team/TeamMemberVideoGallery";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
@@ -63,6 +64,31 @@ export default async function TeamMemberPage({
     name: m.name,
   }));
 
+  const educationItems = member.education
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  const profileStats = [
+    member.birthDate
+      ? { label: "تاریخ تولد", value: member.birthDate }
+      : member.experienceYears
+        ? { label: "سال تجربه", value: member.experienceYears }
+        : null,
+    member.areasOfPractice.length
+      ? {
+          label: "حوزه تخصصی",
+          value: member.areasOfPractice.length.toLocaleString("fa-IR"),
+        }
+      : null,
+    member.achievements.length
+      ? {
+          label: "دستاورد",
+          value: member.achievements.length.toLocaleString("fa-IR"),
+        }
+      : null,
+  ].filter((stat): stat is { label: string; value: string } => stat !== null);
+
   return (
     <>
       <JsonLd
@@ -90,24 +116,35 @@ export default async function TeamMemberPage({
                 <p className="mt-2 text-gold-600">{member.role}</p>
 
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <span className="rounded-lg bg-navy-900/5 px-4 py-2 text-sm font-semibold text-navy-900">
-                    {member.experienceYears} سال تجربه
-                  </span>
-                  <span className="rounded-lg bg-navy-900/5 px-4 py-2 text-sm text-slate-600">
-                    {member.education}
-                  </span>
+                  {member.birthDate ? (
+                    <span className="rounded-lg bg-navy-900/5 px-4 py-2 text-sm text-slate-600">
+                      تاریخ تولد: {member.birthDate}
+                    </span>
+                  ) : null}
+                  {member.experienceYears ? (
+                    <span className="rounded-lg bg-navy-900/5 px-4 py-2 text-sm font-semibold text-navy-900">
+                      {member.experienceYears} سال تجربه
+                    </span>
+                  ) : null}
+                  {educationItems[0] ? (
+                    <span className="rounded-lg bg-navy-900/5 px-4 py-2 text-sm text-slate-600">
+                      {educationItems[0]}
+                    </span>
+                  ) : null}
                 </div>
 
-                <div className="mt-8 grid gap-3 md:grid-cols-3">
-                  <StatCard label="سال تجربه" value={member.experienceYears} />
-                  <StatCard
-                    label="حوزه تخصصی"
-                    value={member.areasOfPractice.length.toLocaleString("fa-IR")}
-                  />
-                  <StatCard
-                    label="دستاورد"
-                    value={member.achievements.length.toLocaleString("fa-IR")}
-                  />
+                <div
+                  className={`mt-8 grid gap-3 ${
+                    profileStats.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2"
+                  }`}
+                >
+                  {profileStats.map((stat) => (
+                    <StatCard
+                      key={stat.label}
+                      label={stat.label}
+                      value={stat.value}
+                    />
+                  ))}
                 </div>
 
                 <div className="mt-10 border-t border-slate-100 pt-10">
@@ -127,7 +164,9 @@ export default async function TeamMemberPage({
       </section>
 
       <TeamMemberGallery member={member} />
+      <TeamMemberVideoGallery member={member} />
 
+      {member.areasOfPractice.length > 0 && (
       <section className="bg-navy-900 py-16 text-white">
         <Container>
           <Reveal className="text-center">
@@ -154,6 +193,7 @@ export default async function TeamMemberPage({
           </Stagger>
         </Container>
       </section>
+      )}
 
       {otherMembers.length > 0 && (
         <section className="py-16">

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { navLinks, siteConfig } from "@/data/site";
 import { BLOG_LIST_PATH, isBlogPath } from "@/lib/blog-paths";
+import { isServiceNavPath, SERVICES_INDEX_PATH } from "@/lib/service-paths";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
 import { NavServicesDropdown } from "@/components/layout/NavServicesDropdown";
@@ -14,7 +15,7 @@ import { NavBlogDropdown } from "@/components/layout/NavBlogDropdown";
 // import { NavCoursesDropdown } from "@/components/layout/NavCoursesDropdown";
 // import { useAuth } from "@/components/providers/AuthProvider";
 
-const SERVICES_NAV_HREF = "/services/";
+const SERVICES_NAV_HREF = SERVICES_INDEX_PATH;
 const BLOG_NAV_HREF = BLOG_LIST_PATH;
 // const COURSES_NAV_HREF = "/courses/";
 
@@ -54,7 +55,7 @@ export function Header() {
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/" || pathname === "";
     if (href === SERVICES_NAV_HREF) {
-      return pathname === SERVICES_NAV_HREF || pathname.startsWith("/services");
+      return isServiceNavPath(pathname);
     }
     if (href === BLOG_NAV_HREF) {
       return isBlogPath(pathname);
@@ -69,7 +70,7 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-white/10 bg-navy-950/95 backdrop-blur-md">
       <div className="mx-auto flex max-w-[90rem] flex-nowrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <div className="shrink-0">
-          <Logo size="sm" variant="dark" />
+          <Logo size="sm" variant="dark" priority />
         </div>
 
         <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 lg:flex xl:gap-1">

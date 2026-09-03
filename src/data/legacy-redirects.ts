@@ -49,17 +49,61 @@ export function findLegacyRedirect(path: string): string | null {
   return redirectByPath.get(normalizePath(path)) ?? null;
 }
 
-const redirectedServiceSlugs = new Set(
-  legacyRedirects
-    .map((r) => normalizePath(r.from))
-    .filter((p) => p.startsWith("/services/"))
-    .map((p) => p.slice("/services/".length).replace(/\/$/, "")),
-);
+function decodeParam(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+/** Root paths like `/وکیل-خلع-ید/` (one segment) that 301 to a new URL. */
+export function rootLegacyRedirects(): { slug: string; to: string }[] {
+  return legacyRedirects
+    .filter(
+      (r) => normalizePath(r.from).split("/").filter(Boolean).length === 1,
+    )
+    .map((r) => ({
+      slug: lastPathSegment(r.from),
+      to: r.to,
+    }));
+}
+
+export function findRootLegacyRedirect(slug: string): string | null {
+  return findLegacyRedirect(`/${decodeParam(slug)}/`);
+}
+
+/** Slugs whose canonical public path is `/{prefix}/{slug}/` via a 301 target. */
+export function slugsRedirectedToPrefix(prefix: string): string[] {
+  const base = `/${prefix}/`;
+  return [
+    ...new Set(
+      legacyRedirects
+        .filter((r) => normalizePath(r.to).startsWith(base))
+        .map((r) => lastPathSegment(r.to)),
+    ),
+  ];
+}
+
+function lastPathSegment(path: string): string {
+  const parts = normalizePath(path).replace(/^\/+|\/+$/g, "").split("/");
+  return parts[parts.length - 1] ?? "";
+}
 
 /**
  * Retired service slugs must not be linked from the mega menu, the services
  * index, related-service rails or the sitemap — every one of them 301s away.
+ *
+ * Path-only moves (`/services/X/` → `/property-lawyer/X/`) keep slug `X` in the
+ * menu; only true slug replacements (different last segment) are hidden.
  */
+const redirectedServiceSlugs = new Set(
+  legacyRedirects
+    .filter((r) => normalizePath(r.from).startsWith("/services/"))
+    .filter((r) => lastPathSegment(r.from) !== lastPathSegment(r.to))
+    .map((r) => lastPathSegment(r.from)),
+);
+
 export function isRetiredServiceSlug(slug: string): boolean {
   return redirectedServiceSlugs.has(normalizePath(slug).replace(/^\/|\/$/g, ""));
 }

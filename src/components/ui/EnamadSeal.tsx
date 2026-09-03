@@ -10,6 +10,10 @@ export function EnamadSeal({ className }: { className?: string }) {
         referrerPolicy="origin"
         src={image}
         alt=""
+        width={125}
+        height={54}
+        loading="lazy"
+        decoding="async"
         style={{ cursor: "pointer" }}
         {...{ code }}
       />

@@ -5,7 +5,7 @@ import { siteConfig } from "@/data/site";
 import { BLOG_LIST_PATH } from "@/lib/blog-paths";
 
 const quickLinks = [
-  { href: "/services/", label: "خدمات حقوقی" },
+  { href: "/family-lawyer/", label: "خدمات حقوقی" },
   { href: BLOG_LIST_PATH, label: "مقالات تخصصی" },
   { href: "/team/", label: "اعضای تیم" },
   { href: "/contact/", label: "تماس با ما" },

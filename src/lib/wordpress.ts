@@ -10,7 +10,6 @@ import {
 } from "@/lib/wordpress/categories";
 import {
   normalizeWpContentHtml,
-  rewriteWpMediaUrl,
   wpApiUrl,
   wpServerHeaders,
 } from "@/lib/wordpress/config";
@@ -24,16 +23,19 @@ import {
   type FetchPostsOptions,
 } from "@/lib/wordpress/posts-query";
 import {
+  getAllServiceRouteParamsFromWp,
   getAllServiceSlugsFromWp,
   getServiceBySlugFromWp,
   getServiceCategoryIdsFromWp,
   getServicesFromWp,
+  getUncategorizedServiceSlugsFromWp,
 } from "@/lib/wordpress/services";
 import {
   getAllTeamSlugsFromWp,
   getTeamFromWp,
   getTeamMemberBySlugFromWp,
 } from "@/lib/wordpress/team";
+import { pickFeaturedImageUrl } from "@/lib/media/featured-image";
 import type { BlogCategory, WpCategory, WpPost, WpProduct } from "@/types";
 
 function apiUrl(path: string): string {
@@ -63,9 +65,7 @@ export function stripHtml(html: string): string {
 }
 
 export function getFeaturedImage(post: WpPost): string | undefined {
-  const media = post._embedded?.["wp:featuredmedia"]?.[0];
-  const url = media?.source_url;
-  return url ? rewriteWpMediaUrl(url) : undefined;
+  return pickFeaturedImageUrl(post._embedded?.["wp:featuredmedia"]?.[0]);
 }
 
 export async function getCategories(): Promise<BlogCategory[]> {
@@ -175,8 +175,9 @@ export async function getAllPostSlugs(): Promise<string[]> {
 
 /**
  * Article slugs only — posts in a service category are landing pages served at
- * `/services/<slug>/`, and listing them again under `/blogs/<slug>/` publishes
- * a second URL for the same content.
+ * `/{family-lawyer|property-lawyer|criminal-defense-lawyer|legal-consultation|administrative-lawyer}/<slug>/`, and
+ * listing them again under `/blogs/<slug>/` publishes a second URL for the
+ * same content.
  *
  * Falls back to every post when the service categories cannot be resolved
  * (WordPress unreachable), so a failed lookup never empties the sitemap.
@@ -290,8 +291,21 @@ export async function getServices() {
   return wpServices;
 }
 
+export async function getServiceMegaTrees() {
+  const { megaTrees } = await getServicesFromWp();
+  return megaTrees;
+}
+
 export async function getAllServiceSlugs(): Promise<string[]> {
   return getAllServiceSlugsFromWp();
+}
+
+export async function getAllServiceRouteParams() {
+  return getAllServiceRouteParamsFromWp();
+}
+
+export async function getUncategorizedServiceSlugs() {
+  return getUncategorizedServiceSlugsFromWp();
 }
 
 export async function getServiceBySlug(slug: string) {

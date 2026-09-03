@@ -1,11 +1,16 @@
 import type { MetadataRoute } from "next";
 import {
-  getAllServiceSlugs,
+  getAllServiceRouteParams,
   getBlogPostSlugs,
   getTeam,
 } from "@/lib/wordpress";
 import { absoluteUrl } from "@/lib/seo";
 import { BLOG_LIST_PATH, blogPostPath } from "@/lib/blog-paths";
+import {
+  SERVICE_CATEGORY_PREFIXES,
+  hubPath,
+  servicePathFromParts,
+} from "@/lib/service-paths";
 import {
   findLegacyRedirect,
   isRestoredPageWpSlug,
@@ -40,9 +45,9 @@ function entry(
  * (hidden shop/courses/account surfaces are omitted).
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [postSlugs, serviceSlugs] = await Promise.all([
+  const [postSlugs, serviceParams] = await Promise.all([
     getBlogPostSlugs(),
-    getAllServiceSlugs(),
+    getAllServiceRouteParams(),
   ]);
   const team = await getTeam();
 
@@ -50,15 +55,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry("/", { changeFrequency: "weekly", priority: 1 }),
     entry("/about/", { changeFrequency: "monthly", priority: 0.8 }),
     entry("/contact/", { changeFrequency: "monthly", priority: 0.8 }),
-    entry("/services/", { changeFrequency: "weekly", priority: 0.9 }),
+    ...SERVICE_CATEGORY_PREFIXES.map((prefix) =>
+      entry(hubPath(prefix), { changeFrequency: "weekly", priority: 0.9 }),
+    ),
     entry("/team/", { changeFrequency: "monthly", priority: 0.8 }),
     entry(BLOG_LIST_PATH, { changeFrequency: "daily", priority: 0.9 }),
   ];
 
-  const serviceRoutes = serviceSlugs
-    .filter((slug) => !isRedirected(`/services/${slug}/`))
-    .map((slug) =>
-      entry(`/services/${slug}/`, {
+  const serviceRoutes = serviceParams
+    .map(({ category, slug }) => servicePathFromParts(category, slug))
+    .filter((path) => !isRedirected(path))
+    .map((path) =>
+      entry(path, {
         changeFrequency: "monthly",
         priority: 0.8,
       }),

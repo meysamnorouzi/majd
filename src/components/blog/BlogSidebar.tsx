@@ -11,7 +11,9 @@ import {
   type BlogCategory,
 } from "@/lib/wordpress/client";
 import { BLOG_LIST_PATH, blogCategoryPath } from "@/lib/blog-paths";
-import { portraitObjectPosition, siteConfig, services, stats } from "@/data/site";
+import { portraitObjectPosition, siteConfig, stats } from "@/data/site";
+import { PILLARS } from "@/data/pillars";
+import { hubPath } from "@/lib/service-paths";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
 import type { LawyerOption } from "@/components/contact/ContactForm";
 
@@ -174,24 +176,18 @@ function BlogSidebarInner({
       <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
         <h3 className="font-bold text-navy-900">خدمات حقوقی</h3>
         <ul className="mt-4 space-y-2">
-          {services.slice(0, 5).map((service) => (
-            <li key={service.slug}>
+          {PILLARS.map((pillar) => (
+            <li key={pillar.prefix}>
               <Link
-                href={`/services/${service.slug}/`}
+                href={hubPath(pillar.prefix)}
                 className="flex items-center gap-2 text-sm text-slate-600 transition hover:text-gold-600"
               >
                 <span className="text-gold-500">←</span>
-                {service.title}
+                {pillar.title}
               </Link>
             </li>
           ))}
         </ul>
-        <Link
-          href="/services/"
-          className="mt-4 inline-block text-sm font-semibold text-navy-900 hover:text-gold-600"
-        >
-          همه خدمات →
-        </Link>
       </div>
 
       {/* Founder / team */}

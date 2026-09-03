@@ -17,7 +17,10 @@ export function LegacyRedirectGuard() {
   const router = useRouter();
 
   useEffect(() => {
-    const target = findLegacyRedirect(pathname);
+    const fromWindow =
+      typeof window !== "undefined" ? window.location.pathname : pathname;
+    const target =
+      findLegacyRedirect(pathname) ?? findLegacyRedirect(fromWindow);
     if (target) router.replace(target);
   }, [pathname, router]);
 

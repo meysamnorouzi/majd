@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ClientRedirect } from "@/components/services/ClientRedirect";
 import { ServiceDetailContent } from "@/components/services/ServiceDetailContent";
 import { ServiceDetailView } from "@/components/services/ServiceDetailView";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -9,17 +10,22 @@ import {
   faqJsonLd,
   serviceJsonLd,
 } from "@/lib/seo";
-import { findRestoredPage, restoredPages } from "@/data/legacy-redirects";
-import { getServiceBySlug, getServices } from "@/lib/wordpress";
-import { getTopLevelServices } from "@/lib/wordpress/services";
+import {
+  findRestoredPage,
+  findRootLegacyRedirect,
+  restoredPages,
+  rootLegacyRedirects,
+} from "@/data/legacy-redirects";
+import { getServiceBySlug } from "@/lib/wordpress";
+import { getPillar } from "@/data/pillars";
+import { hubPath } from "@/lib/service-paths";
 
 /**
- * Root-level legacy URLs that predate the headless migration and still rank
- * (e.g. `/وکیل-خلع-ید/`). They were returning 404; each one is listed in
- * `src/data/legacy-redirects.json` with the WordPress slug that holds its body,
- * and is served here at its original path with a self-referencing canonical.
- *
- * Only the listed paths are generated — every other root path stays a 404.
+ * Root-level legacy URLs that predate the headless migration.
+ * Restored pages (e.g. `/وکیل-حقوقی/`) render content. Retired paths
+ * (e.g. `/وکیل-خلع-ید/`) are generated here so `next dev` and static
+ * fallbacks can send visitors to the new categorized URL — host 301s
+ * still do that in production.
  */
 export const dynamicParams = false;
 
@@ -28,7 +34,13 @@ function slugOf(path: string): string {
 }
 
 export function generateStaticParams() {
-  return restoredPages.map((page) => ({ legacySlug: slugOf(page.path) }));
+  const restored = restoredPages.map((page) => ({
+    legacySlug: slugOf(page.path),
+  }));
+  const redirected = rootLegacyRedirects().map((entry) => ({
+    legacySlug: entry.slug,
+  }));
+  return [...restored, ...redirected];
 }
 
 export async function generateMetadata({
@@ -37,6 +49,17 @@ export async function generateMetadata({
   params: Promise<{ legacySlug: string }>;
 }): Promise<Metadata> {
   const { legacySlug } = await params;
+
+  const redirectTo = findRootLegacyRedirect(legacySlug);
+  if (redirectTo) {
+    return createPageMetadata({
+      title: "انتقال",
+      description: "این صفحه به آدرس جدید منتقل شده است.",
+      path: `/${legacySlug}/`,
+      noIndex: true,
+    });
+  }
+
   const page = findRestoredPage(legacySlug);
   if (!page) return { title: "صفحه یافت نشد" };
 
@@ -57,6 +80,10 @@ export default async function RestoredLegacyPage({
   params: Promise<{ legacySlug: string }>;
 }) {
   const { legacySlug } = await params;
+
+  const redirectTo = findRootLegacyRedirect(legacySlug);
+  if (redirectTo) return <ClientRedirect href={redirectTo} />;
+
   const page = findRestoredPage(legacySlug);
   if (!page) notFound();
 
@@ -66,7 +93,9 @@ export default async function RestoredLegacyPage({
   // fall back to the client shell so the page fills in without a rebuild.
   if (!service) return <ServiceDetailContent slug={page.wpSlug} />;
 
-  const allServices = await getServices();
+  const pillar = service.categoryPrefix
+    ? getPillar(service.categoryPrefix)
+    : undefined;
 
   return (
     <>
@@ -75,16 +104,20 @@ export default async function RestoredLegacyPage({
           serviceJsonLd(service, page.path),
           breadcrumbJsonLd([
             { name: "خانه", path: "/" },
-            { name: "خدمات", path: "/services/" },
+            ...(pillar && service.categoryPrefix
+              ? [
+                  {
+                    name: pillar.title,
+                    path: hubPath(service.categoryPrefix),
+                  },
+                ]
+              : []),
             { name: service.title, path: page.path },
           ]),
           ...(service.faqs?.length ? [faqJsonLd(service.faqs)] : []),
         ]}
       />
-      <ServiceDetailView
-        service={service}
-        relatedServices={getTopLevelServices(allServices)}
-      />
+      <ServiceDetailView service={service} />
     </>
   );
 }

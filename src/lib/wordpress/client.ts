@@ -1,8 +1,8 @@
 import { fallbackPosts, fallbackProducts } from "@/data/site";
 import { normalizeWpSlug } from "@/lib/wordpress/categories";
+import { pickFeaturedImageUrl } from "@/lib/media/featured-image";
 import {
   normalizeWpContentHtml,
-  rewriteWpMediaUrl,
   wpApiUrl,
 } from "@/lib/wordpress/config";
 import {
@@ -37,9 +37,7 @@ export function stripHtml(html: string): string {
 }
 
 function getFeaturedImage(post: WpPost): string | undefined {
-  const media = post._embedded?.["wp:featuredmedia"]?.[0];
-  const url = media?.source_url;
-  return url ? rewriteWpMediaUrl(url) : undefined;
+  return pickFeaturedImageUrl(post._embedded?.["wp:featuredmedia"]?.[0]);
 }
 
 function mapPost(p: WpPost): BlogPost {

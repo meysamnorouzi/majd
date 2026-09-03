@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { assets, siteConfig } from "@/data/site";
 import { blogPostPath } from "@/lib/blog-paths";
+import { servicePath } from "@/lib/service-paths";
 import type { Service, ServiceFAQ, TeamMember } from "@/types";
 
 export type PageSeoInput = {
@@ -152,14 +153,14 @@ export function breadcrumbJsonLd(
   };
 }
 
-/** `path` overrides the canonical URL for services served outside `/services/`. */
+/** `path` overrides the canonical URL for restored root-level service pages. */
 export function serviceJsonLd(service: Service, path?: string) {
   return {
     "@context": "https://schema.org",
     "@type": "Service",
     name: service.title,
     description: service.excerpt || service.description,
-    url: absoluteUrl(path ?? `/services/${service.slug}/`),
+    url: absoluteUrl(path ?? servicePath(service)),
     provider: { "@id": `${absoluteUrl("/")}#organization` },
     areaServed: {
       "@type": "Country",

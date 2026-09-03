@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Container } from "@/components/ui/Container";
 import { ServiceIcon } from "@/components/icons/ServiceIcons";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
+import { servicePath } from "@/lib/service-paths";
 import type { Service } from "@/types";
 
 export function ServiceRelatedServices({
@@ -30,7 +31,7 @@ export function ServiceRelatedServices({
           {related.map((service) => (
             <StaggerItem key={service.id} variant="up">
               <Link
-                href={`/services/${service.slug}/`}
+                href={servicePath(service)}
                 className="group flex h-full overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition hover:border-gold-400/40 hover:shadow-md"
               >
                 {service.image && (

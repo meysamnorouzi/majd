@@ -51,6 +51,24 @@ function decodePath(path) {
 /** `/services/x/` → `{ kind: "service", slug: "x" }` */
 function classify(path) {
   const clean = decodePath(path).replace(/^\/+/, "").replace(/\/+$/, "");
+  if (!clean || clean === "services") {
+    return { kind: "static", slug: "" };
+  }
+  const categoryPrefixes = [
+    "family-lawyer",
+    "property-lawyer",
+    "criminal-defense-lawyer",
+    "legal-consultation",
+    "administrative-lawyer",
+  ];
+  if (categoryPrefixes.includes(clean)) {
+    return { kind: "static", slug: "" };
+  }
+  for (const prefix of categoryPrefixes) {
+    if (clean.startsWith(`${prefix}/`)) {
+      return { kind: "service", slug: clean.slice(prefix.length + 1) };
+    }
+  }
   if (clean.startsWith("services/")) {
     return { kind: "service", slug: clean.slice("services/".length) };
   }
@@ -75,6 +93,8 @@ async function wpCount(endpoint, slug) {
 /** A target is valid if WordPress has a post (service or article) or a category at that slug. */
 async function checkTarget(path) {
   const { kind, slug } = classify(path);
+  if (kind === "static") return { ok: true, detail: "site index page" };
+
   const post = await wpCount("posts", slug);
   if (post.error) return { ok: false, detail: `WordPress unreachable: ${post.error}` };
   if (post.count > 0) return { ok: true, detail: "post found" };

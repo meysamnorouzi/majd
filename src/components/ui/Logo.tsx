@@ -12,10 +12,12 @@ export function Logo({
   size = "md",
   showText = true,
   variant = "dark",
+  priority = false,
 }: {
   size?: keyof typeof sizes;
   showText?: boolean;
   variant?: "dark" | "light";
+  priority?: boolean;
 }) {
   const { img, className } = sizes[size];
   const textPrimary = variant === "dark" ? "text-white" : "text-navy-900";
@@ -32,7 +34,8 @@ export function Logo({
           width={img}
           height={img}
           className="h-full w-full object-cover"
-          priority
+          sizes={`${img}px`}
+          priority={priority}
         />
       </span>
       {showText && (

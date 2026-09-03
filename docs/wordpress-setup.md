@@ -183,11 +183,14 @@ Team profiles are managed in WordPress under **اعضای تیم** (custom post 
 5. **Featured image** — portrait photo
 6. **Page attributes → Order** — display order (lower = first)
 7. Fill meta boxes:
-   - **اطلاعات حرفه‌ای** — role, specialty, education, experience years
-   - **بیوگرافی کامل** — one paragraph per line
-   - **تصاویر** — wide banner + gallery (`URL | alt text` per line)
+   - **اطلاعات حرفه‌ای** — role, specialty, birth date, education (one degree per line), optional experience years
+   - **بیوگرافی کامل** — one paragraph per line; short lines without a period become section headings
+   - **تصاویر** — wide banner + image gallery (`URL | alt text` per line)
+   - **گالری ویدیو** — YouTube / Aparat / Vimeo / uploaded file (`URL | title | poster` per line). Use **افزودن ویدیو از رسانه** to pick files from the media library
    - **تماس و شبکه‌های اجتماعی** — phone, email, location, social links
-   - **حوزه‌ها و دستاوردها** — one item per line
+   - **حوزه‌های تخصصی و سوابق** — one item per line
+
+Every member uses the **same profile layout**. Empty optional fields (birth date, experience years, galleries, videos) are hidden on the site.
 
 Publish to show on `/team/` and the homepage team section. Draft to hide without deleting.
 
@@ -196,7 +199,7 @@ Publish to show on `/team/` and the homepage team section. Draft to hide without
 - `GET /wp-json/wp/v2/team?per_page=100&_embed&orderby=menu_order&order=asc` — all members
 - `GET /wp-json/wp/v2/team?slug={slug}&_embed` — single member
 
-Each response includes a `majd_team` object with structured fields (role, fullBio, gallery, etc.).
+Each response includes a `majd_team` object with structured fields (`role`, `fullBio`, `gallery`, `videoGallery`, `birthDate`, etc.).
 
 Build-time fetch uses `WP_API_KEY`. Homepage team section and contact lawyer picker fetch live in the browser. Offline fallback: founder only in [`src/data/site.ts`](../src/data/site.ts) (`fallbackTeamMembers`).
 
@@ -208,19 +211,23 @@ Build-time fetch uses `WP_API_KEY`. Homepage team section and contact lawyer pic
 
 Services use the **same WordPress Posts API as the blog** (`/wp-json/wp/v2/posts`), grouped by **categories**.
 
-### Category structure (mega menu)
+### Category structure (mega menu + pillar hubs)
 
-| Category slug | Mega menu label | Notes |
-|---------------|-----------------|-------|
-| `ملکی` | وکیل ملکی | Layer 1 |
-| `خانواده` | وکیل خانواده | Layer 1 — merges with `خانواده-fa` / `khanavade-fa` |
-| `کیفری` | وکیل کیفری | Layer 1 |
+Five public pillar hubs. Each hub lists its sub-pillar service posts as cards.
 
-- **Layer 2** (mega menu middle column): child categories under each root (e.g. sub-topics).
-- **Layer 3** (mega menu left column): **posts** assigned to the hovered child category.
-- Posts assigned directly to a root category (not in a child) appear in layer 2 as direct links.
+| WP category slug | Public hub | Mega menu label | Notes |
+|------------------|------------|-----------------|-------|
+| `خانواده` | `/family-lawyer/` | وکیل خانواده | Merges with `خانواده-fa` / `khanavade-fa` |
+| `ملکی` | `/property-lawyer/` | وکیل ملکی | |
+| `کیفری` | `/criminal-defense-lawyer/` | وکیل کیفری | |
+| `مشاوره-حقوقی` | `/legal-consultation/` | مشاوره حقوقی | Merges with `مشاوره` / `moshavere` |
+| `اداری` | `/administrative-lawyer/` | وکیل اداری | Merges with `وکیل-اداری` / `دیوان-عدالت` |
 
-Create categories in **Posts → Categories** with the slugs above. Assign each service post to the appropriate child category.
+Service **posts** (sub-pillars) are public at `/{prefix}/{post-slug}/`, e.g. `/family-lawyer/talagh-mehrieh/`. Child categories are grouping labels in the mega menu; the pillar title links to the hub.
+
+There is **no** `/services/` listing. Old `/services/` and `/services/{slug}/` URLs 301 to the matching hub or sub-pillar.
+
+Create categories in **Posts → Categories** with the slugs above. Assign each service post to the appropriate pillar (or a child of it).
 
 ### Service post content
 

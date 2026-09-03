@@ -1,17 +1,14 @@
-"use client";
-
 import Image from "next/image";
 import { aboutContent, assets, portraitObjectPosition, practiceAreas } from "@/data/site";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
-import { Reveal } from "@/components/motion/reveal";
 
 export function AboutSection() {
   return (
     <section className="bg-white py-20 lg:py-28">
       <Container>
         <div className="grid items-center gap-12 lg:grid-cols-2">
-          <Reveal variant="left" className="relative">
+          <div className="relative">
             <div className="group relative aspect-[4/5] overflow-hidden rounded-2xl shadow-2xl ring-1 ring-gold-500/15">
               <Image
                 src={assets.founderArchitecture}
@@ -31,9 +28,9 @@ export function AboutSection() {
               <p className="text-3xl font-bold text-gold-400">۱۵+</p>
               <p className="text-sm text-white/80">سال تجربه حقوقی</p>
             </div>
-          </Reveal>
+          </div>
 
-          <Reveal variant="right" delay={0.12}>
+          <div>
             <span className="text-sm font-semibold text-gold-600">درباره موسسه</span>
             <h2 className="mt-2 text-2xl font-bold text-navy-900 sm:text-3xl">
               {aboutContent.title}
@@ -52,7 +49,7 @@ export function AboutSection() {
             <div className="mt-8">
               <Button href="/about/">بیشتر بدانید</Button>
             </div>
-          </Reveal>
+          </div>
         </div>
       </Container>
     </section>

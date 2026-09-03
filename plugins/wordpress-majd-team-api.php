@@ -17,7 +17,9 @@ define('MAJD_TEAM_META_SPECIALTY', '_majd_team_specialty');
 define('MAJD_TEAM_META_FULL_BIO', '_majd_team_full_bio');
 define('MAJD_TEAM_META_BANNER_ID', '_majd_team_banner_id');
 define('MAJD_TEAM_META_GALLERY', '_majd_team_gallery');
+define('MAJD_TEAM_META_VIDEO_GALLERY', '_majd_team_video_gallery');
 define('MAJD_TEAM_META_EDUCATION', '_majd_team_education');
+define('MAJD_TEAM_META_BIRTH_DATE', '_majd_team_birth_date');
 define('MAJD_TEAM_META_EXPERIENCE', '_majd_team_experience_years');
 define('MAJD_TEAM_META_AREAS', '_majd_team_areas_of_practice');
 define('MAJD_TEAM_META_ACHIEVEMENTS', '_majd_team_achievements');
@@ -85,6 +87,7 @@ class Majd_Team_API {
             MAJD_TEAM_META_ROLE,
             MAJD_TEAM_META_SPECIALTY,
             MAJD_TEAM_META_EDUCATION,
+            MAJD_TEAM_META_BIRTH_DATE,
             MAJD_TEAM_META_EXPERIENCE,
             MAJD_TEAM_META_PHONE,
             MAJD_TEAM_META_EMAIL,
@@ -118,6 +121,13 @@ class Majd_Team_API {
         ]);
 
         register_post_meta(MAJD_TEAM_POST_TYPE, MAJD_TEAM_META_GALLERY, [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => true,
+            'auth_callback' => '__return_true',
+        ]);
+
+        register_post_meta(MAJD_TEAM_POST_TYPE, MAJD_TEAM_META_VIDEO_GALLERY, [
             'type' => 'string',
             'single' => true,
             'show_in_rest' => true,
@@ -169,7 +179,9 @@ class Majd_Team_API {
             'fullBio' => self::decode_line_list(get_post_meta($post_id, MAJD_TEAM_META_FULL_BIO, true)),
             'bannerImage' => self::attachment_url($banner_id),
             'gallery' => self::decode_gallery(get_post_meta($post_id, MAJD_TEAM_META_GALLERY, true)),
+            'videoGallery' => self::decode_video_gallery(get_post_meta($post_id, MAJD_TEAM_META_VIDEO_GALLERY, true)),
             'education' => (string) get_post_meta($post_id, MAJD_TEAM_META_EDUCATION, true),
+            'birthDate' => (string) get_post_meta($post_id, MAJD_TEAM_META_BIRTH_DATE, true),
             'experienceYears' => (string) get_post_meta($post_id, MAJD_TEAM_META_EXPERIENCE, true),
             'areasOfPractice' => self::decode_line_list(get_post_meta($post_id, MAJD_TEAM_META_AREAS, true)),
             'achievements' => self::decode_line_list(get_post_meta($post_id, MAJD_TEAM_META_ACHIEVEMENTS, true)),
@@ -210,6 +222,15 @@ class Majd_Team_API {
         );
 
         add_meta_box(
+            'majd_team_videos',
+            'گالری ویدیو',
+            [__CLASS__, 'render_videos_meta_box'],
+            MAJD_TEAM_POST_TYPE,
+            'normal',
+            'default'
+        );
+
+        add_meta_box(
             'majd_team_contact',
             'تماس و شبکه‌های اجتماعی',
             [__CLASS__, 'render_contact_meta_box'],
@@ -220,7 +241,7 @@ class Majd_Team_API {
 
         add_meta_box(
             'majd_team_lists',
-            'حوزه‌ها و دستاوردها',
+            'حوزه‌های تخصصی و سوابق',
             [__CLASS__, 'render_lists_meta_box'],
             MAJD_TEAM_POST_TYPE,
             'normal',
@@ -238,7 +259,8 @@ class Majd_Team_API {
                 <td>
                     <input type="text" class="large-text" id="majd_team_role" name="majd_team_role"
                         value="<?php echo esc_attr($fields['role']); ?>"
-                        placeholder="مثال: مدیر عامل موسسه حقوقی مجد" />
+                        placeholder="مثال: مدیرعامل مؤسسه حقوقی مجد وکیل الرعایا" />
+                    <p class="description">زیر نام در کارت و صفحه پروفایل نمایش داده می‌شود.</p>
                 </td>
             </tr>
             <tr>
@@ -246,15 +268,25 @@ class Majd_Team_API {
                 <td>
                     <input type="text" class="large-text" id="majd_team_specialty" name="majd_team_specialty"
                         value="<?php echo esc_attr($fields['specialty']); ?>"
-                        placeholder="مثال: حقوق کیفری و بین‌الملل" />
+                        placeholder="مثال: حقوق بین‌الملل عمومی" />
+                    <p class="description">برچسب طلایی بالای صفحه پروفایل و کارت عضو.</p>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row"><label for="majd_team_birth_date">تاریخ تولد</label></th>
+                <td>
+                    <input type="text" class="regular-text" id="majd_team_birth_date" name="majd_team_birth_date"
+                        value="<?php echo esc_attr($fields['birth_date']); ?>"
+                        placeholder="مثال: ۲۲ بهمن ۱۳۶۱" />
+                    <p class="description">اختیاری. اگر خالی باشد در سایت نشان داده نمی‌شود.</p>
                 </td>
             </tr>
             <tr>
                 <th scope="row"><label for="majd_team_education">تحصیلات</label></th>
                 <td>
-                    <input type="text" class="large-text" id="majd_team_education" name="majd_team_education"
-                        value="<?php echo esc_attr($fields['education']); ?>"
-                        placeholder="مثال: کارشناسی ارشد حقوق جزا" />
+                    <textarea name="majd_team_education" id="majd_team_education" rows="4" class="large-text"
+                        placeholder="دکتری حقوق بین‌الملل عمومی – دانشجو&#10;کارشناسی ارشد حقوق جزا و جرم‌شناسی – دانشگاه تهران مرکز&#10;کارشناسی حقوق قضایی – دانشگاه تهران جنوب"><?php echo esc_textarea($fields['education']); ?></textarea>
+                    <p class="description">هر مقطع تحصیلی در یک خط جداگانه. خط اول در هدر پروفایل هم نمایش داده می‌شود.</p>
                 </td>
             </tr>
             <tr>
@@ -262,13 +294,14 @@ class Majd_Team_API {
                 <td>
                     <input type="text" class="regular-text" id="majd_team_experience" name="majd_team_experience"
                         value="<?php echo esc_attr($fields['experience']); ?>"
-                        placeholder="مثال: ۲۰+" style="max-width:120px" />
+                        placeholder="مثال: ۱۵" style="max-width:120px" />
+                    <p class="description">اختیاری. فقط وقتی پر شود نمایش داده می‌شود. اگر تاریخ تولد دارید و عدد تجربه مشخص نیست، خالی بگذارید.</p>
                 </td>
             </tr>
         </table>
         <p class="description">
             <strong>نام</strong> را در عنوان بالا وارد کنید.
-            <strong>خلاصه بیوگرافی</strong> (bio کوتاه) را در باکس «خلاصه» در سمت راست بنویسید.
+            <strong>خلاصه بیوگرافی</strong> (bio کوتاه کارت‌ها) را در باکس «خلاصه» در سمت راست بنویسید.
             ترتیب نمایش در سایت با فیلد «ترتیب» (Page Attributes) کنترل می‌شود.
         </p>
         <?php
@@ -277,8 +310,15 @@ class Majd_Team_API {
     public static function render_bio_meta_box($post) {
         $full_bio = get_post_meta($post->ID, MAJD_TEAM_META_FULL_BIO, true);
         ?>
-        <p class="description">هر پاراگراف بیوگرافی را در یک خط جداگانه بنویسید.</p>
-        <textarea name="majd_team_full_bio" rows="8" class="large-text code" style="font-family:inherit;line-height:1.8"><?php echo esc_textarea($full_bio); ?></textarea>
+        <p class="description">
+            هر پاراگراف را در یک خط جداگانه بنویسید. ساختار پیشنهادی برای همه اعضا:
+        </p>
+        <ul class="ul-disc" style="margin:0 1.5em 12px;list-style:disc">
+            <li>پاراگراف‌های معرفی</li>
+            <li>عنوان بخش در یک خط کوتاه بدون نقطه (مثل: سوابق تحصیلی)</li>
+            <li>موارد فهرست (مقاطع تحصیلی، سوابق، حوزه‌ها) هر کدام در یک خط</li>
+        </ul>
+        <textarea name="majd_team_full_bio" rows="14" class="large-text code" style="font-family:inherit;line-height:1.8" placeholder="پاراگراف معرفی...&#10;سوابق تحصیلی&#10;دکتری ... – دانشجو"><?php echo esc_textarea($full_bio); ?></textarea>
         <?php
     }
 
@@ -304,6 +344,22 @@ class Majd_Team_API {
         <p><strong>گالری تصاویر</strong></p>
         <p class="description">هر خط: <code>آدرس تصویر | متن alt</code></p>
         <textarea name="majd_team_gallery" rows="6" class="large-text code" style="font-family:inherit"><?php echo esc_textarea($gallery); ?></textarea>
+        <?php
+    }
+
+    public static function render_videos_meta_box($post) {
+        $videos = get_post_meta($post->ID, MAJD_TEAM_META_VIDEO_GALLERY, true);
+        ?>
+        <p class="description">
+            ویدیوها زیر گالری تصاویر در صفحه پروفایل نمایش داده می‌شوند.
+            یوتیوب، آپارات، ویمئو یا فایل آپلودشده در رسانه وردپرس پشتیبانی می‌شود.
+        </p>
+        <p>
+            <button type="button" class="button" id="majd_team_videos_select">افزودن ویدیو از رسانه</button>
+        </p>
+        <p class="description">هر خط: <code>آدرس ویدیو | عنوان | آدرس پوستر (اختیاری)</code></p>
+        <textarea name="majd_team_videos" id="majd_team_videos" rows="8" class="large-text code" dir="ltr" style="font-family:inherit;line-height:1.7"
+            placeholder="https://www.youtube.com/watch?v=xxxxxxxxxxx | سخنرانی همایش&#10;https://www.aparat.com/v/xxxxx | مصاحبه رسانه‌ای"><?php echo esc_textarea($videos); ?></textarea>
         <?php
     }
 
@@ -351,17 +407,17 @@ class Majd_Team_API {
         ?>
         <table class="form-table majd-team-form" role="presentation">
             <tr>
-                <th scope="row"><label for="majd_team_areas">حوزه‌های فعالیت</label></th>
+                <th scope="row"><label for="majd_team_areas">حوزه‌های تخصصی</label></th>
                 <td>
-                    <textarea name="majd_team_areas" id="majd_team_areas" rows="6" class="large-text"><?php echo esc_textarea($areas); ?></textarea>
-                    <p class="description">هر مورد در یک خط جداگانه</p>
+                    <textarea name="majd_team_areas" id="majd_team_areas" rows="8" class="large-text" placeholder="حقوق بین‌الملل عمومی&#10;حقوق جزا و جرم‌شناسی"><?php echo esc_textarea($areas); ?></textarea>
+                    <p class="description">هر حوزه در یک خط. تب «حوزه‌های تخصصی» و نوار پایین صفحه پروفایل از این لیست ساخته می‌شود.</p>
                 </td>
             </tr>
             <tr>
-                <th scope="row"><label for="majd_team_achievements">دستاوردها</label></th>
+                <th scope="row"><label for="majd_team_achievements">سوابق حرفه‌ای و دستاوردها</label></th>
                 <td>
-                    <textarea name="majd_team_achievements" id="majd_team_achievements" rows="6" class="large-text"><?php echo esc_textarea($achievements); ?></textarea>
-                    <p class="description">هر مورد در یک خط جداگانه</p>
+                    <textarea name="majd_team_achievements" id="majd_team_achievements" rows="8" class="large-text" placeholder="نماینده و مشاور حقوقی ..."><?php echo esc_textarea($achievements); ?></textarea>
+                    <p class="description">هر سابقه یا دستاورد در یک خط. تب «دستاوردها» از این لیست ساخته می‌شود.</p>
                 </td>
             </tr>
         </table>
@@ -384,7 +440,7 @@ class Majd_Team_API {
         $map = [
             'majd_team_role' => MAJD_TEAM_META_ROLE,
             'majd_team_specialty' => MAJD_TEAM_META_SPECIALTY,
-            'majd_team_education' => MAJD_TEAM_META_EDUCATION,
+            'majd_team_birth_date' => MAJD_TEAM_META_BIRTH_DATE,
             'majd_team_experience' => MAJD_TEAM_META_EXPERIENCE,
             'majd_team_phone' => MAJD_TEAM_META_PHONE,
             'majd_team_email' => MAJD_TEAM_META_EMAIL,
@@ -404,6 +460,10 @@ class Majd_Team_API {
             update_post_meta($post_id, MAJD_TEAM_META_FULL_BIO, sanitize_textarea_field(wp_unslash($_POST['majd_team_full_bio'])));
         }
 
+        if (isset($_POST['majd_team_education'])) {
+            update_post_meta($post_id, MAJD_TEAM_META_EDUCATION, sanitize_textarea_field(wp_unslash($_POST['majd_team_education'])));
+        }
+
         if (isset($_POST['majd_team_areas'])) {
             update_post_meta($post_id, MAJD_TEAM_META_AREAS, sanitize_textarea_field(wp_unslash($_POST['majd_team_areas'])));
         }
@@ -414,6 +474,10 @@ class Majd_Team_API {
 
         if (isset($_POST['majd_team_gallery'])) {
             update_post_meta($post_id, MAJD_TEAM_META_GALLERY, sanitize_textarea_field(wp_unslash($_POST['majd_team_gallery'])));
+        }
+
+        if (isset($_POST['majd_team_videos'])) {
+            update_post_meta($post_id, MAJD_TEAM_META_VIDEO_GALLERY, sanitize_textarea_field(wp_unslash($_POST['majd_team_videos'])));
         }
 
         if (isset($_POST['majd_team_banner_id'])) {
@@ -482,6 +546,34 @@ class Majd_Team_API {
                     $('#majd_team_banner_preview').empty();
                     $(this).hide();
                 });
+
+                var videoFrame;
+                $('#majd_team_videos_select').on('click', function(e) {
+                    e.preventDefault();
+                    if (videoFrame) { videoFrame.open(); return; }
+                    videoFrame = wp.media({
+                        title: 'انتخاب ویدیو',
+                        library: { type: 'video' },
+                        button: { text: 'افزودن به گالری' },
+                        multiple: true
+                    });
+                    videoFrame.on('select', function() {
+                        var lines = [];
+                        videoFrame.state().get('selection').each(function(att) {
+                            var a = att.toJSON();
+                            var title = a.title || '';
+                            var poster = (a.image && a.image.src) ? a.image.src : '';
+                            var parts = [a.url];
+                            if (title || poster) { parts.push(title); }
+                            if (poster) { parts.push(poster); }
+                            lines.push(parts.join(' | '));
+                        });
+                        var $ta = $('#majd_team_videos');
+                        var existing = $.trim($ta.val());
+                        $ta.val(existing ? existing + '\\n' + lines.join('\\n') : lines.join('\\n'));
+                    });
+                    videoFrame.open();
+                });
             });
         ");
     }
@@ -491,6 +583,7 @@ class Majd_Team_API {
             'role' => get_post_meta($post_id, MAJD_TEAM_META_ROLE, true),
             'specialty' => get_post_meta($post_id, MAJD_TEAM_META_SPECIALTY, true),
             'education' => get_post_meta($post_id, MAJD_TEAM_META_EDUCATION, true),
+            'birth_date' => get_post_meta($post_id, MAJD_TEAM_META_BIRTH_DATE, true),
             'experience' => get_post_meta($post_id, MAJD_TEAM_META_EXPERIENCE, true),
             'phone' => get_post_meta($post_id, MAJD_TEAM_META_PHONE, true),
             'email' => get_post_meta($post_id, MAJD_TEAM_META_EMAIL, true),
@@ -539,6 +632,37 @@ class Majd_Team_API {
                 'src' => $src,
                 'alt' => $parts[1] ?? '',
             ];
+        }
+
+        return $items;
+    }
+
+    private static function decode_video_gallery($raw) {
+        if (!is_string($raw) || trim($raw) === '') {
+            return [];
+        }
+
+        $items = [];
+        foreach (preg_split('/\r\n|\r|\n/', $raw) as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+
+            $parts = array_map('trim', explode('|', $line, 3));
+            $src = $parts[0] ?? '';
+            if ($src === '') {
+                continue;
+            }
+
+            $item = [
+                'src' => $src,
+                'title' => $parts[1] ?? '',
+            ];
+            if (!empty($parts[2])) {
+                $item['poster'] = $parts[2];
+            }
+            $items[] = $item;
         }
 
         return $items;

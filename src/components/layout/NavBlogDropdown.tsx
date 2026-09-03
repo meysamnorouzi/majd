@@ -255,17 +255,20 @@ function NavBlogDropdownInner({
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadStarted = useRef(false);
 
   const isBlogActive = isBlogPath(pathname);
 
-  useEffect(() => {
-    let cancelled = false;
+  function loadCategories() {
+    if (loadStarted.current) return;
+    loadStarted.current = true;
     fetchCategoriesClient().then((data) => {
-      if (!cancelled) setCategories(data);
+      setCategories(data);
     });
-    return () => {
-      cancelled = true;
-    };
+  }
+
+  useEffect(() => {
+    loadCategories();
   }, []);
 
   function clearCloseTimer() {
@@ -276,6 +279,7 @@ function NavBlogDropdownInner({
   }
 
   function openMenu() {
+    loadCategories();
     clearCloseTimer();
     setOpen(true);
   }
