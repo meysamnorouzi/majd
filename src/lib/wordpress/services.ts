@@ -571,7 +571,9 @@ function getFallbackMenuData(): ServiceMenuData {
     };
   });
 
-  const posts = fallbackServices.flatMap(flattenFallbackServices);
+  const posts = fallbackServices.flatMap((service) =>
+    flattenFallbackServices(service),
+  );
 
   return {
     megaMenu,

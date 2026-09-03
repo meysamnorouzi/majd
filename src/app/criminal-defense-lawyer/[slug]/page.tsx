@@ -7,8 +7,6 @@ import {
 
 const PREFIX = "criminal-defense-lawyer" as const;
 
-export const dynamicParams = true;
-
 export async function generateStaticParams() {
   return categoryStaticParams(PREFIX);
 }
