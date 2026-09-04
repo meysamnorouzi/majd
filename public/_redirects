@@ -115,6 +115,7 @@
 
 # SPA fallbacks for client-rendered detail routes (static Next.js export)
 /blogs/:slug    /blogs/view/index.html    200
+/team/:slug    /team/view/index.html    200
 /family-lawyer/:slug    /services/detail/index.html    200
 /property-lawyer/:slug    /services/detail/index.html    200
 /criminal-defense-lawyer/:slug    /services/detail/index.html    200

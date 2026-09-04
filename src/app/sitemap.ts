@@ -6,6 +6,7 @@ import {
 } from "@/lib/wordpress";
 import { absoluteUrl } from "@/lib/seo";
 import { BLOG_LIST_PATH, blogPostPath } from "@/lib/blog-paths";
+import { TEAM_LIST_PATH, teamMemberPath } from "@/lib/team-paths";
 import {
   SERVICE_CATEGORY_PREFIXES,
   hubPath,
@@ -58,7 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...SERVICE_CATEGORY_PREFIXES.map((prefix) =>
       entry(hubPath(prefix), { changeFrequency: "weekly", priority: 0.9 }),
     ),
-    entry("/team/", { changeFrequency: "monthly", priority: 0.8 }),
+    entry(TEAM_LIST_PATH, { changeFrequency: "monthly", priority: 0.8 }),
     entry(BLOG_LIST_PATH, { changeFrequency: "daily", priority: 0.9 }),
   ];
 
@@ -73,7 +74,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     );
 
   const teamRoutes = team.map((member) =>
-    entry(`/team/${member.slug}/`, {
+    entry(teamMemberPath(member.slug), {
       changeFrequency: "monthly",
       priority: 0.7,
     }),

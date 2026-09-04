@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { ServiceDetailView } from "@/components/services/ServiceDetailView";
 import { fetchServiceBySlugClient } from "@/lib/wordpress/client";
 import {
+  categoryPrefixFromPathname,
   hubPath,
   servicePath,
+  servicePathMatchesLocation,
   serviceSlugFromPathname,
 } from "@/lib/service-paths";
 import type { Service } from "@/types";
@@ -20,6 +22,7 @@ export function ServiceDetailContent({ slug: slugProp }: { slug?: string }) {
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const lastRedirectRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!slug) {
@@ -40,14 +43,26 @@ export function ServiceDetailContent({ slug: slugProp }: { slug?: string }) {
         setNotFound(true);
         setService(null);
       } else {
-        const canonical = servicePath(data);
-        const current = pathname.endsWith("/") ? pathname : `${pathname}/`;
-        if (!slugProp && current !== canonical) {
-          router.replace(canonical);
-          return;
+        const urlPrefix = categoryPrefixFromPathname(pathname);
+        const resolved =
+          urlPrefix && !data.categoryPrefix
+            ? { ...data, categoryPrefix: urlPrefix }
+            : data;
+
+        if (!slugProp && !servicePathMatchesLocation(pathname, resolved)) {
+          const canonical = servicePath(resolved, urlPrefix);
+          if (lastRedirectRef.current !== canonical) {
+            lastRedirectRef.current = canonical;
+            router.replace(canonical);
+            return;
+          }
+          // Already attempted this target — render here to break redirect loops.
+        } else {
+          lastRedirectRef.current = null;
         }
-        setService(data);
-        document.title = `${data.title} | موسسه حقوقی مجد`;
+
+        setService(resolved);
+        document.title = `${resolved.title} | موسسه حقوقی مجد`;
       }
       setLoading(false);
     })();

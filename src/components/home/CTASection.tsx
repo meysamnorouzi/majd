@@ -2,12 +2,8 @@ import Image from "next/image";
 import { siteConfig, assets, portraitObjectPosition } from "@/data/site";
 import { Container } from "@/components/ui/Container";
 import { ContactForm } from "@/components/contact/ContactForm";
-import { getTeam } from "@/lib/wordpress";
-import { toLawyerOptions } from "@/lib/wordpress/team";
 
-export async function CTASection() {
-  const lawyerOptions = toLawyerOptions(await getTeam());
-
+export function CTASection() {
   return (
     <section
       id="consultation"
@@ -50,7 +46,6 @@ export async function CTASection() {
             title="درخواست مشاوره"
             description="فرم را تکمیل کنید تا با شما تماس بگیریم."
             defaultSubject="مشاوره حقوقی"
-            lawyerOptions={lawyerOptions}
             showLawyerPicker
           />
         </div>

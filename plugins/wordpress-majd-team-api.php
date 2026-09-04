@@ -515,67 +515,171 @@ class Majd_Team_API {
     }
 
     public static function enqueue_admin_assets($hook) {
-        global $post_type;
-        if (($hook !== 'post.php' && $hook !== 'post-new.php') || $post_type !== MAJD_TEAM_POST_TYPE) {
+        if ($hook !== 'post.php' && $hook !== 'post-new.php') {
+            return;
+        }
+
+        $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+        $post_type = $screen && !empty($screen->post_type)
+            ? $screen->post_type
+            : (isset($GLOBALS['post_type']) ? (string) $GLOBALS['post_type'] : '');
+
+        if ($post_type !== MAJD_TEAM_POST_TYPE) {
             return;
         }
 
         wp_enqueue_media();
-        wp_add_inline_script('jquery', "
-            jQuery(function($) {
-                var frame;
-                $('#majd_team_banner_select').on('click', function(e) {
-                    e.preventDefault();
-                    if (frame) { frame.open(); return; }
-                    frame = wp.media({
-                        title: 'انتخاب بنر',
-                        button: { text: 'استفاده' },
-                        multiple: false
-                    });
-                    frame.on('select', function() {
-                        var attachment = frame.state().get('selection').first().toJSON();
-                        $('#majd_team_banner_id').val(attachment.id);
-                        $('#majd_team_banner_preview').html('<img src=\"' + attachment.url + '\" style=\"max-width:100%;height:auto;border-radius:8px\" />');
-                        $('#majd_team_banner_remove').show();
-                    });
-                    frame.open();
-                });
-                $('#majd_team_banner_remove').on('click', function(e) {
-                    e.preventDefault();
-                    $('#majd_team_banner_id').val('');
-                    $('#majd_team_banner_preview').empty();
-                    $(this).hide();
-                });
 
-                var videoFrame;
-                $('#majd_team_videos_select').on('click', function(e) {
-                    e.preventDefault();
-                    if (videoFrame) { videoFrame.open(); return; }
-                    videoFrame = wp.media({
+        // Gutenberg injects classic meta boxes after document.ready and often
+        // never prints a jquery tag, so bind on document and attach after wp.media.
+        $js = <<<'JS'
+(function () {
+    if (typeof wp === 'undefined' || !wp.media) {
+        return;
+    }
+
+    var bannerFrame;
+    var videoFrame;
+
+    document.addEventListener('click', function (event) {
+        var target = event.target;
+        if (!target || !target.closest) {
+            return;
+        }
+
+        if (target.closest('#majd_team_banner_select')) {
+            event.preventDefault();
+            openBannerFrame();
+            return;
+        }
+
+        if (target.closest('#majd_team_banner_remove')) {
+            event.preventDefault();
+            var idInput = document.getElementById('majd_team_banner_id');
+            var preview = document.getElementById('majd_team_banner_preview');
+            var removeBtn = document.getElementById('majd_team_banner_remove');
+            if (idInput) {
+                idInput.value = '';
+            }
+            if (preview) {
+                preview.innerHTML = '';
+            }
+            if (removeBtn) {
+                removeBtn.style.display = 'none';
+            }
+            return;
+        }
+
+        if (target.closest('#majd_team_videos_select')) {
+            event.preventDefault();
+            openVideoFrame();
+        }
+    });
+
+    function openBannerFrame() {
+        if (bannerFrame) {
+            bannerFrame.open();
+            return;
+        }
+
+        bannerFrame = wp.media({
+            title: 'انتخاب بنر',
+            button: { text: 'استفاده' },
+            library: { type: 'image' },
+            multiple: false
+        });
+
+        bannerFrame.on('select', function () {
+            var attachment = bannerFrame.state().get('selection').first().toJSON();
+            var idInput = document.getElementById('majd_team_banner_id');
+            var preview = document.getElementById('majd_team_banner_preview');
+            var removeBtn = document.getElementById('majd_team_banner_remove');
+            if (idInput) {
+                idInput.value = String(attachment.id || '');
+            }
+            if (preview) {
+                preview.innerHTML = '<img src="' + String(attachment.url || '').replace(/"/g, '&quot;') + '" alt="" style="max-width:100%;height:auto;border-radius:8px" />';
+            }
+            if (removeBtn) {
+                removeBtn.style.display = '';
+            }
+        });
+
+        bannerFrame.open();
+    }
+
+    function openVideoFrame() {
+        if (videoFrame) {
+            videoFrame.open();
+            return;
+        }
+
+        var frameOptions = {
+            title: 'انتخاب ویدیو',
+            button: { text: 'افزودن به گالری' },
+            multiple: true,
+            library: { type: 'video' }
+        };
+
+        if (wp.media.controller && wp.media.controller.Library && typeof wp.media.query === 'function') {
+            frameOptions = {
+                button: { text: 'افزودن به گالری' },
+                states: [
+                    new wp.media.controller.Library({
+                        id: 'majd-team-videos',
                         title: 'انتخاب ویدیو',
-                        library: { type: 'video' },
-                        button: { text: 'افزودن به گالری' },
-                        multiple: true
-                    });
-                    videoFrame.on('select', function() {
-                        var lines = [];
-                        videoFrame.state().get('selection').each(function(att) {
-                            var a = att.toJSON();
-                            var title = a.title || '';
-                            var poster = (a.image && a.image.src) ? a.image.src : '';
-                            var parts = [a.url];
-                            if (title || poster) { parts.push(title); }
-                            if (poster) { parts.push(poster); }
-                            lines.push(parts.join(' | '));
-                        });
-                        var $ta = $('#majd_team_videos');
-                        var existing = $.trim($ta.val());
-                        $ta.val(existing ? existing + '\\n' + lines.join('\\n') : lines.join('\\n'));
-                    });
-                    videoFrame.open();
-                });
+                        priority: 20,
+                        library: wp.media.query({ type: 'video' }),
+                        multiple: true,
+                        editable: false
+                    })
+                ]
+            };
+        }
+
+        videoFrame = wp.media(frameOptions);
+
+        videoFrame.on('select', function () {
+            var selection = videoFrame.state().get('selection');
+            if (!selection) {
+                return;
+            }
+
+            var lines = [];
+            selection.each(function (att) {
+                var a = att.toJSON();
+                if (!a.url) {
+                    return;
+                }
+                var title = a.title || '';
+                var poster = (a.image && a.image.src) ? a.image.src : '';
+                var parts = [a.url];
+                if (title || poster) {
+                    parts.push(title);
+                }
+                if (poster) {
+                    parts.push(poster);
+                }
+                lines.push(parts.join(' | '));
             });
-        ");
+
+            var textarea = document.getElementById('majd_team_videos');
+            if (!textarea || !lines.length) {
+                return;
+            }
+
+            var existing = String(textarea.value || '').replace(/^\s+|\s+$/g, '');
+            textarea.value = existing ? existing + '\n' + lines.join('\n') : lines.join('\n');
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            textarea.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
+        videoFrame.open();
+    }
+})();
+JS;
+
+        wp_add_inline_script('media-editor', $js);
     }
 
     private static function get_post_fields($post_id) {

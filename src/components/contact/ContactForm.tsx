@@ -6,6 +6,7 @@ import {
   submitContactForm,
 } from "@/lib/wordpress/contact-client";
 import { Toast, type ToastVariant } from "@/components/ui/Toast";
+import { useLawyerOptions } from "@/hooks/useTeamMembers";
 import {
   CONSULTATION_AREAS,
   LAWYER_ANY_OPTION,
@@ -39,7 +40,19 @@ function resolveArea(defaultSubject?: string): string {
   return "سایر";
 }
 
-export function ContactForm({
+export function ContactForm(props: ContactFormProps) {
+  if (props.showLawyerPicker && !props.lawyerOptions?.length) {
+    return <ContactFormLiveLawyers {...props} />;
+  }
+  return <ContactFormFields {...props} />;
+}
+
+function ContactFormLiveLawyers(props: ContactFormProps) {
+  const lawyerOptions = useLawyerOptions();
+  return <ContactFormFields {...props} lawyerOptions={lawyerOptions} />;
+}
+
+function ContactFormFields({
   id,
   title = "فرم تماس",
   description = "پیام خود را ارسال کنید؛ در اسرع وقت با شما تماس می‌گیریم.",

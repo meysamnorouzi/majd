@@ -81,12 +81,17 @@ export function isServiceCategoryNode(service: Service): boolean {
 /** Canonical public path for a service post. Hubs use `hubPath()`. */
 export function servicePath(
   service: Pick<Service, "slug" | "categoryPrefix">,
+  /** When WP omits category, keep the pillar the visitor already requested. */
+  urlPrefix?: ServiceCategoryPrefix,
 ): string {
-  if (isServiceCategoryPrefix(service.categoryPrefix)) {
-    if (FALLBACK_PARENT_TO_PREFIX[service.slug] === service.categoryPrefix) {
-      return hubPath(service.categoryPrefix);
+  const prefix = isServiceCategoryPrefix(service.categoryPrefix)
+    ? service.categoryPrefix
+    : urlPrefix;
+  if (isServiceCategoryPrefix(prefix)) {
+    if (FALLBACK_PARENT_TO_PREFIX[service.slug] === prefix) {
+      return hubPath(prefix);
     }
-    return `/${service.categoryPrefix}/${service.slug}/`;
+    return `/${prefix}/${service.slug}/`;
   }
   return hubPath("legal-consultation");
 }
@@ -101,6 +106,38 @@ export function servicePathFromParts(
 function normalizePathname(pathname: string): string {
   const trimmed = pathname.replace(/\/$/, "") || "/";
   return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+}
+
+/** Decode percent-encoding repeatedly so `/foo/` and `/%D8%foo/` compare equal. */
+export function decodePathSegment(segment: string): string {
+  let current = segment.trim();
+  for (let i = 0; i < 3; i++) {
+    try {
+      const decoded = decodeURIComponent(current);
+      if (decoded === current) break;
+      current = decoded;
+    } catch {
+      break;
+    }
+  }
+  return current;
+}
+
+function normalizeServicePath(pathname: string): string {
+  const normalized = normalizePathname(pathname);
+  const segments = normalized.split("/").filter(Boolean).map(decodePathSegment);
+  if (!segments.length) return "/";
+  return `/${segments.join("/")}/`;
+}
+
+/** Compare prefix + slug instead of raw strings (avoids Persian encoding loops). */
+export function servicePathMatchesLocation(
+  pathname: string,
+  service: Pick<Service, "slug" | "categoryPrefix">,
+): boolean {
+  const expected = normalizeServicePath(servicePath(service, categoryPrefixFromPathname(pathname)));
+  const actual = normalizeServicePath(pathname);
+  return actual === expected;
 }
 
 export function isServiceNavPath(pathname: string): boolean {

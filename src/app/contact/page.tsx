@@ -4,8 +4,6 @@ import { ContactForm } from "@/components/contact/ContactForm";
 import { Reveal } from "@/components/motion/reveal";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { assets, portraitObjectPosition, siteConfig } from "@/data/site";
-import { getTeam } from "@/lib/wordpress";
-import { toLawyerOptions } from "@/lib/wordpress/team";
 import {
   absoluteUrl,
   breadcrumbJsonLd,
@@ -20,9 +18,7 @@ export const metadata: Metadata = createPageMetadata({
   keywords: ["تماس با وکیل", "مشاوره حقوقی تهران", "آدرس موسسه حقوقی مجد"],
 });
 
-export default async function ContactPage() {
-  const lawyerOptions = toLawyerOptions(await getTeam());
-
+export default function ContactPage() {
   return (
     <>
       <JsonLd
@@ -118,7 +114,6 @@ export default async function ContactPage() {
               <ContactForm
                 title="ارسال پیام"
                 description="پیام خود را ارسال کنید؛ در اسرع وقت با شما تماس می‌گیریم."
-                lawyerOptions={lawyerOptions}
                 showLawyerPicker
               />
             </Reveal>

@@ -5,7 +5,6 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { Container } from "@/components/ui/Container";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/reveal";
-import { portraitObjectPosition } from "@/data/site";
 import type { TeamMember, TeamMemberGalleryItem } from "@/types";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -115,68 +114,47 @@ export function TeamMemberGallery({ member }: { member: TeamMember }) {
         </Reveal>
 
         <Stagger
-          className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4"
+          className="mt-8 columns-2 gap-3 lg:columns-4 lg:gap-4"
           stagger={0.06}
+          immediate
         >
-          {gallery.map((item, i) => {
-            const isFeatured = i === 0;
-            const objectPosition =
-              portraitObjectPosition(item.src) ?? "center";
-            return (
-              <StaggerItem
-                key={item.src}
-                variant={isFeatured ? "right" : "up"}
-                className={isFeatured ? "col-span-2 lg:row-span-2" : undefined}
+          {gallery.map((item, i) => (
+            <StaggerItem
+              key={item.src}
+              variant="up"
+              className="mb-3 break-inside-avoid lg:mb-4"
+            >
+              <button
+                type="button"
+                onClick={() => setActive(i)}
+                className="group relative block w-full overflow-hidden rounded-2xl text-right shadow-md ring-1 ring-navy-900/5"
               >
-                <button
-                  type="button"
-                  onClick={() => setActive(i)}
-                  className="group relative block h-full w-full overflow-hidden rounded-2xl text-right shadow-md ring-1 ring-navy-900/5"
-                >
-                  <div
-                    className={
-                      isFeatured
-                        ? "relative aspect-[16/11] h-full min-h-[220px] lg:aspect-auto lg:min-h-0"
-                        : "relative aspect-square"
-                    }
-                  >
-                    <Image
-                      src={item.src}
-                      alt={item.alt}
-                      fill
-                      className="portrait-warm object-cover"
-                      style={{ objectPosition }}
-                      sizes={
-                        isFeatured
-                          ? "(max-width: 1024px) 100vw, 50vw"
-                          : "(max-width: 1024px) 50vw, 25vw"
-                      }
-                    />
-                    <div
-                      className={
-                        isFeatured
-                          ? "absolute inset-0 bg-gradient-to-t from-navy-950/60 via-transparent to-transparent opacity-80 transition duration-500 group-hover:opacity-95"
-                          : "absolute inset-0 bg-navy-950/0 transition duration-500 group-hover:bg-navy-950/30"
-                      }
-                    />
-                    {isFeatured ? (
-                      <div className="absolute inset-x-0 bottom-0 p-5">
-                        <span className="text-sm font-medium text-white/90 transition group-hover:text-gold-400">
-                          {item.alt}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 transition duration-500 group-hover:opacity-100">
-                        <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
-                          بزرگ‌نمایی
-                        </span>
-                      </div>
-                    )}
+                <Image
+                  src={item.src}
+                  alt={item.alt || ""}
+                  width={1200}
+                  height={1600}
+                  sizes="(max-width: 1024px) 50vw, 25vw"
+                  className="portrait-warm h-auto w-full"
+                  style={{ width: "100%", height: "auto", aspectRatio: "auto" }}
+                />
+                <div className="absolute inset-0 bg-navy-950/0 transition duration-500 group-hover:bg-navy-950/25" />
+                {item.alt ? (
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-950/70 to-transparent p-3 opacity-0 transition duration-500 group-hover:opacity-100">
+                    <span className="text-xs font-medium text-white/90 sm:text-sm">
+                      {item.alt}
+                    </span>
                   </div>
-                </button>
-              </StaggerItem>
-            );
-          })}
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 transition duration-500 group-hover:opacity-100">
+                    <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
+                      بزرگ‌نمایی
+                    </span>
+                  </div>
+                )}
+              </button>
+            </StaggerItem>
+          ))}
         </Stagger>
       </Container>
 

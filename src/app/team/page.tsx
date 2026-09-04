@@ -1,24 +1,19 @@
 import { PageHero } from "@/components/layout/PageHero";
-import { Container } from "@/components/ui/Container";
-import { SectionTitle } from "@/components/ui/SectionTitle";
 import { CTASection } from "@/components/home/CTASection";
-import { TeamMemberCard } from "@/components/team/TeamMemberCard";
-import { Stagger, StaggerItem } from "@/components/motion/reveal";
+import { TeamPageContent } from "@/components/team/TeamPageContent";
 import { createPageMetadata } from "@/lib/seo";
-import { getTeam } from "@/lib/wordpress";
+import { TEAM_LIST_PATH } from "@/lib/team-paths";
 import { assets, portraitObjectPosition } from "@/data/site";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = createPageMetadata({
   title: "اعضای تیم",
   description: "وکلای پایه یک و متخصص موسسه حقوقی مجد وکیل الرعایا",
-  path: "/team/",
+  path: TEAM_LIST_PATH,
   keywords: ["وکیل پایه یک", "تیم حقوقی مجد", "وکلای تهران"],
 });
 
-export default async function TeamPage() {
-  const team = await getTeam();
-
+export default function TeamPage() {
   return (
     <>
       <PageHero
@@ -28,28 +23,7 @@ export default async function TeamPage() {
         image={assets.founderBanner}
         imagePosition={portraitObjectPosition(assets.founderBanner) ?? "center 28%"}
       />
-      <section className="py-20">
-        <Container>
-          <SectionTitle
-            title="تیم حقوقی ما"
-            description="هر یک از وکلای موسسه در حوزه تخصصی خود سال‌ها تجربه عملی دارند."
-          />
-          <Stagger
-            className={`grid gap-10 sm:grid-cols-2 ${
-              team.length === 1
-                ? "mx-auto max-w-sm lg:grid-cols-1"
-                : "lg:grid-cols-4"
-            }`}
-            stagger={0.1}
-          >
-            {team.map((member) => (
-              <StaggerItem key={member.id} variant="up">
-                <TeamMemberCard member={member} />
-              </StaggerItem>
-            ))}
-          </Stagger>
-        </Container>
-      </section>
+      <TeamPageContent />
       <CTASection />
     </>
   );

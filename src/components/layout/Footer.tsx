@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { navLinks, siteConfig } from "@/data/site";
 import { PILLARS } from "@/data/pillars";
@@ -23,14 +22,7 @@ export function Footer() {
             <p className="text-sm leading-relaxed text-white/70">
               {siteConfig.footerBlurb}
             </p>
-            <div className="mt-6 flex flex-wrap items-center gap-4">
-              <Image
-                src={siteConfig.award.image}
-                alt={`${siteConfig.award.title} — ${siteConfig.award.year}`}
-                width={150}
-                height={75}
-                className="h-auto w-[140px] object-contain"
-              />
+            <div className="mt-6">
               <EnamadSeal />
             </div>
           </div>

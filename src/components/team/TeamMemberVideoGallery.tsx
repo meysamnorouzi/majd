@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { Container } from "@/components/ui/Container";
@@ -9,6 +9,71 @@ import { parseVideoSource } from "@/lib/media/video";
 import type { TeamMember, TeamMemberVideoItem } from "@/types";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+
+/** Paused HTML5 video painted at the opening frame — used as the tile cover. */
+function FileVideoCover({ src }: { src: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    let cancelled = false;
+    setReady(false);
+
+    const firstFrameTime = () => {
+      if (el.duration && Number.isFinite(el.duration) && el.duration > 0) {
+        return Math.min(0.12, Math.max(0.04, el.duration * 0.002));
+      }
+      return 0.08;
+    };
+
+    const seekToStart = () => {
+      if (cancelled) return;
+      try {
+        el.pause();
+        const t = firstFrameTime();
+        if (Math.abs(el.currentTime - t) > 0.02) {
+          el.currentTime = t;
+        } else {
+          setReady(true);
+        }
+      } catch {
+        if (!cancelled) setReady(true);
+      }
+    };
+
+    const onSeeked = () => {
+      if (!cancelled) setReady(true);
+    };
+
+    el.addEventListener("loadeddata", seekToStart);
+    el.addEventListener("seeked", onSeeked);
+    if (el.readyState >= 2) seekToStart();
+
+    return () => {
+      cancelled = true;
+      el.removeEventListener("loadeddata", seekToStart);
+      el.removeEventListener("seeked", onSeeked);
+    };
+  }, [src]);
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      muted
+      playsInline
+      preload="auto"
+      tabIndex={-1}
+      aria-hidden
+      className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105 ${
+        ready ? "opacity-100" : "opacity-0"
+      }`}
+    />
+  );
+}
 
 function PlayIcon({ className }: { className?: string }) {
   return (
@@ -99,7 +164,7 @@ function VideoLightbox({
             controls
             autoPlay
             playsInline
-            poster={item.poster || parsed.poster}
+            poster={parsed.provider === "file" ? undefined : item.poster || parsed.poster}
             className="h-full w-full object-contain"
           />
         ) : (
@@ -157,10 +222,12 @@ export function TeamMemberVideoGallery({ member }: { member: TeamMember }) {
         <Stagger
           className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
           stagger={0.06}
+          immediate
         >
           {videos.map((item, i) => {
             const parsed = parseVideoSource(item.src);
-            const poster = item.poster || parsed?.poster;
+            const isFile = parsed?.provider === "file";
+            const poster = isFile ? undefined : item.poster || parsed?.poster;
             return (
               <StaggerItem key={`${item.src}-${i}`} variant="up">
                 <button
@@ -169,7 +236,9 @@ export function TeamMemberVideoGallery({ member }: { member: TeamMember }) {
                   className="group relative block w-full overflow-hidden rounded-2xl text-right shadow-md ring-1 ring-navy-900/5"
                 >
                   <div className="relative aspect-video bg-navy-900">
-                    {poster ? (
+                    {isFile && parsed ? (
+                      <FileVideoCover src={parsed.embedUrl} />
+                    ) : poster ? (
                       <Image
                         src={poster}
                         alt={item.title || "ویدیو"}

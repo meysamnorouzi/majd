@@ -196,6 +196,11 @@ RewriteRule ^ /blogs/%D8%A7%D8%B5%D9%84-%DB%B4%DB%B9-%D9%82%D8%A7%D9%86%D9%88%D9
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^blogs/[^/]+/?$ /blogs/view/index.html [L]
 
+  # Team profile shell: /team/<slug>/ → /team/view/index.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^team/[^/]+/?$ /team/view/index.html [L]
+
   # Categorized service pages: /{prefix}/<slug>/
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d

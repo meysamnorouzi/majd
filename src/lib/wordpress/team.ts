@@ -15,8 +15,7 @@ import type {
   WpTeamMember,
 } from "@/types";
 
-/** WordPress team CPT — enable with NEXT_PUBLIC_USE_WP_TEAM=true */
-export const USE_WP_TEAM = process.env.NEXT_PUBLIC_USE_WP_TEAM === "true";
+let teamClientPromise: Promise<TeamMember[]> | null = null;
 
 function stripHtml(html: string): string {
   return html
@@ -149,9 +148,7 @@ async function fetchAllTeamPosts(
   return posts;
 }
 
-export async function fetchTeamClient(): Promise<TeamMember[]> {
-  if (!USE_WP_TEAM) return fallbackTeamMembers;
-
+async function loadTeamClient(): Promise<TeamMember[]> {
   const posts = await fetchAllTeamPosts();
   if (posts.length) {
     return posts.map(mapWpTeamMember);
@@ -159,18 +156,15 @@ export async function fetchTeamClient(): Promise<TeamMember[]> {
   return fallbackTeamMembers;
 }
 
+export async function fetchTeamClient(): Promise<TeamMember[]> {
+  teamClientPromise ??= loadTeamClient();
+  return teamClientPromise;
+}
+
 export async function fetchTeamMemberBySlugClient(
   slug: string,
 ): Promise<TeamMember | null> {
   const normalized = normalizeWpSlug(slug);
-
-  if (!USE_WP_TEAM) {
-    return (
-      fallbackTeamMembers.find(
-        (m) => m.slug === normalized || m.slug === slug,
-      ) ?? null
-    );
-  }
 
   const data = await fetchJson<WpTeamMember[]>(
     wpApiUrl(
@@ -193,13 +187,6 @@ export async function getTeamFromWp(): Promise<{
   team: TeamMember[];
   fromWordPress: boolean;
 }> {
-  if (!USE_WP_TEAM) {
-    return {
-      team: fallbackTeamMembers,
-      fromWordPress: false,
-    };
-  }
-
   const posts = await fetchAllTeamPosts(wpServerHeaders(), "force-cache");
   if (posts.length) {
     return {
@@ -218,14 +205,6 @@ export async function getTeamMemberBySlugFromWp(
   slug: string,
 ): Promise<TeamMember | null> {
   const normalized = normalizeWpSlug(slug);
-
-  if (!USE_WP_TEAM) {
-    return (
-      fallbackTeamMembers.find(
-        (m) => m.slug === normalized || m.slug === slug,
-      ) ?? null
-    );
-  }
 
   const data = await fetchJson<WpTeamMember[]>(
     wpApiUrl(
