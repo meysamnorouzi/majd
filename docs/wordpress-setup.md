@@ -17,6 +17,7 @@ This site is a **static Next.js frontend** (`output: "export"`) backed by **Word
 | [`plugins/wordpress-majd-account-api.php`](../plugins/wordpress-majd-account-api.php) | `wordpress-majd-account-api.php` |
 | [`plugins/wordpress-majd-contact-api.php`](../plugins/wordpress-majd-contact-api.php) | `wordpress-majd-contact-api.php` |
 | [`plugins/wordpress-majd-team-api.php`](../plugins/wordpress-majd-team-api.php) | `wordpress-majd-team-api.php` |
+| [`plugins/wordpress-majd-landing-api.php`](../plugins/wordpress-majd-landing-api.php) | `wordpress-majd-landing-api.php` |
 | [`plugins/whitelist.php`](../plugins/whitelist.php) | `whitelist.php` |
 
 ### Server environment
@@ -207,6 +208,58 @@ Build-time fetch uses `WP_API_KEY`. Homepage team section and contact lawyer pic
 
 ---
 
+## Pillar landings (لندینگ پیلارها)
+
+The four hub pages are edited in WordPress like blog posts — **title, excerpt, and the visual editor** — then loaded live on the Next.js frontend.
+
+| WP landing slug | Public hub |
+|-----------------|------------|
+| `family-lawyer` | `/family-lawyer/` |
+| `property-lawyer` | `/property-lawyer/` |
+| `criminal-defense-lawyer` | `/criminal-defense-lawyer/` |
+| `administrative-lawyer` | `/administrative-lawyer/` |
+
+After copying the mu-plugin, WordPress shows **لندینگ پیلارها** in the admin menu and seeds these four posts (you can rewrite them). Optional fifth landing: create a post with slug `legal-consultation` for `/legal-consultation/`.
+
+### How to edit
+
+1. Open **لندینگ پیلارها** and edit the matching post.
+2. **Title** → page H1 and SEO title.
+3. **Excerpt** → meta description (and hero subtitle unless you fill the hero field).
+4. **Featured image** → hero background.
+5. **سئو لندینگ** box → optional hero sentence + comma-separated keywords.
+6. Write the body **exactly like the family landing outline**, using Heading 2 / Heading 3 in the editor:
+
+```
+[H2] خدمات تخصصی ما در حوزه …
+۲–۳ پاراگراف معرفی
+[H3] عنوان کارت خدمت
+یک پاراگراف برای همان کارت
+… (همین الگو برای بقیه کارت‌ها)
+
+[H2] چرا برای این دعاوی به وکیل نیاز داریم؟
+[H2] دادگاه / مرجع صالح
+[H2] مراحل کلی رسیدگی
+[H2] چرا موسسه حقوقی مجد وکیل الرعایا؟
+[H3] تیم تخصصی …
+[H3] مشاوره رایگان اولیه
+[H2] سوالات متداول …
+[H3] سؤال
+پاراگراف جواب
+[H2] همین حالا … مشورت کنید
+```
+
+The frontend parses those headings and keeps the same layout: service cards after the first H2, FAQ accordion, and the consultation form. Cards still link to the matching service posts under that pillar.
+
+### REST API
+
+- `GET /wp-json/wp/v2/landings?slug=family-lawyer&_embed`
+- Each item includes `content.rendered`, `excerpt.rendered`, and `majd_landing.keywords` / `heroDescription`.
+
+The hub pages fetch this in the browser (same pattern as blog posts). If WordPress is unreachable, the site falls back to the built-in copy.
+
+---
+
 ## Legal services (خدمات حقوقی)
 
 Services use the **same WordPress Posts API as the blog** (`/wp-json/wp/v2/posts`), grouped by **categories**.
@@ -272,6 +325,10 @@ Build-time fetch uses `WP_API_KEY`. Mega menu and home section fetch live in the
 
 - `GET /wp-json/wp/v2/team?per_page=100&_embed&orderby=menu_order&order=asc`
 
+### WordPress — Pillar landings
+
+- `GET /wp-json/wp/v2/landings?slug={family-lawyer|property-lawyer|criminal-defense-lawyer|administrative-lawyer}&_embed`
+
 ### WordPress — Blog
 
 - `GET /wp-json/wp/v2/posts?per_page=N&_embed`
@@ -319,6 +376,7 @@ NEXT_PUBLIC_WC_PAYMENT_METHOD=zarinpal
 7. Enter license on order → visible in account panel after login.
 8. Submit contact form on `/contact/` → toast success; message appears under **پیام‌های تماس** in WP admin.
 9. Add a team member in **اعضای تیم** → visible on `/team/` without redeploying Next.
+10. Edit a post in **لندینگ پیلارها** → the matching hub (`/family-lawyer/` …) updates without redeploying Next.
 
 ---
 

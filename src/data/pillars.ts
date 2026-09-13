@@ -1,4 +1,5 @@
 import { assets } from "@/data/site";
+import type { PillarLanding } from "@/data/pillar-landings";
 import type { ServiceCategoryPrefix } from "@/lib/service-paths";
 
 export interface PillarDefinition {
@@ -21,14 +22,20 @@ export const PILLARS: PillarDefinition[] = [
     title: "وکیل خانواده",
     menuLabel: "وکیل خانواده",
     excerpt:
-      "طلاق، مهریه، حضانت، نفقه و حقوق زوجین با رویکردی انسانی و تخصصی در دادگاه خانواده.",
+      "بهترین وکلای حوزه خانواده؛ مشاوره و وکالت تخصصی در طلاق، مهریه، نفقه، حضانت و تمام دعاوی خانواده.",
     intro:
-      "پرونده‌های خانواده همزمان حساس و فنی‌اند. موسسه حقوقی مجد در تمام دعاوی خانواده — از مشاوره اولیه تا اجرای حکم — کنار شماست تا حقوق مالی و غیرمالی‌تان با کمترین تنش احقاق شود.",
+      "دعاوی خانواده از جمله مهم‌ترین پرونده‌های حقوقی هستند که به دلیل ارتباط مستقیم با زندگی شخصی، حقوق مالی و روابط میان اعضای خانواده، نیازمند بررسی دقیق و تخصصی هستند.",
     body:
-      "وکیل خانواده باید هم قانون حمایت خانواده را بشناسد و هم رویه شعب تهران را. تیم خانواده موسسه مجد مسیر طلاق توافقی و یک‌طرفه، مطالبه و تقسیط مهریه، حضانت و ملاقات فرزند، نفقه و تمکین را با شفافیت و برنامه زمانی مشخص پیش می‌برد. هدف ما حفظ کرامت موکل و منافع کودک در کنار نتیجه حقوقی قابل اتکاست.",
+      "موسسه حقوقی مجد وکیل الرعایا با ارائه خدمات تخصصی در حوزه حقوق خانواده، امکان دریافت مشاوره حقوقی خانواده و پیگیری انواع دعاوی خانواده — از جمله طلاق، مهریه، نفقه، حضانت، تمکین و اجرت‌المثل — را فراهم کرده است.",
     image: assets.businessDesk,
     icon: "heart",
-    keywords: ["وکیل خانواده", "طلاق", "مهریه", "حضانت", "نفقه"],
+    keywords: [
+      "وکیل خانواده",
+      "بهترین وکیل خانواده تهران",
+      "مشاوره حقوقی خانواده",
+      "دعاوی خانواده",
+      "وکیل دعاوی خانواده",
+    ],
     blogCategorySlugs: ["خانواده", "خانواه", "family"],
   },
   {
@@ -102,4 +109,38 @@ export function getPillar(
   prefix: ServiceCategoryPrefix,
 ): PillarDefinition | undefined {
   return PILLARS.find((item) => item.prefix === prefix);
+}
+
+/** Minimal landing used when WordPress has no editor content for this hub. */
+export function landingFromPillar(pillar: PillarDefinition): PillarLanding {
+  return {
+    heroTitle: pillar.title,
+    heroDescription: pillar.excerpt,
+    seoTitle: pillar.title,
+    seoDescription: pillar.excerpt,
+    keywords: pillar.keywords,
+    image: pillar.image,
+    servicesHeading: `خدمات تخصصی ${pillar.title}`,
+    servicesIntro: [pillar.intro],
+    cardCopy: [],
+    sections: [
+      {
+        heading: `چرا ${pillar.title}؟`,
+        paragraphs: [pillar.body],
+        variant: "navy",
+      },
+    ],
+    faqsHeading: `سوالات متداول درباره ${pillar.title}`,
+    faqs: [],
+    cta: {
+      heading: `همین حالا با ${pillar.title} مشورت کنید`,
+      paragraphs: [
+        `برای بررسی پرونده ${pillar.title} می‌توانید شرایط خود را با متخصصان موسسه حقوقی مجد وکیل الرعایا مطرح کنید.`,
+      ],
+      callTitle: `تماس با ${pillar.title}`,
+      callDescription: `برای بررسی پرونده ${pillar.title} همین حالا تماس بگیرید.`,
+      formTitle: `درخواست مشاوره ${pillar.title}`,
+      formDescription: `موضوع پرونده ${pillar.title} را بنویسید؛ کارشناسان موسسه با شما تماس می‌گیرند.`,
+    },
+  };
 }

@@ -15,8 +15,6 @@ import type {
   WpTeamMember,
 } from "@/types";
 
-let teamClientPromise: Promise<TeamMember[]> | null = null;
-
 function stripHtml(html: string): string {
   return html
     .replace(/<[^>]+>/g, "")
@@ -157,8 +155,7 @@ async function loadTeamClient(): Promise<TeamMember[]> {
 }
 
 export async function fetchTeamClient(): Promise<TeamMember[]> {
-  teamClientPromise ??= loadTeamClient();
-  return teamClientPromise;
+  return loadTeamClient();
 }
 
 export async function fetchTeamMemberBySlugClient(
@@ -187,7 +184,7 @@ export async function getTeamFromWp(): Promise<{
   team: TeamMember[];
   fromWordPress: boolean;
 }> {
-  const posts = await fetchAllTeamPosts(wpServerHeaders(), "force-cache");
+  const posts = await fetchAllTeamPosts(wpServerHeaders(), "no-store");
   if (posts.length) {
     return {
       team: posts.map(mapWpTeamMember),
@@ -210,7 +207,7 @@ export async function getTeamMemberBySlugFromWp(
     wpApiUrl(
       `/wp-json/wp/v2/team?slug=${encodeURIComponent(normalized)}&_embed&status=publish`,
     ),
-    { headers: wpServerHeaders(), cache: "force-cache" },
+    { headers: wpServerHeaders(), cache: "no-store" },
   );
 
   if (data?.[0]) {

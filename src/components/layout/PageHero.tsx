@@ -9,6 +9,7 @@ export function PageHero({
   breadcrumb,
   image,
   imagePosition = "center",
+  compactTitle = false,
 }: {
   title: string;
   description?: string;
@@ -16,6 +17,8 @@ export function PageHero({
   /** Optional background image — defaults to law books */
   image?: string;
   imagePosition?: string;
+  /** Smaller type for long SEO titles that wrap to several lines */
+  compactTitle?: boolean;
 }) {
   const bg = image ?? assets.lawBooks;
 
@@ -56,9 +59,17 @@ export function PageHero({
             ))}
           </nav>
         )}
-        <h1 className="text-3xl font-bold sm:text-4xl lg:text-5xl">{title}</h1>
+        <h1
+          className={
+            compactTitle
+              ? "max-w-5xl text-2xl font-bold leading-snug sm:text-3xl lg:text-4xl"
+              : "text-3xl font-bold sm:text-4xl lg:text-5xl"
+          }
+        >
+          {title}
+        </h1>
         {description && (
-          <p className="mt-4 max-w-2xl text-base text-white/75 sm:text-lg">
+          <p className="mt-4 max-w-3xl text-base text-white/75 sm:text-lg">
             {description}
           </p>
         )}

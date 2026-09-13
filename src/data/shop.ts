@@ -266,7 +266,7 @@ const defaultMeta: ProductDetailMeta = {
   specs: [
     { label: "فروشنده", value: "موسسه حقوقی مجد وکیل الرعایا" },
     { label: "پشتیبانی", value: "info@vakilmajd.com" },
-    { label: "ساعات پاسخگویی", value: "شنبه تا چهارشنبه ۹ تا ۱۸" },
+    { label: "ساعات پاسخگویی", value: "شنبه تا چهارشنبه ۱۱ تا ۱۹" },
   ],
   steps: [
     {

@@ -324,3 +324,5 @@ export async function getTeamMemberBySlug(slug: string) {
 export async function getAllTeamSlugs(): Promise<string[]> {
   return getAllTeamSlugsFromWp();
 }
+
+export { getLandingByPrefix } from "@/lib/wordpress/landings";

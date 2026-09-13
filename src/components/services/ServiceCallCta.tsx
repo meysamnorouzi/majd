@@ -3,18 +3,21 @@ import { siteConfig } from "@/data/site";
 export function ServiceCallCta({
   title = "نیاز به مشاوره فوری دارید؟",
   description = "همین حالا با موسسه حقوقی مجد تماس بگیرید؛ وکیل متخصص پرونده شما را بررسی می‌کند.",
+  titleAs = "h2",
 }: {
   title?: string;
   description?: string;
+  titleAs?: "h2" | "p";
 }) {
   const phone = siteConfig.phones[0];
   const tel = siteConfig.phonesTel[0];
+  const Title = titleAs;
 
   return (
     <section className="my-12 overflow-hidden rounded-2xl bg-navy-900 px-6 py-10 text-white sm:px-10">
       <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-bold sm:text-2xl">{title}</h2>
+          <Title className="text-xl font-bold sm:text-2xl">{title}</Title>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base">
             {description}
           </p>

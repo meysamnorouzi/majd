@@ -112,6 +112,7 @@ export {
   fetchTeamMemberBySlugClient,
   toLawyerOptions,
 } from "@/lib/wordpress/team";
+export { fetchLandingByPrefixClient } from "@/lib/wordpress/landings";
 export type { BlogCategory } from "@/types";
 
 export async function fetchPostBySlugClient(

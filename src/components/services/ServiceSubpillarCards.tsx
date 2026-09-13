@@ -11,20 +11,25 @@ export function ServiceSubpillarCards({
   description,
 }: {
   services: Service[];
-  heading: string;
+  heading?: string;
   description?: string;
 }) {
   if (!services.length) return null;
 
   return (
-    <section className="py-4">
-      <h2 className="text-2xl font-bold text-navy-900">{heading}</h2>
+    <div className={heading ? "py-4" : undefined}>
+      {heading ? (
+        <h2 className="text-2xl font-bold text-navy-900">{heading}</h2>
+      ) : null}
       {description ? (
         <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
           {description}
         </p>
       ) : null}
-      <Stagger className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" stagger={0.08}>
+      <Stagger
+        className={`${heading || description ? "mt-8" : ""} grid gap-6 sm:grid-cols-2 lg:grid-cols-3`}
+        stagger={0.08}
+      >
         {services.map((service) => (
           <StaggerItem key={service.id} variant="up">
             <Link
@@ -61,6 +66,6 @@ export function ServiceSubpillarCards({
           </StaggerItem>
         ))}
       </Stagger>
-    </section>
+    </div>
   );
 }
