@@ -156,8 +156,16 @@ async function loadTeamClient(): Promise<TeamMember[]> {
   return posts.map(mapWpTeamMember);
 }
 
-export async function fetchTeamClient(): Promise<TeamMember[]> {
-  return loadTeamClient();
+let teamClientPromise: Promise<TeamMember[]> | null = null;
+
+export function fetchTeamClient(): Promise<TeamMember[]> {
+  if (teamClientPromise) return teamClientPromise;
+  const pending = loadTeamClient().catch((error: unknown) => {
+    if (teamClientPromise === pending) teamClientPromise = null;
+    throw error;
+  });
+  teamClientPromise = pending;
+  return pending;
 }
 
 export async function fetchTeamMemberBySlugClient(
