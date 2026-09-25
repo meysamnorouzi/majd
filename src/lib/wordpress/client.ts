@@ -1,4 +1,3 @@
-import { fallbackPosts, fallbackProducts } from "@/data/site";
 import { normalizeWpSlug } from "@/lib/wordpress/categories";
 import { pickFeaturedImageUrl } from "@/lib/media/featured-image";
 import {
@@ -6,10 +5,8 @@ import {
   wpApiUrl,
 } from "@/lib/wordpress/config";
 import {
-  applyFallbackBlogPosts,
   applyPostsListOptions,
   buildPostsQuery,
-  hasPostsQueryFilters,
   postsFetchLimitWhenSearching,
   type FetchPostsOptions,
 } from "@/lib/wordpress/posts-query";
@@ -52,14 +49,12 @@ function mapPost(p: WpPost): BlogPost {
   };
 }
 
-async function fetchJson<T>(url: string): Promise<T | null> {
-  try {
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
-  } catch {
-    return null;
+async function fetchJson<T>(url: string): Promise<T> {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error("WordPress request failed");
   }
+  return (await res.json()) as T;
 }
 
 export async function fetchPostsClient(
@@ -72,27 +67,10 @@ export async function fetchPostsClient(
     wpApiUrl(`/wp-json/wp/v2/posts?${buildPostsQuery(fetchLimit, options)}`),
   );
 
-  if (data?.length) {
-    const posts = data.map(mapPost);
-    return searching
-      ? applyPostsListOptions(posts, options, limit)
-      : posts;
-  }
+  if (!data?.length) return [];
 
-  if (hasPostsQueryFilters(options)) return [];
-
-  return applyFallbackBlogPosts(
-    fallbackPosts.map((p) => ({
-      id: p.id,
-      slug: p.slug,
-      title: p.title,
-      excerpt: p.excerpt,
-      content: p.content || `<p>${p.excerpt}</p>`,
-      date: p.date,
-      image: p.image,
-    })),
-    options,
-  ).slice(0, limit);
+  const posts = data.map(mapPost);
+  return searching ? applyPostsListOptions(posts, options, limit) : posts;
 }
 
 export {
@@ -125,24 +103,8 @@ export async function fetchPostBySlugClient(
     ),
   );
 
-  if (data?.[0]) {
-    return mapPost(data[0]);
-  }
-
-  const fallback = fallbackPosts.find(
-    (p) => p.slug === normalized || p.slug === slug,
-  );
-  if (!fallback) return null;
-
-  return {
-    id: fallback.id,
-    slug: fallback.slug,
-    title: fallback.title,
-    excerpt: fallback.excerpt,
-    content: `<p>${fallback.excerpt}</p><p>برای مشاوره تخصصی با موسسه حقوقی مجد تماس بگیرید.</p>`,
-    date: fallback.date,
-    image: fallback.image,
-  };
+  if (data?.[0]) return mapPost(data[0]);
+  return null;
 }
 
 export interface ShopProduct {
@@ -205,20 +167,7 @@ export async function fetchShopProductBySlugClientIncludingCourse(
     "@/lib/woocommerce/store-products-client"
   );
   const product = await fetchStoreProductBySlugClient(slug);
-  if (!product) {
-    const fallback = fallbackProducts.find((p) => p.slug === slug);
-    if (!fallback) return null;
-    return {
-      id: fallback.id,
-      slug: fallback.slug,
-      name: fallback.name,
-      short_description: fallback.short_description,
-      description: fallback.description,
-      price: fallback.price,
-      currency: "تومان",
-      image: fallback.image,
-    };
-  }
+  if (!product) return null;
 
   return {
     id: product.id,

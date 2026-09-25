@@ -22,6 +22,7 @@ export function ServiceDetailContent({ slug: slugProp }: { slug?: string }) {
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [error, setError] = useState("");
   const lastRedirectRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -34,9 +35,19 @@ export function ServiceDetailContent({ slug: slugProp }: { slug?: string }) {
     let cancelled = false;
     setLoading(true);
     setNotFound(false);
+    setError("");
 
     (async () => {
-      const data = await fetchServiceBySlugClient(slug);
+      let data: Service | null;
+      try {
+        data = await fetchServiceBySlugClient(slug);
+      } catch {
+        if (!cancelled) {
+          setError("بارگذاری خدمت انجام نشد.");
+          setLoading(false);
+        }
+        return;
+      }
       if (cancelled) return;
 
       if (!data) {
@@ -77,6 +88,14 @@ export function ServiceDetailContent({ slug: slugProp }: { slug?: string }) {
       <div className="flex justify-center py-24">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-gold-500 border-t-transparent" />
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <p className="py-24 text-center text-slate-600">{error}</p>
+      </Container>
     );
   }
 

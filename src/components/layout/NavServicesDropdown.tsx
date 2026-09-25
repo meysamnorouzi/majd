@@ -187,14 +187,21 @@ function MegaMenuColumn({
 function DesktopMegaMenu({
   onNavigate,
   megaServices,
+  menuError,
 }: {
   onNavigate: () => void;
   megaServices: MegaServiceItem[];
+  menuError?: string;
 }) {
   const pathname = usePathname();
 
   return (
     <div className="grid min-h-[14rem] grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+      {menuError ? (
+        <p className="col-span-full px-6 py-8 text-sm text-slate-600">
+          {menuError}
+        </p>
+      ) : null}
       {megaServices.map(({ service, label }) => (
         <MegaMenuColumn
           key={service.slug}
@@ -337,6 +344,7 @@ export function NavServicesDropdown({
   const menuId = useId();
   const [open, setOpen] = useState(false);
   const [megaServices, setMegaServices] = useState<MegaServiceItem[]>([]);
+  const [menuError, setMenuError] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadStarted = useRef(false);
@@ -344,9 +352,13 @@ export function NavServicesDropdown({
   function loadMegaServices() {
     if (loadStarted.current) return;
     loadStarted.current = true;
-    fetchServicesClient().then(({ megaMenu, megaTrees }) => {
-      setMegaServices(megaTreesToMenuItems(megaMenu, megaTrees));
-    });
+    fetchServicesClient()
+      .then(({ megaMenu, megaTrees }) => {
+        setMegaServices(megaTreesToMenuItems(megaMenu, megaTrees));
+      })
+      .catch(() => {
+        setMenuError("بارگذاری خدمات انجام نشد.");
+      });
   }
 
   useEffect(() => {
@@ -410,6 +422,9 @@ export function NavServicesDropdown({
     return (
       <div className="space-y-1">
         <div className="mr-2 space-y-1 border-r border-white/10 pr-2">
+          {menuError ? (
+            <p className="px-3 py-2 text-sm text-white/70">{menuError}</p>
+          ) : null}
           {megaServices.map(({ service, label }) => (
             <MobileServiceNode
               key={service.slug}
@@ -488,6 +503,7 @@ export function NavServicesDropdown({
         <DesktopMegaMenu
           onNavigate={handleNavigate}
           megaServices={megaServices}
+          menuError={menuError}
         />
       </div>
     </div>

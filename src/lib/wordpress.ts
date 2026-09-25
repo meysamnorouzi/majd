@@ -1,8 +1,4 @@
 import {
-  fallbackPosts,
-  fallbackProducts,
-} from "@/data/site";
-import {
   buildCategoryTree,
   findCategoryBySlug,
   flattenCategories,
@@ -15,10 +11,8 @@ import {
 } from "@/lib/wordpress/config";
 import { wpFetch } from "@/lib/wordpress/fetch";
 import {
-  applyFallbackBlogPosts,
   applyPostsListOptions,
   buildPostsQuery,
-  hasPostsQueryFilters,
   postsFetchLimitWhenSearching,
   type FetchPostsOptions,
 } from "@/lib/wordpress/posts-query";
@@ -126,9 +120,7 @@ export async function getPosts(
       : posts;
   }
 
-  if (hasPostsQueryFilters(options)) return [];
-
-  return applyFallbackBlogPosts(fallbackPosts, options).slice(0, limit);
+  return [];
 }
 
 export async function getPostBySlug(slug: string) {
@@ -152,17 +144,7 @@ export async function getPostBySlug(slug: string) {
     };
   }
 
-  const fallback = fallbackPosts.find(
-    (p) => p.slug === normalized || p.slug === slug,
-  );
-  if (!fallback) return null;
-
-  return {
-    ...fallback,
-    title: fallback.title,
-    excerpt: fallback.excerpt,
-    content: `<p>${fallback.excerpt}</p><p>برای مشاوره تخصصی با موسسه حقوقی مجد تماس بگیرید.</p>`,
-  };
+  return null;
 }
 
 export async function getAllPostSlugs(): Promise<string[]> {
@@ -170,7 +152,7 @@ export async function getAllPostSlugs(): Promise<string[]> {
     apiUrl("/wp-json/wp/v2/posts?per_page=100&_fields=slug"),
   );
   if (data?.length) return data.map((p) => normalizeWpSlug(p.slug));
-  return fallbackPosts.map((p) => p.slug);
+  return [];
 }
 
 /**
@@ -232,16 +214,7 @@ export async function getProducts(limit = 12) {
     }));
   }
 
-  return fallbackProducts.map((p) => ({
-    id: p.id,
-    slug: p.slug,
-    name: p.name,
-    short_description: p.short_description,
-    description: p.description,
-    price: p.price,
-    currency: "تومان",
-    image: p.image,
-  }));
+  return [];
 }
 
 export async function getProductBySlug(slug: string) {
@@ -263,19 +236,7 @@ export async function getProductBySlug(slug: string) {
     };
   }
 
-  const fallback = fallbackProducts.find((p) => p.slug === slug);
-  return fallback
-    ? {
-        id: fallback.id,
-        slug: fallback.slug,
-        name: fallback.name,
-        short_description: fallback.short_description,
-        description: fallback.short_description,
-        price: fallback.price,
-        currency: "تومان",
-        image: fallback.image,
-      }
-    : null;
+  return null;
 }
 
 export async function getAllProductSlugs(): Promise<string[]> {
@@ -283,7 +244,7 @@ export async function getAllProductSlugs(): Promise<string[]> {
     apiUrl("/wp-json/wc/store/v1/products?per_page=100"),
   );
   if (data?.length) return data.map((p) => p.slug);
-  return fallbackProducts.map((p) => p.slug);
+  return [];
 }
 
 export async function getServices() {

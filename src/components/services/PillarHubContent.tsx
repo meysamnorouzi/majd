@@ -36,24 +36,39 @@ export function PillarHubContent({
   const [landing, setLanding] = useState<PillarLanding | null>(null);
   const [cards, setCards] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [landingError, setLandingError] = useState("");
+  const [servicesError, setServicesError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
 
     (async () => {
-      const [nextLanding, menu] = await Promise.all([
-        fetchLandingByPrefixClient(prefix),
-        fetchServicesClient(),
-      ]);
+      let nextLanding: PillarLanding;
+      try {
+        nextLanding = await fetchLandingByPrefixClient(prefix);
+      } catch {
+        if (!cancelled) {
+          setLandingError("بارگذاری این صفحه انجام نشد.");
+          setLoading(false);
+        }
+        return;
+      }
       if (cancelled) return;
-
-      const leaves = getPillarLeavesFromTree(
-        menu.megaTrees.find((tree) => tree.categoryPrefix === prefix),
-      );
       setLanding(nextLanding);
-      setCards(applyPillarLandingCards(leaves, nextLanding));
       document.title = `${nextLanding.seoTitle} | موسسه حقوقی مجد`;
-      setLoading(false);
+
+      try {
+        const menu = await fetchServicesClient();
+        if (cancelled) return;
+        const leaves = getPillarLeavesFromTree(
+          menu.megaTrees.find((tree) => tree.categoryPrefix === prefix),
+        );
+        setCards(applyPillarLandingCards(leaves, nextLanding));
+      } catch {
+        if (!cancelled) setServicesError("بارگذاری خدمات انجام نشد.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
 
     return () => {
@@ -108,7 +123,15 @@ export function PillarHubContent({
         compactTitle
       />
 
-      {loading || !landing ? (
+      {landingError ? (
+        <p className="py-16 text-center text-slate-600">{landingError}</p>
+      ) : null}
+
+      {servicesError ? (
+        <p className="py-8 text-center text-slate-600">{servicesError}</p>
+      ) : null}
+
+      {landingError ? null : loading || !landing ? (
         <div className="flex justify-center py-24">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-gold-500 border-t-transparent" />
         </div>

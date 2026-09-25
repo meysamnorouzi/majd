@@ -113,25 +113,6 @@ export function sortBlogPosts(
   }
 }
 
-export function applyFallbackBlogPosts(
-  posts: BlogPostListItem[],
-  options?: FetchPostsOptions,
-): BlogPostListItem[] {
-  let result = posts;
-
-  if (options?.search?.trim()) {
-    result = result.filter((post) =>
-      matchesBlogPostSearch(post, options.search!),
-    );
-  }
-
-  if (options?.sort) {
-    result = sortBlogPosts(result, options.sort);
-  }
-
-  return result;
-}
-
 export function hasPostsQueryFilters(options?: FetchPostsOptions): boolean {
   return Boolean(
     options?.categoryId ||

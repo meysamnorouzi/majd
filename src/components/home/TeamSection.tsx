@@ -12,12 +12,16 @@ import type { TeamMember } from "@/types";
 export function TeamSection() {
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
     fetchTeamClient()
       .then((data) => {
         if (!cancelled) setTeam(data);
+      })
+      .catch(() => {
+        if (!cancelled) setError("بارگذاری اعضای تیم انجام نشد.");
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -39,6 +43,16 @@ export function TeamSection() {
           <div className="flex justify-center py-16">
             <div className="h-10 w-10 animate-spin rounded-full border-4 border-gold-500 border-t-transparent" />
           </div>
+        </Container>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="bg-cream py-20 lg:py-28">
+        <Container>
+          <p className="text-center text-slate-600">{error}</p>
         </Container>
       </section>
     );

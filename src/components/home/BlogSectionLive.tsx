@@ -11,16 +11,31 @@ import Link from "next/link";
 
 export function BlogSectionLive() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
-    fetchPostsClient(6).then((data) => {
-      if (!cancelled) setPosts(data);
-    });
+    fetchPostsClient(6)
+      .then((data) => {
+        if (!cancelled) setPosts(data);
+      })
+      .catch(() => {
+        if (!cancelled) setError("بارگذاری مقالات انجام نشد.");
+      });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  if (error) {
+    return (
+      <section className="py-20 lg:py-28">
+        <Container>
+          <p className="text-center text-slate-600">{error}</p>
+        </Container>
+      </section>
+    );
+  }
 
   if (posts.length === 0) return null;
 

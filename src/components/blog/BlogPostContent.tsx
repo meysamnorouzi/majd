@@ -19,6 +19,7 @@ export function BlogPostContent() {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!slug) {
@@ -30,18 +31,24 @@ export function BlogPostContent() {
     let cancelled = false;
     setLoading(true);
     setNotFound(false);
+    setError("");
 
     (async () => {
-      const data = await fetchPostBySlugClient(slug);
-      if (cancelled) return;
-      if (!data) {
-        setNotFound(true);
-        setPost(null);
-      } else {
-        setPost(data);
-        document.title = `${data.title} | موسسه حقوقی مجد`;
+      try {
+        const data = await fetchPostBySlugClient(slug);
+        if (cancelled) return;
+        if (!data) {
+          setNotFound(true);
+          setPost(null);
+        } else {
+          setPost(data);
+          document.title = `${data.title} | موسسه حقوقی مجد`;
+        }
+      } catch {
+        if (!cancelled) setError("بارگذاری مقاله انجام نشد.");
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
     })();
 
     return () => {
@@ -54,6 +61,14 @@ export function BlogPostContent() {
       <div className="flex justify-center py-24">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-gold-500 border-t-transparent" />
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <p className="py-24 text-center text-slate-600">{error}</p>
+      </Container>
     );
   }
 

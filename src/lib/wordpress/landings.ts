@@ -118,6 +118,6 @@ export async function fetchLandingByPrefixClient(
   prefix: ServiceCategoryPrefix,
 ): Promise<PillarLanding> {
   const post = await fetchLandingJson(prefix, { cache: "no-store" });
-  if (post) return mapWpLanding(post, prefix);
-  return fallbackLanding(prefix);
+  if (!post) throw new Error("Landing request failed");
+  return mapWpLanding(post, prefix);
 }

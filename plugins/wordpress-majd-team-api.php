@@ -222,6 +222,15 @@ class Majd_Team_API {
         );
 
         add_meta_box(
+            'majd_team_gallery',
+            'گالری تصاویر',
+            [__CLASS__, 'render_gallery_meta_box'],
+            MAJD_TEAM_POST_TYPE,
+            'normal',
+            'default'
+        );
+
+        add_meta_box(
             'majd_team_videos',
             'گالری ویدیو',
             [__CLASS__, 'render_videos_meta_box'],
@@ -325,7 +334,6 @@ class Majd_Team_API {
     public static function render_media_meta_box($post) {
         $banner_id = (int) get_post_meta($post->ID, MAJD_TEAM_META_BANNER_ID, true);
         $banner_url = self::attachment_url($banner_id);
-        $gallery = get_post_meta($post->ID, MAJD_TEAM_META_GALLERY, true);
         ?>
         <p><strong>تصویر پرتره</strong> — از «تصویر شاخص» (Featured Image) استفاده کنید.</p>
         <hr style="margin:16px 0" />
@@ -340,10 +348,43 @@ class Majd_Team_API {
             <button type="button" class="button" id="majd_team_banner_select">انتخاب بنر</button>
             <button type="button" class="button" id="majd_team_banner_remove" <?php echo $banner_id ? '' : 'style="display:none"'; ?>>حذف</button>
         </div>
-        <hr style="margin:16px 0" />
-        <p><strong>گالری تصاویر</strong></p>
-        <p class="description">هر خط: <code>آدرس تصویر | متن alt</code></p>
-        <textarea name="majd_team_gallery" rows="6" class="large-text code" style="font-family:inherit"><?php echo esc_textarea($gallery); ?></textarea>
+        <?php
+    }
+
+    public static function render_gallery_meta_box($post) {
+        $items = self::gallery_editor_items(get_post_meta($post->ID, MAJD_TEAM_META_GALLERY, true));
+        ?>
+        <style>
+            .majd-team-gallery-list{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0}
+            .majd-team-gallery-item{width:160px;background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:8px}
+            .majd-team-gallery-item.is-dragging{opacity:.45}
+            .majd-team-gallery-thumb{cursor:grab}
+            .majd-team-gallery-thumb img{display:block;width:100%;height:110px;object-fit:cover;border-radius:4px;background:#f0f0f1}
+            .majd-team-gallery-item input[type="text"]{width:100%;margin-top:8px}
+            .majd-team-gallery-remove{margin-top:6px}
+        </style>
+        <p class="description">
+            تصاویر را از کتابخانه رسانه انتخاب کنید. برای تغییر ترتیب، تصویر را بکشید و رها کنید.
+            متن جایگزین زیر هر تصویر در سایت نمایش داده می‌شود.
+        </p>
+        <p>
+            <button type="button" class="button button-primary" id="majd_team_gallery_select">انتخاب از رسانه</button>
+        </p>
+        <input type="hidden" name="majd_team_gallery_present" value="1" />
+        <div id="majd_team_gallery_list" class="majd-team-gallery-list">
+            <?php foreach ($items as $item) : ?>
+                <div class="majd-team-gallery-item"<?php echo $item['id'] ? ' data-id="' . esc_attr((string) $item['id']) . '"' : ''; ?>>
+                    <div class="majd-team-gallery-thumb" draggable="true">
+                        <img src="<?php echo esc_url($item['preview']); ?>" alt="" />
+                    </div>
+                    <input type="hidden" name="majd_team_gallery_item_id[]" value="<?php echo esc_attr((string) $item['id']); ?>" />
+                    <input type="hidden" name="majd_team_gallery_item_src[]" value="<?php echo esc_attr($item['src']); ?>" />
+                    <input type="text" name="majd_team_gallery_item_alt[]" value="<?php echo esc_attr($item['alt']); ?>" placeholder="متن جایگزین" />
+                    <button type="button" class="button-link-delete majd-team-gallery-remove">حذف</button>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        <p id="majd_team_gallery_empty" class="description"<?php echo $items ? ' style="display:none"' : ''; ?>>هنوز تصویری انتخاب نشده است.</p>
         <?php
     }
 
@@ -472,8 +513,8 @@ class Majd_Team_API {
             update_post_meta($post_id, MAJD_TEAM_META_ACHIEVEMENTS, sanitize_textarea_field(wp_unslash($_POST['majd_team_achievements'])));
         }
 
-        if (isset($_POST['majd_team_gallery'])) {
-            update_post_meta($post_id, MAJD_TEAM_META_GALLERY, sanitize_textarea_field(wp_unslash($_POST['majd_team_gallery'])));
+        if (isset($_POST['majd_team_gallery_present'])) {
+            update_post_meta($post_id, MAJD_TEAM_META_GALLERY, self::sanitize_gallery_from_request());
         }
 
         if (isset($_POST['majd_team_videos'])) {
@@ -540,6 +581,8 @@ class Majd_Team_API {
 
     var bannerFrame;
     var videoFrame;
+    var galleryFrame;
+    var galleryDragItem;
 
     document.addEventListener('click', function (event) {
         var target = event.target;
@@ -573,7 +616,69 @@ class Majd_Team_API {
         if (target.closest('#majd_team_videos_select')) {
             event.preventDefault();
             openVideoFrame();
+            return;
         }
+
+        if (target.closest('#majd_team_gallery_select')) {
+            event.preventDefault();
+            openGalleryFrame();
+            return;
+        }
+
+        var removeGallery = target.closest('.majd-team-gallery-remove');
+        if (removeGallery) {
+            event.preventDefault();
+            var galleryItem = removeGallery.closest('.majd-team-gallery-item');
+            if (galleryItem) {
+                galleryItem.remove();
+            }
+            syncGalleryEmpty();
+        }
+    });
+
+    document.addEventListener('dragstart', function (event) {
+        var thumb = event.target && event.target.closest ? event.target.closest('.majd-team-gallery-thumb') : null;
+        if (!thumb) {
+            return;
+        }
+        galleryDragItem = thumb.closest('.majd-team-gallery-item');
+        if (!galleryDragItem) {
+            return;
+        }
+        galleryDragItem.classList.add('is-dragging');
+        if (event.dataTransfer) {
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', 'gallery');
+        }
+    });
+
+    document.addEventListener('dragend', function () {
+        if (galleryDragItem) {
+            galleryDragItem.classList.remove('is-dragging');
+        }
+        galleryDragItem = null;
+    });
+
+    document.addEventListener('dragover', function (event) {
+        if (!galleryDragItem) {
+            return;
+        }
+        var list = document.getElementById('majd_team_gallery_list');
+        if (!list || !event.target || !list.contains(event.target)) {
+            return;
+        }
+        event.preventDefault();
+        var over = event.target.closest ? event.target.closest('.majd-team-gallery-item') : null;
+        if (!over || over === galleryDragItem || !list.contains(over)) {
+            return;
+        }
+        var rect = over.getBoundingClientRect();
+        var before = event.clientX < rect.left + rect.width / 2;
+        var rtl = getComputedStyle(list).direction === 'rtl';
+        if (rtl) {
+            before = !before;
+        }
+        list.insertBefore(galleryDragItem, before ? over : over.nextSibling);
     });
 
     function openBannerFrame() {
@@ -606,6 +711,108 @@ class Majd_Team_API {
         });
 
         bannerFrame.open();
+    }
+
+    function openGalleryFrame() {
+        if (galleryFrame) {
+            galleryFrame.open();
+            return;
+        }
+
+        galleryFrame = wp.media({
+            title: 'انتخاب تصاویر گالری',
+            button: { text: 'افزودن به گالری' },
+            library: { type: 'image' },
+            multiple: true
+        });
+
+        galleryFrame.on('select', function () {
+            var selection = galleryFrame.state().get('selection');
+            if (!selection) {
+                return;
+            }
+
+            selection.each(function (att) {
+                var image = att.toJSON();
+                if (!image.id || !image.url) {
+                    return;
+                }
+                if (document.querySelector('.majd-team-gallery-item[data-id="' + image.id + '"]')) {
+                    return;
+                }
+                var preview = (image.sizes && image.sizes.medium && image.sizes.medium.url)
+                    ? image.sizes.medium.url
+                    : image.url;
+                appendGalleryItem({
+                    id: image.id,
+                    src: '',
+                    preview: preview,
+                    alt: image.alt || ''
+                });
+            });
+            syncGalleryEmpty();
+        });
+
+        galleryFrame.open();
+    }
+
+    function appendGalleryItem(item) {
+        var list = document.getElementById('majd_team_gallery_list');
+        if (!list) {
+            return;
+        }
+
+        var card = document.createElement('div');
+        card.className = 'majd-team-gallery-item';
+        if (item.id) {
+            card.setAttribute('data-id', String(item.id));
+        }
+
+        var thumb = document.createElement('div');
+        thumb.className = 'majd-team-gallery-thumb';
+        thumb.draggable = true;
+
+        var img = document.createElement('img');
+        img.src = item.preview || item.src || '';
+        img.alt = '';
+        thumb.appendChild(img);
+
+        var idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'majd_team_gallery_item_id[]';
+        idInput.value = item.id ? String(item.id) : '0';
+
+        var srcInput = document.createElement('input');
+        srcInput.type = 'hidden';
+        srcInput.name = 'majd_team_gallery_item_src[]';
+        srcInput.value = item.src || '';
+
+        var altInput = document.createElement('input');
+        altInput.type = 'text';
+        altInput.name = 'majd_team_gallery_item_alt[]';
+        altInput.value = item.alt || '';
+        altInput.placeholder = 'متن جایگزین';
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'button-link-delete majd-team-gallery-remove';
+        removeBtn.textContent = 'حذف';
+
+        card.appendChild(thumb);
+        card.appendChild(idInput);
+        card.appendChild(srcInput);
+        card.appendChild(altInput);
+        card.appendChild(removeBtn);
+        list.appendChild(card);
+    }
+
+    function syncGalleryEmpty() {
+        var list = document.getElementById('majd_team_gallery_list');
+        var empty = document.getElementById('majd_team_gallery_empty');
+        if (!list || !empty) {
+            return;
+        }
+        empty.style.display = list.querySelector('.majd-team-gallery-item') ? 'none' : '';
     }
 
     function openVideoFrame() {
@@ -714,12 +921,61 @@ JS;
         return $out;
     }
 
-    private static function decode_gallery($raw) {
+    private static function sanitize_gallery_from_request() {
+        $ids = isset($_POST['majd_team_gallery_item_id']) ? (array) wp_unslash($_POST['majd_team_gallery_item_id']) : [];
+        $srcs = isset($_POST['majd_team_gallery_item_src']) ? (array) wp_unslash($_POST['majd_team_gallery_item_src']) : [];
+        $alts = isset($_POST['majd_team_gallery_item_alt']) ? (array) wp_unslash($_POST['majd_team_gallery_item_alt']) : [];
+        $count = max(count($ids), count($srcs), count($alts));
+        $stored = [];
+        $seen_ids = [];
+        $seen_srcs = [];
+
+        for ($i = 0; $i < $count; $i++) {
+            $id = absint($ids[$i] ?? 0);
+            $src = esc_url_raw((string) ($srcs[$i] ?? ''));
+            $alt = sanitize_text_field((string) ($alts[$i] ?? ''));
+
+            if ($id && wp_attachment_is_image($id)) {
+                if (isset($seen_ids[$id])) {
+                    continue;
+                }
+                $seen_ids[$id] = true;
+                $row = ['id' => $id];
+                if ($alt !== '') {
+                    $row['alt'] = $alt;
+                }
+                $stored[] = $row;
+                continue;
+            }
+
+            if ($src === '' || isset($seen_srcs[$src])) {
+                continue;
+            }
+            $seen_srcs[$src] = true;
+            $stored[] = [
+                'src' => $src,
+                'alt' => $alt,
+            ];
+        }
+
+        if (!$stored) {
+            return '';
+        }
+
+        return wp_json_encode($stored, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+
+    private static function gallery_entries($raw) {
         if (!is_string($raw) || trim($raw) === '') {
             return [];
         }
 
-        $items = [];
+        $decoded = json_decode(trim($raw), true);
+        if (is_array($decoded) && self::is_gallery_json($decoded)) {
+            return $decoded;
+        }
+
+        $entries = [];
         foreach (preg_split('/\r\n|\r|\n/', $raw) as $line) {
             $line = trim($line);
             if ($line === '') {
@@ -732,13 +988,135 @@ JS;
                 continue;
             }
 
-            $items[] = [
+            $entries[] = [
                 'src' => $src,
                 'alt' => $parts[1] ?? '',
             ];
         }
 
+        return $entries;
+    }
+
+    private static function is_gallery_json($decoded) {
+        foreach ($decoded as $key => $entry) {
+            if (!is_int($key) || !is_array($entry)) {
+                return false;
+            }
+            if (!array_key_exists('id', $entry) && !array_key_exists('src', $entry)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static function gallery_editor_items($raw) {
+        $items = [];
+        foreach (self::gallery_entries($raw) as $entry) {
+            $id = isset($entry['id']) ? (int) $entry['id'] : 0;
+            $src = isset($entry['src']) ? trim((string) $entry['src']) : '';
+            $alt = isset($entry['alt']) ? (string) $entry['alt'] : '';
+
+            if (!$id && $src !== '') {
+                $id = self::attachment_id_from_url($src);
+                if ($id) {
+                    $src = '';
+                }
+            }
+
+            if ($id && wp_attachment_is_image($id)) {
+                $preview = wp_get_attachment_image_url($id, 'medium');
+                if (!$preview) {
+                    $preview = self::attachment_url($id);
+                }
+                if (!$preview) {
+                    continue;
+                }
+                if ($alt === '') {
+                    $alt = (string) get_post_meta($id, '_wp_attachment_image_alt', true);
+                }
+                $items[] = [
+                    'id' => $id,
+                    'src' => '',
+                    'preview' => $preview,
+                    'alt' => $alt,
+                ];
+                continue;
+            }
+
+            if ($src === '') {
+                continue;
+            }
+
+            $items[] = [
+                'id' => 0,
+                'src' => $src,
+                'preview' => $src,
+                'alt' => $alt,
+            ];
+        }
+
         return $items;
+    }
+
+    private static function gallery_public_item($entry) {
+        if (!is_array($entry)) {
+            return null;
+        }
+
+        $alt = isset($entry['alt']) ? trim((string) $entry['alt']) : '';
+        $id = isset($entry['id']) ? (int) $entry['id'] : 0;
+        if ($id) {
+            $src = self::attachment_url($id);
+            if ($src === '') {
+                return null;
+            }
+            if ($alt === '') {
+                $alt = trim((string) get_post_meta($id, '_wp_attachment_image_alt', true));
+            }
+            return [
+                'src' => $src,
+                'alt' => $alt,
+            ];
+        }
+
+        $src = isset($entry['src']) ? trim((string) $entry['src']) : '';
+        if ($src === '') {
+            return null;
+        }
+
+        return [
+            'src' => $src,
+            'alt' => $alt,
+        ];
+    }
+
+    private static function decode_gallery($raw) {
+        $items = [];
+        foreach (self::gallery_entries($raw) as $entry) {
+            $item = self::gallery_public_item($entry);
+            if ($item) {
+                $items[] = $item;
+            }
+        }
+        return $items;
+    }
+
+    private static function attachment_id_from_url($url) {
+        if (!function_exists('attachment_url_to_postid') || $url === '') {
+            return 0;
+        }
+
+        $id = (int) attachment_url_to_postid($url);
+        if ($id) {
+            return $id;
+        }
+
+        $stripped = preg_replace('/-\d+x\d+(?=\.[^.]+$)/', '', $url);
+        if (is_string($stripped) && $stripped !== $url) {
+            return (int) attachment_url_to_postid($stripped);
+        }
+
+        return 0;
     }
 
     private static function decode_video_gallery($raw) {

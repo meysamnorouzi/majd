@@ -34,6 +34,7 @@ export function TeamMemberContent() {
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!slug) {
@@ -45,12 +46,23 @@ export function TeamMemberContent() {
     let cancelled = false;
     setLoading(true);
     setNotFound(false);
+    setError("");
 
     (async () => {
-      const [bySlug, allMembers] = await Promise.all([
-        fetchTeamMemberBySlugClient(slug),
-        fetchTeamClient(),
-      ]);
+      let bySlug: Awaited<ReturnType<typeof fetchTeamMemberBySlugClient>>;
+      let allMembers: Awaited<ReturnType<typeof fetchTeamClient>>;
+      try {
+        [bySlug, allMembers] = await Promise.all([
+          fetchTeamMemberBySlugClient(slug),
+          fetchTeamClient(),
+        ]);
+      } catch {
+        if (!cancelled) {
+          setError("بارگذاری عضو تیم انجام نشد.");
+          setLoading(false);
+        }
+        return;
+      }
       if (cancelled) return;
 
       const resolved =
@@ -80,6 +92,14 @@ export function TeamMemberContent() {
       <div className="flex justify-center py-24">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-gold-500 border-t-transparent" />
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <p className="py-24 text-center text-slate-600">{error}</p>
+      </Container>
     );
   }
 

@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fallbackTeamMembers } from "@/data/site";
 import { fetchTeamClient, toLawyerOptions } from "@/lib/wordpress/client";
 import type { TeamMember } from "@/types";
 
 export function useTeamMembers() {
-  const [members, setMembers] = useState<TeamMember[]>(fallbackTeamMembers);
+  const [members, setMembers] = useState<TeamMember[]>([]);
 
   useEffect(() => {
     let cancelled = false;

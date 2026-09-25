@@ -1,4 +1,3 @@
-import { fallbackTeamMembers } from "@/data/site";
 import { normalizeWpSlug } from "@/lib/wordpress/categories";
 import { pickFeaturedImageUrl } from "@/lib/media/featured-image";
 import {
@@ -126,6 +125,7 @@ const TEAM_QUERY =
 async function fetchAllTeamPosts(
   headers?: HeadersInit,
   cache: RequestCache = "no-store",
+  failOnError = false,
 ): Promise<WpTeamMember[]> {
   const posts: WpTeamMember[] = [];
   let page = 1;
@@ -134,7 +134,12 @@ async function fetchAllTeamPosts(
   while (page <= totalPages && page <= 10) {
     const url = wpApiUrl(`${TEAM_QUERY}&page=${page}`);
     const res = await wpFetch(url, { cache, headers });
-    if (!res?.ok) break;
+    if (!res?.ok) {
+      if (failOnError && posts.length === 0) {
+        throw new Error("Team request failed");
+      }
+      break;
+    }
 
     const batch = (await res.json()) as WpTeamMember[];
     posts.push(...batch);
@@ -147,11 +152,8 @@ async function fetchAllTeamPosts(
 }
 
 async function loadTeamClient(): Promise<TeamMember[]> {
-  const posts = await fetchAllTeamPosts();
-  if (posts.length) {
-    return posts.map(mapWpTeamMember);
-  }
-  return fallbackTeamMembers;
+  const posts = await fetchAllTeamPosts(undefined, "no-store", true);
+  return posts.map(mapWpTeamMember);
 }
 
 export async function fetchTeamClient(): Promise<TeamMember[]> {
@@ -169,15 +171,9 @@ export async function fetchTeamMemberBySlugClient(
     ),
   );
 
-  if (data?.[0]) {
-    return mapWpTeamMember(data[0]);
-  }
-
-  return (
-    fallbackTeamMembers.find(
-      (m) => m.slug === normalized || m.slug === slug,
-    ) ?? null
-  );
+  if (!data) throw new Error("Team request failed");
+  if (data[0]) return mapWpTeamMember(data[0]);
+  return null;
 }
 
 export async function getTeamFromWp(): Promise<{
@@ -193,7 +189,7 @@ export async function getTeamFromWp(): Promise<{
   }
 
   return {
-    team: fallbackTeamMembers,
+    team: [],
     fromWordPress: false,
   };
 }

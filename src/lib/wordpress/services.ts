@@ -1,8 +1,6 @@
-import { services as fallbackServices } from "@/data/site";
 import { isRetiredServiceSlug } from "@/data/legacy-redirects";
 import { enrichService } from "@/data/services-detail";
 import {
-  FALLBACK_PARENT_TO_PREFIX,
   getPillarLeavesFromTree,
   getRelatedServices,
   isServiceCategoryNode,
@@ -70,24 +68,6 @@ export const SERVICE_MEGA_ROOTS = [
     mergeSlugs: ["وکیل-اداری", "دیوان-عدالت"],
   },
 ] as const;
-
-/** Static fallback parent slugs in site.ts */
-const FALLBACK_PARENT_SLUG: Record<
-  (typeof SERVICE_MEGA_ROOTS)[number]["slug"],
-  string
-> = {
-  خانواده: "vakalat-khanavade",
-  ملکی: "vakalat-melki",
-  کیفری: "vakalat-keyfari",
-  "مشاوره-حقوقی": "moshavere-hoghooghi",
-  اداری: "vakalat-hoghooghi",
-};
-
-/** Public ranking slugs that still use the static fallback tree when WP has no post. */
-const FALLBACK_SLUG_ALIASES: Record<string, string> = {
-  "وکیل-خلع-ید": "khale-yad",
-  "وکیل-متخصص-سرقفلی": "malek-mostajer",
-};
 
 export interface MegaMenuItem {
   slug: string;
@@ -286,7 +266,6 @@ export function buildServiceMenuData(
 ): ServiceMenuData {
   const megaMenu: MegaMenuItem[] = [];
   const megaTrees: Service[] = [];
-  const fallback = getFallbackMenuData();
 
   for (const root of SERVICE_MEGA_ROOTS) {
     const slugs = [root.slug, ...root.mergeSlugs];
@@ -297,13 +276,7 @@ export function buildServiceMenuData(
       megaTrees.push(
         buildRootMegaTree(matched, posts, root.slug, root.prefix),
       );
-      continue;
     }
-
-    const fallbackTree = fallback.megaTrees.find((tree) =>
-      slugMatches(tree.slug, root.slug),
-    );
-    if (fallbackTree) megaTrees.push(fallbackTree);
   }
 
   const serviceCategoryIds = new Set<number>();
@@ -485,103 +458,6 @@ async function loadServiceData(
   return buildServiceMenuData(tree, posts);
 }
 
-function annotateFallbackTree(
-  service: Service,
-  inheritedPrefix?: ServiceCategoryPrefix,
-): Service {
-  const prefix =
-    inheritedPrefix ?? FALLBACK_PARENT_TO_PREFIX[service.slug];
-  const enriched = enrichService({
-    ...service,
-    categoryPrefix: prefix,
-  });
-  return {
-    ...enriched,
-    categoryPrefix: prefix,
-    children: service.children?.map((child) =>
-      annotateFallbackTree(
-        {
-          ...child,
-          parentSlug: service.slug,
-          parentTitle: service.title,
-        },
-        prefix,
-      ),
-    ),
-  };
-}
-
-function flattenFallbackServices(
-  service: Service,
-  inheritedPrefix?: ServiceCategoryPrefix,
-): Service[] {
-  const annotated = annotateFallbackTree(service, inheritedPrefix);
-  return [
-    annotated,
-    ...(annotated.children?.flatMap((child) =>
-      flattenFallbackServices(child, annotated.categoryPrefix),
-    ) ?? []),
-  ];
-}
-
-function getFallbackMenuData(): ServiceMenuData {
-  const megaMenu = SERVICE_MEGA_ROOTS.map((r) => ({
-    slug: r.slug,
-    label: r.label,
-  }));
-  const megaTrees = SERVICE_MEGA_ROOTS.map((root) => {
-    const parentSlug = FALLBACK_PARENT_SLUG[root.slug];
-    const parent = fallbackServices.find((s) => s.slug === parentSlug);
-    const annotated = parent
-      ? annotateFallbackTree(parent, root.prefix)
-      : undefined;
-    let children = annotated?.children ?? [];
-
-    if (root.prefix === "legal-consultation") {
-      const collections = fallbackServices.find(
-        (s) => s.slug === "vosool-matalabat",
-      );
-      if (collections?.children?.length) {
-        children = [
-          ...children,
-          ...collections.children.map((child) =>
-            annotateFallbackTree(
-              {
-                ...child,
-                parentSlug: collections.slug,
-                parentTitle: collections.title,
-              },
-              root.prefix,
-            ),
-          ),
-        ];
-      }
-    }
-
-    return {
-      id: root.slug,
-      slug: root.slug,
-      title: root.label,
-      excerpt: annotated?.excerpt ?? "",
-      description: annotated?.description ?? "",
-      icon: annotated?.icon ?? "scale",
-      image: annotated?.image,
-      categoryPrefix: root.prefix,
-      children,
-    };
-  });
-
-  const posts = fallbackServices.flatMap((service) =>
-    flattenFallbackServices(service),
-  );
-
-  return {
-    megaMenu,
-    megaTrees,
-    posts,
-  };
-}
-
 export function megaTreesToMenuItems(
   megaMenu: MegaMenuItem[],
   megaTrees: Service[],
@@ -599,10 +475,16 @@ export function megaTreesToMenuItems(
 let servicesClientPromise: Promise<ServiceMenuData> | null = null;
 
 export async function fetchServicesClient(): Promise<ServiceMenuData> {
-  servicesClientPromise ??= loadServiceData().then(
-    (data) => data ?? getFallbackMenuData(),
-  );
-  return servicesClientPromise;
+  if (servicesClientPromise) return servicesClientPromise;
+  const pending = loadServiceData().then((data) => {
+    if (!data) {
+      if (servicesClientPromise === pending) servicesClientPromise = null;
+      throw new Error("Services request failed");
+    }
+    return data;
+  });
+  servicesClientPromise = pending;
+  return pending;
 }
 
 export async function fetchServiceBySlugClient(
@@ -628,10 +510,7 @@ export async function fetchServiceBySlugClient(
   }
 
   const menu = await fetchServicesClient();
-  const found = menu.posts.find((s) => slugMatches(s.slug, normalized));
-  if (found) return found;
-
-  return resolveFallbackService(slug);
+  return menu.posts.find((s) => slugMatches(s.slug, normalized)) ?? null;
 }
 
 export async function getServicesFromWp(): Promise<{
@@ -644,11 +523,10 @@ export async function getServicesFromWp(): Promise<{
   if (data) {
     return { ...data, services: data.posts, fromWordPress: true };
   }
-  const fallback = getFallbackMenuData();
   return {
-    services: fallback.posts,
-    megaMenu: fallback.megaMenu,
-    megaTrees: fallback.megaTrees,
+    services: [],
+    megaMenu: [],
+    megaTrees: [],
     fromWordPress: false,
   };
 }
@@ -683,37 +561,9 @@ export async function getServiceBySlugFromWp(
   }
 
   const { services } = await getServicesFromWp();
-  const found = services.find(
-    (s) => s.slug === normalized || s.slug === slug,
+  return (
+    services.find((s) => s.slug === normalized || s.slug === slug) ?? null
   );
-  if (found) return found;
-
-  return resolveFallbackService(slug);
-}
-
-function resolveFallbackService(slug: string): Service | null {
-  const normalized = normalizeWpSlug(slug);
-  const aliased = FALLBACK_SLUG_ALIASES[normalized] ?? normalized;
-  for (const parent of fallbackServices) {
-    const parentPrefix = FALLBACK_PARENT_TO_PREFIX[parent.slug];
-    if (parent.slug === aliased) {
-      return annotateFallbackTree(parent, parentPrefix);
-    }
-    const child = parent.children?.find((c) => c.slug === aliased);
-    if (child) {
-      return annotateFallbackTree(
-        {
-          ...child,
-          icon: child.icon || parent.icon,
-          image: child.image || parent.image,
-          parentSlug: parent.slug,
-          parentTitle: parent.title,
-        },
-        parentPrefix,
-      );
-    }
-  }
-  return null;
 }
 
 export async function getAllServiceSlugsFromWp(): Promise<string[]> {

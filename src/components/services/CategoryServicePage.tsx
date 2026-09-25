@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { ServiceDetailContent } from "@/components/services/ServiceDetailContent";
-import {
-  ServicePage,
-  generateServicePageMetadata,
-} from "@/components/services/ServicePage";
+import { generateServicePageMetadata } from "@/components/services/ServicePage";
 import { createPageMetadata } from "@/lib/seo";
 import {
   generateCategoryStaticParams,
@@ -36,20 +32,11 @@ export async function categoryServiceMetadata(
   return { title: "خدمت یافت نشد" };
 }
 
-export async function CategoryServicePage({
-  prefix,
+export function CategoryServicePage({
   slug,
 }: {
   prefix: ServiceCategoryPrefix;
   slug: string;
 }) {
-  const path = `/${prefix}/${slug}/`;
-  const service = await resolveCategoryService(prefix, slug);
-  if (service) {
-    return <ServicePage slug={service.slug} path={path} service={service} />;
-  }
-  if (isRedirectTargetSlug(prefix, slug)) {
-    return <ServiceDetailContent slug={slug} />;
-  }
-  notFound();
+  return <ServiceDetailContent slug={slug} />;
 }
