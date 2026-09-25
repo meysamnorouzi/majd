@@ -11,6 +11,8 @@ import { getTeam, getTeamMemberBySlug } from "@/lib/wordpress";
 
 export async function generateStaticParams() {
   const team = await getTeam();
+  // output: "export" treats an empty list as a missing generateStaticParams().
+  if (!team.length) return [{ slug: "_placeholder" }];
   return team.map((m) => ({ slug: m.slug }));
 }
 

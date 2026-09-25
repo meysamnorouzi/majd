@@ -302,23 +302,6 @@ export function buildServiceMenuData(
     })
     .filter((s) => !isRetiredServiceSlug(s.slug));
 
-  const presentPrefixes = new Set(
-    servicePosts
-      .map((s) => s.categoryPrefix)
-      .filter((prefix): prefix is ServiceCategoryPrefix => Boolean(prefix)),
-  );
-  for (const root of SERVICE_MEGA_ROOTS) {
-    if (presentPrefixes.has(root.prefix)) continue;
-    servicePosts.push(
-      ...fallback.posts.filter(
-        (s) =>
-          s.categoryPrefix === root.prefix &&
-          !isServiceCategoryNode(s) &&
-          !s.children?.length,
-      ),
-    );
-  }
-
   return { megaMenu, megaTrees, posts: servicePosts };
 }
 

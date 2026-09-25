@@ -25,7 +25,10 @@ export async function generateCategoryStaticParams(
     ...leaves.map((service) => service.slug),
     ...slugsRedirectedToPrefix(prefix),
   ]);
-  return [...slugs].map((slug) => ({ slug }));
+  const params = [...slugs].filter(Boolean).map((slug) => ({ slug }));
+  // output: "export" treats an empty list as a missing generateStaticParams().
+  if (!params.length) return [{ slug: "_placeholder" }];
+  return params;
 }
 
 export function isRedirectTargetSlug(

@@ -11,6 +11,8 @@ import { getAllPostSlugs, getPostBySlug } from "@/lib/wordpress";
 
 export async function generateStaticParams() {
   const slugs = await getAllPostSlugs();
+  // output: "export" treats an empty list as a missing generateStaticParams().
+  if (!slugs.length) return [{ slug: "_placeholder" }];
   return slugs.map((slug) => ({ slug }));
 }
 
