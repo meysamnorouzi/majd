@@ -3,285 +3,106 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
-import { fetchServicesClient, megaTreesToMenuItems } from "@/lib/wordpress/client";
 import { ServiceIcon } from "@/components/icons/ServiceIcons";
-import {
-  hubPath,
-  isServiceCategoryNode,
-  isServiceCategoryPrefix,
-  isServiceNavPath,
-  servicePath,
-} from "@/lib/service-paths";
-import type { Service } from "@/types";
-
-type MegaServiceItem = { service: Service; label: string };
+import { fetchServiceMenuClient } from "@/lib/wordpress/service-landings";
+import type { ServiceHub } from "@/lib/wordpress/service-landings";
+import { hubPath, isServiceNavPath, servicePathFromParts } from "@/lib/service-paths";
 
 function pathActive(pathname: string, href: string) {
-  return pathname.startsWith(href.replace(/\/$/, ""));
+  const target = href.replace(/\/$/, "");
+  return pathname === target || pathname.startsWith(`${target}/`);
 }
 
-function serviceHref(service: Service) {
-  return servicePath(service);
-}
-
-function pillarHref(service: Service) {
-  return isServiceCategoryPrefix(service.categoryPrefix)
-    ? hubPath(service.categoryPrefix)
-    : undefined;
-}
-
-function servicePathActive(pathname: string, service: Service): boolean {
-  if (
-    !isServiceCategoryNode(service) &&
-    pathActive(pathname, serviceHref(service))
-  ) {
-    return true;
-  }
-  return service.children?.some((child) => servicePathActive(pathname, child)) ?? false;
-}
-
-function MegaMenuLink({
-  href,
-  label,
+function HubColumn({
+  hub,
   pathname,
   onNavigate,
-  nested = false,
 }: {
-  href: string;
-  label: string;
+  hub: ServiceHub;
   pathname: string;
   onNavigate: () => void;
-  nested?: boolean;
 }) {
+  const href = hubPath(hub.slug);
   const active = pathActive(pathname, href);
 
   return (
-    <Link
-      href={href}
-      onClick={onNavigate}
-      role="menuitem"
-      className={`block rounded-lg transition hover:bg-white/5 hover:text-gold-400 ${
-        nested ? "px-2 py-1.5 text-xs" : "px-2 py-2 text-sm"
-      } ${
-        active ? "bg-white/5 font-medium text-gold-400" : "text-white/75"
-      }`}
-    >
-      {label}
-    </Link>
-  );
-}
-
-function MegaMenuColumn({
-  service,
-  label,
-  pathname,
-  onNavigate,
-}: {
-  service: Service;
-  label: string;
-  pathname: string;
-  onNavigate: () => void;
-}) {
-  const columnActive = servicePathActive(pathname, service);
-  const href = pillarHref(service);
-
-  return (
-    <div className="min-w-0 flex-1 border-e border-white/10 px-3 py-4 last:border-e-0">
-      {href ? (
-        <Link
-          href={href}
-          onClick={onNavigate}
-          className={`mb-3 flex items-center gap-2 border-b border-white/10 pb-3 transition hover:text-gold-400 ${
-            columnActive ? "text-gold-400" : "text-white"
-          }`}
-        >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold-500/15 text-gold-400 [&_svg]:h-4 [&_svg]:w-4">
-            <ServiceIcon name={service.icon} />
-          </span>
-          <span className="text-sm font-bold">{label}</span>
-        </Link>
-      ) : (
-        <div
-          className={`mb-3 flex items-center gap-2 border-b border-white/10 pb-3 ${
-            columnActive ? "text-gold-400" : "text-white"
-          }`}
-        >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold-500/15 text-gold-400 [&_svg]:h-4 [&_svg]:w-4">
-            <ServiceIcon name={service.icon} />
-          </span>
-          <span className="text-sm font-bold">{label}</span>
-        </div>
-      )}
-
-      <ul className="space-y-0.5" role="group" aria-label={label}>
-        {(!service.children || service.children.length === 0) && href ? (
-          <li>
-            <MegaMenuLink
-              href={href}
-              label={`صفحه ${label}`}
-              pathname={pathname}
-              onNavigate={onNavigate}
-            />
-          </li>
-        ) : null}
-        {service.children?.map((child) => {
-          const hasGrandchildren = Boolean(child.children?.length);
-          const childActive = servicePathActive(pathname, child);
-          const childIsCategory = isServiceCategoryNode(child);
-
-          if (!hasGrandchildren) {
+    <div className="min-w-0 border-e border-white/10 px-3 py-4 last:border-e-0">
+      <Link
+        href={href}
+        onClick={onNavigate}
+        className={`mb-3 flex items-center gap-2 border-b border-white/10 pb-3 transition hover:text-gold-400 ${
+          active ? "text-gold-400" : "text-white"
+        }`}
+      >
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold-500/15 text-gold-400 [&_svg]:h-4 [&_svg]:w-4">
+          <ServiceIcon name={hub.icon} />
+        </span>
+        <span className="text-sm font-bold">{hub.menuLabel}</span>
+      </Link>
+      <ul className="space-y-0.5" role="group" aria-label={hub.menuLabel}>
+        {hub.landings.length === 0 ? null : (
+          hub.landings.map((landing) => {
+            const landingHref = servicePathFromParts(hub.slug, landing.slug);
+            const landingActive = pathActive(pathname, landingHref);
             return (
-              <li key={child.slug}>
-                <MegaMenuLink
-                  href={serviceHref(child)}
-                  label={child.title}
-                  pathname={pathname}
-                  onNavigate={onNavigate}
-                />
+              <li key={landing.slug}>
+                <Link
+                  href={landingHref}
+                  onClick={onNavigate}
+                  role="menuitem"
+                  className={`block rounded-lg px-2 py-2 text-sm transition hover:bg-white/5 hover:text-gold-400 ${
+                    landingActive
+                      ? "bg-white/5 font-medium text-gold-400"
+                      : "text-white/75"
+                  }`}
+                >
+                  {landing.title}
+                </Link>
               </li>
             );
-          }
-
-          return (
-            <li key={child.slug} className="pt-1 first:pt-0">
-              {childIsCategory ? (
-                <p
-                  className={`block px-2 py-1.5 text-xs font-semibold ${
-                    childActive ? "text-gold-400/90" : "text-white/45"
-                  }`}
-                >
-                  {child.title}
-                </p>
-              ) : (
-                <Link
-                  href={serviceHref(child)}
-                  onClick={onNavigate}
-                  className={`block px-2 py-1.5 text-xs font-semibold transition hover:text-gold-400 ${
-                    childActive ? "text-gold-400/90" : "text-white/45"
-                  }`}
-                >
-                  {child.title}
-                </Link>
-              )}
-              <ul className="mr-2 space-y-0.5 border-r border-white/10 pr-2">
-                {child.children!.map((grandchild) => (
-                  <li key={grandchild.slug}>
-                    <MegaMenuLink
-                      href={serviceHref(grandchild)}
-                      label={grandchild.title}
-                      pathname={pathname}
-                      onNavigate={onNavigate}
-                      nested
-                    />
-                  </li>
-                ))}
-              </ul>
-            </li>
-          );
-        })}
+          })
+        )}
       </ul>
     </div>
   );
 }
 
-function DesktopMegaMenu({
+function MobileHub({
+  hub,
   onNavigate,
-  megaServices,
-  menuError,
 }: {
-  onNavigate: () => void;
-  megaServices: MegaServiceItem[];
-  menuError?: string;
-}) {
-  const pathname = usePathname();
-
-  return (
-    <div className="grid min-h-[14rem] grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-      {menuError ? (
-        <p className="col-span-full px-6 py-8 text-sm text-slate-600">
-          {menuError}
-        </p>
-      ) : null}
-      {megaServices.map(({ service, label }) => (
-        <MegaMenuColumn
-          key={service.slug}
-          service={service}
-          label={label}
-          pathname={pathname}
-          onNavigate={onNavigate}
-        />
-      ))}
-    </div>
-  );
-}
-
-function MobileServiceNode({
-  service,
-  label,
-  onNavigate,
-  depth = 0,
-}: {
-  service: Service;
-  label?: string;
+  hub: ServiceHub;
   onNavigate?: () => void;
-  depth?: number;
 }) {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState(false);
-  const hasChildren = Boolean(service.children?.length);
-  const hub = pillarHref(service);
-  const isCategory = isServiceCategoryNode(service) || hasChildren;
-  const href = isCategory ? hub : serviceHref(service);
-  const active = servicePathActive(pathname, service);
-  const displayLabel = label ?? service.title;
-
-  const labelClass = `flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-4 py-2.5 text-sm ${
-    depth > 0 ? "px-3 py-2" : ""
-  } ${
-    active
-      ? "bg-white/10 text-gold-400"
-      : "text-white/70 hover:bg-white/5 hover:text-white"
-  }`;
+  const href = hubPath(hub.slug);
+  const active = pathActive(pathname, href);
+  const hasChildren = hub.landings.length > 0;
 
   return (
     <div>
       <div className="flex items-center gap-1">
-        {href ? (
-          <Link
-            href={href}
-            onClick={onNavigate}
-            className={labelClass}
-            style={depth > 0 ? { paddingInlineStart: `${depth * 0.75 + 0.75}rem` } : undefined}
-          >
-            {depth === 0 && (
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gold-500/15 text-gold-400 [&_svg]:h-4 [&_svg]:w-4">
-                <ServiceIcon name={service.icon} />
-              </span>
-            )}
-            <span className="truncate">{displayLabel}</span>
-          </Link>
-        ) : (
+        <Link
+          href={href}
+          onClick={onNavigate}
+          className={`flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-4 py-2.5 text-sm ${
+            active
+              ? "bg-white/10 text-gold-400"
+              : "text-white/70 hover:bg-white/5 hover:text-white"
+          }`}
+        >
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gold-500/15 text-gold-400 [&_svg]:h-4 [&_svg]:w-4">
+            <ServiceIcon name={hub.icon} />
+          </span>
+          <span className="truncate">{hub.menuLabel}</span>
+        </Link>
+        {hasChildren ? (
           <button
             type="button"
-            onClick={() => hasChildren && setExpanded((v) => !v)}
-            aria-expanded={hasChildren ? expanded : undefined}
-            className={labelClass}
-            style={depth > 0 ? { paddingInlineStart: `${depth * 0.75 + 0.75}rem` } : undefined}
-          >
-            {depth === 0 && (
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gold-500/15 text-gold-400 [&_svg]:h-4 [&_svg]:w-4">
-                <ServiceIcon name={service.icon} />
-              </span>
-            )}
-            <span className="truncate">{displayLabel}</span>
-          </button>
-        )}
-        {hasChildren && href && (
-          <button
-            type="button"
-            onClick={() => setExpanded((v) => !v)}
+            onClick={() => setExpanded((value) => !value)}
             aria-expanded={expanded}
-            aria-label={`زیرمجموعه‌های ${displayLabel}`}
+            aria-label={`زیرلندینگ‌های ${hub.menuLabel}`}
             className="rounded-lg p-2 text-white/60 hover:bg-white/5 hover:text-white"
           >
             <svg
@@ -298,37 +119,30 @@ function MobileServiceNode({
               />
             </svg>
           </button>
-        )}
-        {hasChildren && !href && (
-          <span className="pointer-events-none pe-2 text-white/60" aria-hidden>
-            <svg
-              className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-              />
-            </svg>
-          </span>
-        )}
+        ) : null}
       </div>
-      {hasChildren && expanded && (
+      {hasChildren && expanded ? (
         <div className="mr-4 mt-1 space-y-0.5 border-r border-white/10 pr-2">
-          {service.children!.map((child) => (
-            <MobileServiceNode
-              key={child.slug}
-              service={child}
-              onNavigate={onNavigate}
-              depth={depth + 1}
-            />
-          ))}
+          {hub.landings.map((landing) => {
+            const landingHref = servicePathFromParts(hub.slug, landing.slug);
+            const landingActive = pathActive(pathname, landingHref);
+            return (
+              <Link
+                key={landing.slug}
+                href={landingHref}
+                onClick={onNavigate}
+                className={`block rounded-lg px-3 py-2 text-sm ${
+                  landingActive
+                    ? "bg-white/10 text-gold-400"
+                    : "text-white/70 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                {landing.title}
+              </Link>
+            );
+          })}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -343,29 +157,30 @@ export function NavServicesDropdown({
   const pathname = usePathname();
   const menuId = useId();
   const [open, setOpen] = useState(false);
-  const [megaServices, setMegaServices] = useState<MegaServiceItem[]>([]);
+  const [hubs, setHubs] = useState<ServiceHub[] | null>(null);
   const [menuError, setMenuError] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadStarted = useRef(false);
 
-  function loadMegaServices() {
+  function loadHubs() {
     if (loadStarted.current) return;
     loadStarted.current = true;
-    fetchServicesClient()
-      .then(({ megaMenu, megaTrees }) => {
-        setMegaServices(megaTreesToMenuItems(megaMenu, megaTrees));
-      })
+    fetchServiceMenuClient()
+      .then(setHubs)
       .catch(() => {
+        setHubs([]);
         setMenuError("بارگذاری خدمات انجام نشد.");
       });
   }
 
   useEffect(() => {
-    loadMegaServices();
+    loadHubs();
   }, []);
 
-  const isServicesActive = isServiceNavPath(pathname);
+  const isServicesActive =
+    isServiceNavPath(pathname) ||
+    (hubs ?? []).some((hub) => pathActive(pathname, hubPath(hub.slug)));
 
   function clearCloseTimer() {
     if (closeTimer.current) {
@@ -375,7 +190,7 @@ export function NavServicesDropdown({
   }
 
   function openMenu() {
-    loadMegaServices();
+    loadHubs();
     clearCloseTimer();
     setOpen(true);
   }
@@ -397,17 +212,17 @@ export function NavServicesDropdown({
   useEffect(() => {
     if (variant !== "desktop" || !open) return;
 
-    function handleClickOutside(e: MouseEvent) {
+    function handleClickOutside(event: MouseEvent) {
       if (
         containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
+        !containerRef.current.contains(event.target as Node)
       ) {
         setOpen(false);
       }
     }
 
-    function handleEscape(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
     }
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -418,6 +233,8 @@ export function NavServicesDropdown({
     };
   }, [variant, open]);
 
+  const columns = Math.min(Math.max(hubs?.length ?? 1, 1), 5);
+
   if (variant === "mobile") {
     return (
       <div className="space-y-1">
@@ -425,13 +242,16 @@ export function NavServicesDropdown({
           {menuError ? (
             <p className="px-3 py-2 text-sm text-white/70">{menuError}</p>
           ) : null}
-          {megaServices.map(({ service, label }) => (
-            <MobileServiceNode
-              key={service.slug}
-              service={service}
-              label={label}
-              onNavigate={onNavigate}
-            />
+          {hubs === null && !menuError ? (
+            <p className="px-3 py-2 text-sm text-white/50">در حال بارگذاری…</p>
+          ) : null}
+          {hubs?.length === 0 && !menuError ? (
+            <p className="px-3 py-2 text-sm text-white/70">
+              لندینگی ثبت نشده است.
+            </p>
+          ) : null}
+          {hubs?.map((hub) => (
+            <MobileHub key={hub.slug} hub={hub} onNavigate={onNavigate} />
           ))}
         </div>
       </div>
@@ -455,8 +275,8 @@ export function NavServicesDropdown({
         <button
           type="button"
           onClick={() => {
-            loadMegaServices();
-            setOpen((v) => !v);
+            loadHubs();
+            setOpen((value) => !value);
           }}
           className="whitespace-nowrap py-2 ps-2.5 pe-0.5 text-sm font-medium xl:ps-3"
           aria-expanded={open}
@@ -467,7 +287,7 @@ export function NavServicesDropdown({
         </button>
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
           aria-haspopup="true"
           aria-controls={menuId}
@@ -494,17 +314,38 @@ export function NavServicesDropdown({
         id={menuId}
         role="menu"
         aria-label="خدمات حقوقی"
-        className={`absolute left-1/2 top-full z-50 mt-1 w-[72rem] max-w-[calc(100vw-1.5rem)] origin-top rounded-xl border border-white/10 bg-navy-900 py-1 shadow-2xl shadow-black/40 transition-all duration-200 ${
+        className={`absolute left-1/2 top-full z-50 mt-1 max-h-[70vh] max-w-[calc(100vw-1.5rem)] origin-top overflow-y-auto rounded-xl border border-white/10 bg-navy-900 py-1 shadow-2xl shadow-black/40 transition-all duration-200 ${
           open
             ? "pointer-events-auto -translate-x-1/2 translate-y-0 opacity-100 visible"
             : "pointer-events-none -translate-x-1/2 -translate-y-1 opacity-0 invisible"
-        }`}
+        } ${columns >= 4 ? "w-[72rem]" : "w-max min-w-[20rem]"}`}
       >
-        <DesktopMegaMenu
-          onNavigate={handleNavigate}
-          megaServices={megaServices}
-          menuError={menuError}
-        />
+        {menuError ? (
+          <p className="px-6 py-8 text-sm text-white/70">{menuError}</p>
+        ) : null}
+        {hubs === null && !menuError ? (
+          <p className="px-6 py-8 text-sm text-white/50">در حال بارگذاری…</p>
+        ) : null}
+        {hubs?.length === 0 && !menuError ? (
+          <p className="px-6 py-8 text-sm text-white/70">لندینگی ثبت نشده است.</p>
+        ) : null}
+        {hubs && hubs.length > 0 ? (
+          <div
+            className="grid"
+            style={{
+              gridTemplateColumns: `repeat(${columns}, minmax(11rem, 1fr))`,
+            }}
+          >
+            {hubs.map((hub) => (
+              <HubColumn
+                key={hub.slug}
+                hub={hub}
+                pathname={pathname}
+                onNavigate={handleNavigate}
+              />
+            ))}
+          </div>
+        ) : null}
       </div>
     </div>
   );

@@ -8,11 +8,9 @@ import { getPillar } from "@/data/pillars";
 import {
   fetchCategoriesClient,
   fetchPostsClient,
-  fetchServicesClient,
   findCategoryBySlug,
   type BlogPost,
 } from "@/lib/wordpress/client";
-import { isServiceCategoryNode } from "@/lib/service-paths";
 import type { ServiceCategoryPrefix } from "@/lib/service-paths";
 
 export function PillarRelatedPosts({
@@ -30,25 +28,15 @@ export function PillarRelatedPosts({
 
     (async () => {
       let categories;
-      let menu;
       try {
-        [categories, menu] = await Promise.all([
-          fetchCategoriesClient(),
-          fetchServicesClient(),
-        ]);
+        categories = await fetchCategoriesClient();
       } catch {
         if (!cancelled) setError("بارگذاری مقالات انجام نشد.");
         return;
       }
       if (cancelled) return;
 
-      const serviceSlugs = new Set(
-        menu.posts
-          .filter((service) => !isServiceCategoryNode(service))
-          .map((service) => service.slug),
-      );
-      const asArticles = (items: BlogPost[]) =>
-        items.filter((post) => !serviceSlugs.has(post.slug)).slice(0, 6);
+      const asArticles = (items: BlogPost[]) => items.slice(0, 6);
 
       try {
         for (const slug of pillar.blogCategorySlugs) {

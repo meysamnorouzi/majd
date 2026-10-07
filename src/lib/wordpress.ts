@@ -17,13 +17,12 @@ import {
   type FetchPostsOptions,
 } from "@/lib/wordpress/posts-query";
 import {
-  getAllServiceRouteParamsFromWp,
   getAllServiceSlugsFromWp,
   getServiceBySlugFromWp,
-  getServiceCategoryIdsFromWp,
   getServicesFromWp,
   getUncategorizedServiceSlugsFromWp,
 } from "@/lib/wordpress/services";
+import { getAllServiceLandingRoutesFromWp } from "@/lib/wordpress/service-landings";
 import {
   getAllTeamSlugsFromWp,
   getTeamFromWp,
@@ -155,19 +154,8 @@ export async function getAllPostSlugs(): Promise<string[]> {
   return [];
 }
 
-/**
- * Article slugs only — posts in a service category are landing pages served at
- * `/{family-lawyer|property-lawyer|criminal-defense-lawyer|legal-consultation|administrative-lawyer}/<slug>/`, and
- * listing them again under `/blogs/<slug>/` publishes a second URL for the
- * same content.
- *
- * Falls back to every post when the service categories cannot be resolved
- * (WordPress unreachable), so a failed lookup never empties the sitemap.
- */
+/** Article slugs. Service hubs and sub-landings are a separate API, not posts. */
 export async function getBlogPostSlugs(): Promise<string[]> {
-  const serviceCategoryIds = await getServiceCategoryIdsFromWp();
-  if (!serviceCategoryIds.length) return getAllPostSlugs();
-
   const slugs: string[] = [];
   let fetchedAnyPage = false;
   let page = 1;
@@ -175,9 +163,7 @@ export async function getBlogPostSlugs(): Promise<string[]> {
 
   while (page <= totalPages && page <= 20) {
     const res = await wpFetch(
-      apiUrl(
-        `/wp-json/wp/v2/posts?per_page=100&page=${page}&_fields=slug&categories_exclude=${serviceCategoryIds.join(",")}`,
-      ),
+      apiUrl(`/wp-json/wp/v2/posts?per_page=100&page=${page}&_fields=slug`),
       { cache: "force-cache", headers: wpServerHeaders() },
     );
     if (!res?.ok) break;
@@ -262,7 +248,7 @@ export async function getAllServiceSlugs(): Promise<string[]> {
 }
 
 export async function getAllServiceRouteParams() {
-  return getAllServiceRouteParamsFromWp();
+  return getAllServiceLandingRoutesFromWp();
 }
 
 export async function getUncategorizedServiceSlugs() {

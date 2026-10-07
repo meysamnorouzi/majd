@@ -10,8 +10,10 @@ import { TEAM_LIST_PATH, teamMemberPath } from "@/lib/team-paths";
 import {
   SERVICE_CATEGORY_PREFIXES,
   hubPath,
+  isServiceCategoryPrefix,
   servicePathFromParts,
 } from "@/lib/service-paths";
+import { getServiceHubsFromWp } from "@/lib/wordpress/service-landings";
 import {
   findLegacyRedirect,
   isRestoredPageWpSlug,
@@ -46,9 +48,10 @@ function entry(
  * (hidden shop/courses/account surfaces are omitted).
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [postSlugs, serviceParams] = await Promise.all([
+  const [postSlugs, serviceParams, serviceHubs] = await Promise.all([
     getBlogPostSlugs(),
     getAllServiceRouteParams(),
+    getServiceHubsFromWp(),
   ]);
   const team = await getTeam();
 
@@ -59,6 +62,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...SERVICE_CATEGORY_PREFIXES.map((prefix) =>
       entry(hubPath(prefix), { changeFrequency: "weekly", priority: 0.9 }),
     ),
+    ...(serviceHubs ?? [])
+      .filter((hub) => !isServiceCategoryPrefix(hub.slug))
+      .map((hub) =>
+        entry(hubPath(hub.slug), { changeFrequency: "weekly", priority: 0.9 }),
+      ),
     entry(TEAM_LIST_PATH, { changeFrequency: "monthly", priority: 0.8 }),
     entry(BLOG_LIST_PATH, { changeFrequency: "daily", priority: 0.9 }),
   ];

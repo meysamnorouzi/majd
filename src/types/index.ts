@@ -186,6 +186,8 @@ export interface Service {
   /** Set when this item is a child of another service */
   parentSlug?: string;
   parentTitle?: string;
+  /** Public hub slug (`family-lawyer` or any hub added in WordPress). */
+  hubSlug?: string;
   /**
    * Public URL prefix for pillar services.
    * Unset only when a post is not in any mega-root category.

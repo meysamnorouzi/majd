@@ -62,8 +62,32 @@ export function prefixForFallbackParent(
   return FALLBACK_PARENT_TO_PREFIX[slug];
 }
 
-export function hubPath(prefix: ServiceCategoryPrefix): string {
+export function hubPath(prefix: string): string {
   return `/${prefix}/`;
+}
+
+const RESERVED_ROOT_SLUGS = new Set([
+  "about",
+  "account",
+  "blog",
+  "blogs",
+  "cart",
+  "checkout",
+  "contact",
+  "courses",
+  "services",
+  "shop",
+  "team",
+]);
+
+/** First URL segment when it can be a service hub, including hubs added later. */
+export function hubSlugFromPathname(pathname: string): string {
+  const normalized = normalizePathname(pathname);
+  const first = decodePathSegment(
+    normalized.replace(/^\//, "").split("/")[0] ?? "",
+  );
+  if (!first || RESERVED_ROOT_SLUGS.has(first)) return "";
+  return first;
 }
 
 /**
@@ -80,15 +104,21 @@ export function isServiceCategoryNode(service: Service): boolean {
 
 /** Canonical public path for a service post. Hubs use `hubPath()`. */
 export function servicePath(
-  service: Pick<Service, "slug" | "categoryPrefix">,
-  /** When WP omits category, keep the pillar the visitor already requested. */
-  urlPrefix?: ServiceCategoryPrefix,
+  service: Pick<Service, "slug" | "categoryPrefix" | "hubSlug">,
+  /** When the record omits its hub, keep the pillar the visitor already requested. */
+  urlPrefix?: string,
 ): string {
-  const prefix = isServiceCategoryPrefix(service.categoryPrefix)
-    ? service.categoryPrefix
-    : urlPrefix;
-  if (isServiceCategoryPrefix(prefix)) {
-    if (FALLBACK_PARENT_TO_PREFIX[service.slug] === prefix) {
+  const prefix =
+    service.hubSlug ||
+    (isServiceCategoryPrefix(service.categoryPrefix)
+      ? service.categoryPrefix
+      : undefined) ||
+    urlPrefix;
+  if (prefix) {
+    if (
+      isServiceCategoryPrefix(prefix) &&
+      FALLBACK_PARENT_TO_PREFIX[service.slug] === prefix
+    ) {
       return hubPath(prefix);
     }
     return `/${prefix}/${service.slug}/`;
@@ -97,7 +127,7 @@ export function servicePath(
 }
 
 export function servicePathFromParts(
-  categoryPrefix: ServiceCategoryPrefix,
+  categoryPrefix: string,
   slug: string,
 ): string {
   return `/${categoryPrefix}/${slug}/`;

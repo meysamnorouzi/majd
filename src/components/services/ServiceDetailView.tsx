@@ -8,7 +8,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { portraitObjectPosition } from "@/data/site";
 import { getPillar } from "@/data/pillars";
 import { splitHtmlIntoParts } from "@/lib/split-html";
-import { hubPath, type ServiceCategoryPrefix } from "@/lib/service-paths";
+import { hubPath, isServiceCategoryPrefix } from "@/lib/service-paths";
 import type { Service } from "@/types";
 
 function buildServiceRichHtml(service: Service): string {
@@ -21,9 +21,15 @@ function buildServiceRichHtml(service: Service): string {
 }
 
 export function ServiceDetailView({ service }: { service: Service }) {
-  const prefix = service.categoryPrefix as ServiceCategoryPrefix | undefined;
-  const pillar = prefix ? getPillar(prefix) : undefined;
-  const hubHref = prefix ? hubPath(prefix) : undefined;
+  const hubSlug =
+    service.hubSlug ||
+    (isServiceCategoryPrefix(service.categoryPrefix)
+      ? service.categoryPrefix
+      : undefined);
+  const pillar =
+    hubSlug && isServiceCategoryPrefix(hubSlug) ? getPillar(hubSlug) : undefined;
+  const hubLabel = service.parentTitle || pillar?.title;
+  const hubHref = hubSlug && hubLabel ? hubPath(hubSlug) : undefined;
   const richHtml = buildServiceRichHtml(service);
   const [first, second, third] = splitHtmlIntoParts(richHtml, 3);
 
@@ -33,8 +39,8 @@ export function ServiceDetailView({ service }: { service: Service }) {
         title={service.title}
         description={service.excerpt}
         breadcrumb={[
-          ...(pillar && hubHref
-            ? [{ label: pillar.title, href: hubHref }]
+          ...(hubLabel && hubHref
+            ? [{ label: hubLabel, href: hubHref }]
             : []),
           { label: service.title },
         ]}

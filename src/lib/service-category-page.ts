@@ -1,6 +1,11 @@
 import { slugsRedirectedToPrefix } from "@/data/legacy-redirects";
 import { getServiceBySlug, getServiceMegaTrees } from "@/lib/wordpress";
 import {
+  getAllServiceLandingRoutesFromWp,
+  getServiceHubsFromWp,
+  getServiceLandingAsService,
+} from "@/lib/wordpress/service-landings";
+import {
   getPillarLeavesFromTree,
   type ServiceCategoryPrefix,
 } from "@/lib/service-paths";
@@ -17,12 +22,11 @@ function decodeSlug(slug: string): string {
 export async function generateCategoryStaticParams(
   prefix: ServiceCategoryPrefix,
 ) {
-  const trees = await getServiceMegaTrees();
-  const leaves = getPillarLeavesFromTree(
-    trees.find((tree) => tree.categoryPrefix === prefix),
-  );
+  const routes = await getAllServiceLandingRoutesFromWp();
   const slugs = new Set([
-    ...leaves.map((service) => service.slug),
+    ...routes
+      .filter((route) => route.category === prefix)
+      .map((route) => route.slug),
     ...slugsRedirectedToPrefix(prefix),
   ]);
   const params = [...slugs].filter(Boolean).map((slug) => ({ slug }));
@@ -54,6 +58,11 @@ export async function resolveCategoryService(
   slug: string,
 ): Promise<Service | null> {
   const decoded = decodeSlug(slug);
+  const apiHubs = await getServiceHubsFromWp();
+  if (apiHubs) {
+    return getServiceLandingAsService(prefix, decoded);
+  }
+
   const trees = await getServiceMegaTrees();
   const leaf = getPillarLeavesFromTree(
     trees.find((tree) => tree.categoryPrefix === prefix),

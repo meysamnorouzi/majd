@@ -7,8 +7,13 @@ import { Container } from "@/components/ui/Container";
 import { ServiceDetailView } from "@/components/services/ServiceDetailView";
 import { fetchServiceBySlugClient } from "@/lib/wordpress/client";
 import {
+  fetchServiceLandingClient,
+  serviceHubApiInstalled,
+} from "@/lib/wordpress/service-landings";
+import {
   categoryPrefixFromPathname,
   hubPath,
+  hubSlugFromPathname,
   servicePath,
   servicePathMatchesLocation,
   serviceSlugFromPathname,
@@ -38,9 +43,15 @@ export function ServiceDetailContent({ slug: slugProp }: { slug?: string }) {
     setError("");
 
     (async () => {
+      const hub = hubSlugFromPathname(pathname);
       let data: Service | null;
       try {
-        data = await fetchServiceBySlugClient(slug);
+        const installed = await serviceHubApiInstalled();
+        if (installed) {
+          data = hub ? await fetchServiceLandingClient(hub, slug) : null;
+        } else {
+          data = await fetchServiceBySlugClient(slug);
+        }
       } catch {
         if (!cancelled) {
           setError("بارگذاری خدمت انجام نشد.");
@@ -105,7 +116,7 @@ export function ServiceDetailContent({ slug: slugProp }: { slug?: string }) {
         <div className="py-24 text-center">
           <h1 className="text-2xl font-bold text-navy-900">خدمت یافت نشد</h1>
           <Link
-            href={hubPath("family-lawyer")}
+            href={hubPath(hubSlugFromPathname(pathname) || "family-lawyer")}
             className="mt-6 inline-block text-gold-600"
           >
             بازگشت به خدمات

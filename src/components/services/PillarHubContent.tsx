@@ -2,18 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { PageHero } from "@/components/layout/PageHero";
-import { Container } from "@/components/ui/Container";
 import { ConsultationSection } from "@/components/contact/ConsultationSection";
 import { PillarLandingBody } from "@/components/services/PillarLandingBody";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { portraitObjectPosition } from "@/data/site";
-import { getPillar } from "@/data/pillars";
+import { getPillar, landingFromPillar } from "@/data/pillars";
 import {
   applyPillarLandingCards,
+  getPillarLanding,
   type PillarLanding,
 } from "@/data/pillar-landings";
 import { fetchLandingByPrefixClient } from "@/lib/wordpress/landings";
 import { fetchServicesClient } from "@/lib/wordpress/services";
+import {
+  fetchServiceHubClient,
+  landingFromServiceHub,
+  landingToService,
+  serviceHubApiInstalled,
+} from "@/lib/wordpress/service-landings";
 import {
   absoluteUrl,
   breadcrumbJsonLd,
@@ -22,50 +28,91 @@ import {
 import {
   getPillarLeavesFromTree,
   hubPath,
+  isServiceCategoryPrefix,
   servicePath,
-  type ServiceCategoryPrefix,
 } from "@/lib/service-paths";
 import type { Service } from "@/types";
 
-export function PillarHubContent({
-  prefix,
-}: {
-  prefix: ServiceCategoryPrefix;
-}) {
-  const pillar = getPillar(prefix);
+export function PillarHubContent({ prefix }: { prefix: string }) {
+  const pillar = isServiceCategoryPrefix(prefix) ? getPillar(prefix) : undefined;
   const [landing, setLanding] = useState<PillarLanding | null>(null);
   const [cards, setCards] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [landingError, setLandingError] = useState("");
-  const [servicesError, setServicesError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
 
     (async () => {
-      let nextLanding: PillarLanding;
       try {
-        nextLanding = await fetchLandingByPrefixClient(prefix);
-      } catch {
-        if (!cancelled) {
+        const installed = await serviceHubApiInstalled();
+        if (cancelled) return;
+
+        if (installed) {
+          const hub = await fetchServiceHubClient(prefix);
+          if (cancelled) return;
+          if (hub) {
+            const nextLanding = landingFromServiceHub(hub);
+            setLanding(nextLanding);
+            setCards(hub.landings.map((item) => landingToService(hub, item)));
+            document.title = `${nextLanding.seoTitle} | موسسه حقوقی مجد`;
+            setLoading(false);
+            return;
+          }
+          if (pillar && isServiceCategoryPrefix(prefix)) {
+            const fallback = getPillarLanding(prefix) ?? landingFromPillar(pillar);
+            setLanding(fallback);
+            setCards([]);
+            setLoading(false);
+            return;
+          }
+          setLandingError("این لندینگ پیدا نشد.");
+          setLoading(false);
+          return;
+        }
+
+        if (!pillar || !isServiceCategoryPrefix(prefix)) {
           setLandingError("بارگذاری این صفحه انجام نشد.");
           setLoading(false);
+          return;
         }
-        return;
-      }
-      if (cancelled) return;
-      setLanding(nextLanding);
-      document.title = `${nextLanding.seoTitle} | موسسه حقوقی مجد`;
 
-      try {
-        const menu = await fetchServicesClient();
+        const nextLanding = await Promise.race([
+          fetchLandingByPrefixClient(prefix),
+          new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error("timeout")), 8000);
+          }),
+        ]);
         if (cancelled) return;
-        const leaves = getPillarLeavesFromTree(
-          menu.megaTrees.find((tree) => tree.categoryPrefix === prefix),
-        );
-        setCards(applyPillarLandingCards(leaves, nextLanding));
+        setLanding(nextLanding);
+        document.title = `${nextLanding.seoTitle} | موسسه حقوقی مجد`;
+
+        try {
+          const menu = await Promise.race([
+            fetchServicesClient(),
+            new Promise<never>((_, reject) => {
+              setTimeout(() => reject(new Error("timeout")), 8000);
+            }),
+          ]);
+          if (cancelled) return;
+          const leaves = getPillarLeavesFromTree(
+            menu.megaTrees.find((tree) => tree.categoryPrefix === prefix),
+          ).map((service) => ({ ...service, hubSlug: prefix }));
+          setCards(applyPillarLandingCards(leaves, nextLanding));
+        } catch {
+          if (!cancelled) setCards([]);
+        }
       } catch {
-        if (!cancelled) setServicesError("بارگذاری خدمات انجام نشد.");
+        if (cancelled) return;
+        if (pillar && isServiceCategoryPrefix(prefix)) {
+          const fallback =
+            getPillarLanding(prefix) ?? landingFromPillar(pillar);
+          setLanding(fallback);
+          setCards([]);
+          document.title = `${fallback.seoTitle} | موسسه حقوقی مجد`;
+        } else {
+          setLandingError("بارگذاری این صفحه انجام نشد.");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -74,14 +121,13 @@ export function PillarHubContent({
     return () => {
       cancelled = true;
     };
-  }, [prefix]);
-
-  if (!pillar) return null;
+  }, [pillar, prefix]);
 
   const path = hubPath(prefix);
-  const pageName = landing?.heroTitle ?? pillar.title;
-  const pageDescription = landing?.seoDescription ?? pillar.excerpt;
-  const heroImage = landing?.image ?? pillar.image;
+  const pageName = landing?.heroTitle ?? pillar?.title ?? "خدمات حقوقی";
+  const pageDescription = landing?.seoDescription ?? pillar?.excerpt ?? "";
+  const heroImage = landing?.image ?? pillar?.image;
+  const crumb = pillar?.title ?? landing?.heroTitle ?? pageName;
 
   return (
     <>
@@ -90,7 +136,7 @@ export function PillarHubContent({
           data={[
             breadcrumbJsonLd([
               { name: "خانه", path: "/" },
-              { name: pillar.title, path },
+              { name: crumb, path },
             ]),
             {
               "@context": "https://schema.org",
@@ -105,7 +151,7 @@ export function PillarHubContent({
                   "@type": "ListItem",
                   position: index + 1,
                   name: service.title,
-                  url: absoluteUrl(servicePath(service)),
+                  url: absoluteUrl(servicePath(service, prefix)),
                 })),
               },
             },
@@ -116,19 +162,17 @@ export function PillarHubContent({
 
       <PageHero
         title={pageName}
-        description={landing?.heroDescription ?? pillar.excerpt}
-        breadcrumb={[{ label: pillar.title }]}
+        description={landing?.heroDescription ?? pillar?.excerpt ?? ""}
+        breadcrumb={[{ label: crumb }]}
         image={heroImage}
-        imagePosition={portraitObjectPosition(heroImage) ?? "center 28%"}
+        imagePosition={
+          heroImage ? (portraitObjectPosition(heroImage) ?? "center 28%") : "center 28%"
+        }
         compactTitle
       />
 
       {landingError ? (
         <p className="py-16 text-center text-slate-600">{landingError}</p>
-      ) : null}
-
-      {servicesError ? (
-        <p className="py-8 text-center text-slate-600">{servicesError}</p>
       ) : null}
 
       {landingError ? null : loading || !landing ? (
@@ -139,7 +183,7 @@ export function PillarHubContent({
         <PillarLandingBody
           landing={landing}
           cards={cards}
-          defaultSubject={pillar.title}
+          defaultSubject={pillar?.title ?? pageName}
         />
       )}
 
@@ -147,10 +191,10 @@ export function PillarHubContent({
         title={landing?.cta.formTitle ?? "فرم مشاوره"}
         description={
           landing?.cta.formDescription ??
-          `موضوع پرونده ${pillar.title} را بنویسید؛ کارشناسان موسسه با شما تماس می‌گیرند.`
+          `موضوع پرونده ${pillar?.title ?? pageName} را بنویسید؛ کارشناسان موسسه با شما تماس می‌گیرند.`
         }
-        defaultSubject={pillar.title}
-        defaultMessage={`درخواست مشاوره برای ${pillar.title}`}
+        defaultSubject={pillar?.title ?? pageName}
+        defaultMessage={`درخواست مشاوره برای ${pillar?.title ?? pageName}`}
       />
     </>
   );

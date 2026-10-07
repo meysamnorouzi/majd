@@ -206,6 +206,16 @@ RewriteRule ^ /blogs/%D8%A7%D8%B5%D9%84-%DB%B4%DB%B9-%D9%82%D8%A7%D9%86%D9%88%D9
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^(family-lawyer|property-lawyer|criminal-defense-lawyer|legal-consultation|administrative-lawyer)/[^/]+/?$ /services/detail/index.html [L]
 
+  # Hubs added later in WordPress: /{new-slug}/
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^[a-z0-9-]+/?$ /services/hub/index.html [L]
+
+  # Sub-landings under a hub added later: /{hub}/{slug}/
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^[a-z0-9-]+/[^/]+/?$ /services/detail/index.html [L]
+
   # Leftover /services/<slug>/ bookmarks — SPA then client-canonicalizes.
   # Exact /services/ is a 301 in the generated block above.
   RewriteCond %{REQUEST_FILENAME} !-f

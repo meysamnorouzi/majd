@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Majd Pillar Landings
- * Description: Custom post type for pillar hub landings (وکیل خانواده، ملکی، کیفری، اداری) — edited like blog posts and read by the Next.js frontend.
+ * Description: Service landing hubs and their sub-landings (separate from blog posts), with a dedicated REST API for the Next.js frontend.
  * Install: copy to wp-content/mu-plugins/wordpress-majd-landing-api.php
  */
 
@@ -12,6 +12,11 @@ if (!defined('ABSPATH')) {
 define('MAJD_LANDING_POST_TYPE', 'majd_landing');
 define('MAJD_LANDING_META_KEYWORDS', '_majd_landing_keywords');
 define('MAJD_LANDING_META_HERO', '_majd_landing_hero');
+define('MAJD_LANDING_META_MENU_LABEL', '_majd_landing_menu_label');
+define('MAJD_LANDING_META_ICON', '_majd_landing_icon');
+define('MAJD_SUBLANDING_POST_TYPE', 'majd_sublanding');
+define('MAJD_SUBLANDING_META_HUB', '_majd_sublanding_hub_id');
+define('MAJD_SUBLANDING_META_ICON', '_majd_sublanding_icon');
 
 class Majd_Landing_API {
     public static function init() {
@@ -28,11 +33,11 @@ class Majd_Landing_API {
     public static function register_post_type() {
         register_post_type(MAJD_LANDING_POST_TYPE, [
             'labels' => [
-                'name' => 'لندینگ پیلارها',
-                'singular_name' => 'لندینگ',
-                'menu_name' => 'لندینگ پیلارها',
+                'name' => 'لندینگ‌های اصلی',
+                'singular_name' => 'لندینگ اصلی',
+                'menu_name' => 'لندینگ خدمات',
                 'add_new' => 'افزودن لندینگ',
-                'add_new_item' => 'افزودن لندینگ جدید',
+                'add_new_item' => 'افزودن لندینگ اصلی',
                 'edit_item' => 'ویرایش لندینگ',
                 'new_item' => 'لندینگ جدید',
                 'view_item' => 'مشاهده',
@@ -63,6 +68,7 @@ class Majd_Landing_API {
                 'editor',
                 'excerpt',
                 'thumbnail',
+                'page-attributes',
                 'revisions',
             ],
         ]);
@@ -76,6 +82,18 @@ class Majd_Landing_API {
             'auth_callback' => '__return_true',
         ]);
         register_post_meta(MAJD_LANDING_POST_TYPE, MAJD_LANDING_META_HERO, [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => true,
+            'auth_callback' => '__return_true',
+        ]);
+        register_post_meta(MAJD_LANDING_POST_TYPE, MAJD_LANDING_META_MENU_LABEL, [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => true,
+            'auth_callback' => '__return_true',
+        ]);
+        register_post_meta(MAJD_LANDING_POST_TYPE, MAJD_LANDING_META_ICON, [
             'type' => 'string',
             'single' => true,
             'show_in_rest' => true,
@@ -122,18 +140,20 @@ class Majd_Landing_API {
 
     public static function render_guide_box($post) {
         $slug = $post->post_name ?: '(هنوز ذخیره نشده)';
-        echo '<p><strong>نامک (slug) باید دقیقاً یکی از این‌ها باشد:</strong></p>';
+        echo '<p><strong>نامک، آدرس صفحه در سایت است:</strong> <code>/' . esc_html($slug) . '/</code></p>';
+        echo '<p>لندینگ جدید با هر نامک لاتین اضافه می‌شود و در منوی خدمات ظاهر می‌شود. نمونه‌های فعلی:</p>';
         echo '<ul style="margin:0 1rem 1rem;list-style:disc">';
         foreach (self::landing_slugs() as $item) {
             echo '<li><code>' . esc_html($item) . '</code></li>';
         }
-        echo '<li><code>legal-consultation</code> (اختیاری)</li>';
+        echo '<li><code>legal-consultation</code></li>';
         echo '</ul>';
-        echo '<p>نامک فعلی: <code>' . esc_html($slug) . '</code></p>';
-        echo '<p style="color:#555">عنوان = H1 صفحه<br>چکیده = توضیح هیرو / متا<br>محتوا را مثل مقاله با تیتر ۲ و ۳ بنویسید:</p>';
+        echo '<p style="color:#555">از این نامک‌ها استفاده نکنید: <code>blogs</code>، <code>team</code>، <code>about</code>، <code>contact</code>، <code>services</code>.</p>';
+        echo '<p style="color:#555">عنوان = H1 صفحه<br>چکیده = توضیح هیرو / متا<br>ترتیب (ویژگی‌های برگه) = جای ستون در منو<br>زیرلندینگ‌ها را از منوی «زیرلندینگ‌ها» به این لندینگ وصل کنید، نه از نوشته‌های وبلاگ.</p>';
+        echo '<p style="color:#555">محتوا را مثل مقاله با تیتر ۲ و ۳ بنویسید:</p>';
         echo '<ol style="margin:0 1rem;color:#444">';
-        echo '<li><strong>H2</strong> خدمات تخصصی… + ۲–۳ پاراگراف</li>';
-        echo '<li><strong>H3</strong> برای هر کارت خدمت + یک پاراگراف</li>';
+        echo '<li><strong>H2</strong> خدمات تخصصی… + ۲–۳ پاراگراف معرفی</li>';
+        echo '<li>کارت‌های قابل کلیک را اینجا ننویسید؛ از «زیرلندینگ‌ها» اضافه کنید</li>';
         echo '<li><strong>H2</strong> بخش‌های بعدی (چرا وکیل، دادگاه، مراحل، چرا مجد)</li>';
         echo '<li><strong>H3</strong> زیربخش‌های «چرا مجد»</li>';
         echo '<li><strong>H2</strong> سوالات متداول + H3 سؤال و پاراگراف جواب</li>';
@@ -145,6 +165,12 @@ class Majd_Landing_API {
         wp_nonce_field('majd_landing_save', 'majd_landing_nonce');
         $keywords = get_post_meta($post->ID, MAJD_LANDING_META_KEYWORDS, true);
         $hero = get_post_meta($post->ID, MAJD_LANDING_META_HERO, true);
+        $menu_label = get_post_meta($post->ID, MAJD_LANDING_META_MENU_LABEL, true);
+        $icon = get_post_meta($post->ID, MAJD_LANDING_META_ICON, true);
+        echo '<p><label>برچسب منوی خدمات (کوتاه)</label></p>';
+        echo '<input type="text" name="majd_landing_menu_label" class="large-text" value="' . esc_attr((string) $menu_label) . '" />';
+        echo '<p><label>آیکون (<code>scale</code>، <code>gavel</code>، <code>heart</code>، <code>building</code>، <code>coins</code>، <code>chat</code>)</label></p>';
+        echo '<input type="text" name="majd_landing_icon" class="large-text" value="' . esc_attr((string) $icon) . '" />';
         echo '<p><label>توضیح کوتاه هیرو (اختیاری؛ در غیر این صورت چکیده استفاده می‌شود)</label></p>';
         echo '<textarea name="majd_landing_hero" rows="3" class="large-text">' . esc_textarea((string) $hero) . '</textarea>';
         echo '<p><label>کلمات کلیدی (با ویرگول جدا کنید)</label></p>';
@@ -166,6 +192,12 @@ class Majd_Landing_API {
         }
         if (isset($_POST['majd_landing_hero'])) {
             update_post_meta($post_id, MAJD_LANDING_META_HERO, sanitize_textarea_field(wp_unslash($_POST['majd_landing_hero'])));
+        }
+        if (isset($_POST['majd_landing_menu_label'])) {
+            update_post_meta($post_id, MAJD_LANDING_META_MENU_LABEL, sanitize_text_field(wp_unslash($_POST['majd_landing_menu_label'])));
+        }
+        if (isset($_POST['majd_landing_icon'])) {
+            update_post_meta($post_id, MAJD_LANDING_META_ICON, Majd_Service_Landings::sanitize_icon(wp_unslash($_POST['majd_landing_icon'])));
         }
     }
 
@@ -416,3 +448,508 @@ class Majd_Landing_API {
 }
 
 Majd_Landing_API::init();
+
+/**
+ * Sub-landings under a service hub, plus the public services API.
+ * Blog posts are not used.
+ */
+class Majd_Service_Landings {
+    public static function init() {
+        add_action('init', [__CLASS__, 'register_post_type']);
+        add_action('init', [__CLASS__, 'register_meta']);
+        add_action('init', [__CLASS__, 'maybe_prepare_content'], 40);
+        add_action('rest_api_init', [__CLASS__, 'register_routes']);
+        add_action('add_meta_boxes', [__CLASS__, 'add_meta_boxes']);
+        add_action('save_post_' . MAJD_SUBLANDING_POST_TYPE, [__CLASS__, 'save_meta'], 10, 2);
+        add_filter('manage_' . MAJD_SUBLANDING_POST_TYPE . '_posts_columns', [__CLASS__, 'list_columns']);
+        add_action('manage_' . MAJD_SUBLANDING_POST_TYPE . '_posts_custom_column', [__CLASS__, 'render_list_column'], 10, 2);
+    }
+
+    public static function sanitize_icon($value) {
+        $icon = sanitize_key((string) $value);
+        $allowed = ['scale', 'gavel', 'heart', 'building', 'coins', 'chat'];
+        return in_array($icon, $allowed, true) ? $icon : 'scale';
+    }
+
+    public static function register_post_type() {
+        register_post_type(MAJD_SUBLANDING_POST_TYPE, [
+            'labels' => [
+                'name' => 'زیرلندینگ‌ها',
+                'singular_name' => 'زیرلندینگ',
+                'menu_name' => 'زیرلندینگ‌ها',
+                'add_new' => 'افزودن زیرلندینگ',
+                'add_new_item' => 'افزودن زیرلندینگ',
+                'edit_item' => 'ویرایش زیرلندینگ',
+                'new_item' => 'زیرلندینگ جدید',
+                'view_item' => 'مشاهده',
+                'search_items' => 'جستجوی زیرلندینگ',
+                'not_found' => 'زیرلندینگی یافت نشد',
+                'not_found_in_trash' => 'زیرلندینگی در زباله‌دان نیست',
+                'featured_image' => 'تصویر کارت',
+                'set_featured_image' => 'انتخاب تصویر کارت',
+                'remove_featured_image' => 'حذف تصویر کارت',
+            ],
+            'public' => true,
+            'publicly_queryable' => false,
+            'exclude_from_search' => true,
+            'show_ui' => true,
+            'show_in_menu' => 'edit.php?post_type=' . MAJD_LANDING_POST_TYPE,
+            'show_in_nav_menus' => false,
+            'capability_type' => 'post',
+            'map_meta_cap' => true,
+            'has_archive' => false,
+            'rewrite' => false,
+            'query_var' => false,
+            'show_in_rest' => false,
+            'supports' => [
+                'title',
+                'editor',
+                'excerpt',
+                'thumbnail',
+                'page-attributes',
+                'revisions',
+            ],
+        ]);
+    }
+
+    public static function register_meta() {
+        register_post_meta(MAJD_SUBLANDING_POST_TYPE, MAJD_SUBLANDING_META_HUB, [
+            'type' => 'integer',
+            'single' => true,
+            'show_in_rest' => false,
+            'auth_callback' => function () {
+                return current_user_can('edit_posts');
+            },
+        ]);
+        register_post_meta(MAJD_SUBLANDING_POST_TYPE, MAJD_SUBLANDING_META_ICON, [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => false,
+            'auth_callback' => function () {
+                return current_user_can('edit_posts');
+            },
+        ]);
+    }
+
+    public static function register_routes() {
+        register_rest_route('majd/v1', '/service-hubs', [
+            'methods' => 'GET',
+            'callback' => [__CLASS__, 'rest_hubs'],
+            'permission_callback' => '__return_true',
+        ]);
+        register_rest_route('majd/v1', '/service-hubs/(?P<slug>[a-z0-9-]+)', [
+            'methods' => 'GET',
+            'callback' => [__CLASS__, 'rest_hub'],
+            'permission_callback' => '__return_true',
+        ]);
+        register_rest_route('majd/v1', '/service-landings/(?P<hub>[a-z0-9-]+)/(?P<slug>.+)', [
+            'methods' => 'GET',
+            'callback' => [__CLASS__, 'rest_landing'],
+            'permission_callback' => '__return_true',
+        ]);
+    }
+
+    public static function rest_hubs() {
+        $hubs = self::published_hubs();
+        return rest_ensure_response(array_map(function ($post) {
+            return self::hub_payload($post, false);
+        }, $hubs));
+    }
+
+    public static function rest_hub(WP_REST_Request $request) {
+        $post = self::hub_by_slug((string) $request['slug']);
+        if (!$post) {
+            return new WP_Error('majd_hub_not_found', 'Landing hub not found', ['status' => 404]);
+        }
+        return rest_ensure_response(self::hub_payload($post, true));
+    }
+
+    public static function rest_landing(WP_REST_Request $request) {
+        $hub = self::hub_by_slug((string) $request['hub']);
+        if (!$hub) {
+            return new WP_Error('majd_hub_not_found', 'Landing hub not found', ['status' => 404]);
+        }
+        $landing = self::landing_by_slug($hub->ID, rawurldecode((string) $request['slug']));
+        if (!$landing) {
+            return new WP_Error('majd_landing_not_found', 'Sub-landing not found', ['status' => 404]);
+        }
+        $card = self::landing_card($landing);
+        $card['content'] = apply_filters('the_content', $landing->post_content);
+        $card['hubSlug'] = $hub->post_name;
+        $card['hubTitle'] = self::menu_label($hub);
+        return rest_ensure_response($card);
+    }
+
+    public static function add_meta_boxes() {
+        add_meta_box(
+            'majd_sublanding_hub',
+            'لندینگ اصلی',
+            [__CLASS__, 'render_hub_box'],
+            MAJD_SUBLANDING_POST_TYPE,
+            'side',
+            'high'
+        );
+    }
+
+    public static function render_hub_box($post) {
+        wp_nonce_field('majd_sublanding_save', 'majd_sublanding_nonce');
+        $hub_id = (int) get_post_meta($post->ID, MAJD_SUBLANDING_META_HUB, true);
+        $icon = (string) get_post_meta($post->ID, MAJD_SUBLANDING_META_ICON, true);
+        $hubs = get_posts([
+            'post_type' => MAJD_LANDING_POST_TYPE,
+            'post_status' => ['publish', 'draft', 'pending', 'private'],
+            'numberposts' => 100,
+            'orderby' => 'menu_order title',
+            'order' => 'ASC',
+        ]);
+        echo '<p><label for="majd_sublanding_hub"><strong>این کارت زیر کدام لندینگ است؟</strong></label></p>';
+        echo '<select name="majd_sublanding_hub" id="majd_sublanding_hub" class="widefat">';
+        echo '<option value="0">انتخاب کنید</option>';
+        foreach ($hubs as $hub) {
+            printf(
+                '<option value="%d" %s>%s</option>',
+                (int) $hub->ID,
+                selected($hub_id, (int) $hub->ID, false),
+                esc_html(get_the_title($hub) . ' /' . $hub->post_name . '/')
+            );
+        }
+        echo '</select>';
+        echo '<p><label>آیکون کارت</label></p>';
+        echo '<input type="text" name="majd_sublanding_icon" class="widefat" value="' . esc_attr($icon) . '" />';
+        echo '<p style="color:#555">آدرس صفحه: <code>/{نامک لندینگ}/{نامک همین زیرلندینگ}/</code></p>';
+        echo '<p style="color:#555">این‌ها نوشته وبلاگ نیستند. عنوان و چکیده روی کارت لندینگ اصلی دیده می‌شود.</p>';
+    }
+
+    public static function save_meta($post_id) {
+        if (!isset($_POST['majd_sublanding_nonce']) || !wp_verify_nonce($_POST['majd_sublanding_nonce'], 'majd_sublanding_save')) {
+            return;
+        }
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
+        if (!current_user_can('edit_post', $post_id)) {
+            return;
+        }
+        $hub_id = isset($_POST['majd_sublanding_hub']) ? absint($_POST['majd_sublanding_hub']) : 0;
+        if ($hub_id && get_post_type($hub_id) !== MAJD_LANDING_POST_TYPE) {
+            $hub_id = 0;
+        }
+        update_post_meta($post_id, MAJD_SUBLANDING_META_HUB, $hub_id);
+        if (isset($_POST['majd_sublanding_icon'])) {
+            update_post_meta($post_id, MAJD_SUBLANDING_META_ICON, self::sanitize_icon(wp_unslash($_POST['majd_sublanding_icon'])));
+        }
+    }
+
+    public static function list_columns($columns) {
+        $columns['majd_hub'] = 'لندینگ اصلی';
+        $columns['majd_path'] = 'مسیر سایت';
+        return $columns;
+    }
+
+    public static function render_list_column($column, $post_id) {
+        if ($column === 'majd_hub') {
+            $hub_id = (int) get_post_meta($post_id, MAJD_SUBLANDING_META_HUB, true);
+            echo $hub_id ? esc_html(get_the_title($hub_id)) : '—';
+            return;
+        }
+        if ($column === 'majd_path') {
+            $hub_id = (int) get_post_meta($post_id, MAJD_SUBLANDING_META_HUB, true);
+            $hub_slug = $hub_id ? get_post_field('post_name', $hub_id) : '…';
+            $slug = get_post_field('post_name', $post_id);
+            echo '<code>/' . esc_html($hub_slug . '/' . $slug) . '/</code>';
+        }
+    }
+
+    private static function published_hubs() {
+        return get_posts([
+            'post_type' => MAJD_LANDING_POST_TYPE,
+            'post_status' => 'publish',
+            'numberposts' => 100,
+            'orderby' => ['menu_order' => 'ASC', 'title' => 'ASC'],
+        ]);
+    }
+
+    private static function hub_by_slug($slug) {
+        $posts = get_posts([
+            'post_type' => MAJD_LANDING_POST_TYPE,
+            'name' => sanitize_title($slug),
+            'post_status' => 'publish',
+            'numberposts' => 1,
+        ]);
+        return $posts[0] ?? null;
+    }
+
+    private static function landings_for_hub($hub_id) {
+        return get_posts([
+            'post_type' => MAJD_SUBLANDING_POST_TYPE,
+            'post_status' => 'publish',
+            'numberposts' => 100,
+            'meta_key' => MAJD_SUBLANDING_META_HUB,
+            'meta_value' => (int) $hub_id,
+            'orderby' => ['menu_order' => 'ASC', 'title' => 'ASC'],
+        ]);
+    }
+
+    private static function landing_by_slug($hub_id, $slug) {
+        $posts = get_posts([
+            'post_type' => MAJD_SUBLANDING_POST_TYPE,
+            'name' => $slug,
+            'post_status' => 'publish',
+            'numberposts' => 1,
+        ]);
+        if (!$posts) {
+            return null;
+        }
+        $parent = (int) get_post_meta($posts[0]->ID, MAJD_SUBLANDING_META_HUB, true);
+        return $parent === (int) $hub_id ? $posts[0] : null;
+    }
+
+    private static function excerpt($post) {
+        $text = trim((string) $post->post_excerpt);
+        if ($text !== '') {
+            return $text;
+        }
+        return wp_trim_words(wp_strip_all_tags($post->post_content), 32, '…');
+    }
+
+    private static function keywords($post_id) {
+        $raw = (string) get_post_meta($post_id, MAJD_LANDING_META_KEYWORDS, true);
+        $parts = preg_split('/[,،]+/u', $raw) ?: [];
+        return array_values(array_filter(array_map('trim', $parts)));
+    }
+
+    private static function image_url($post_id) {
+        $url = get_the_post_thumbnail_url($post_id, 'large');
+        return $url ? $url : '';
+    }
+
+    private static function default_presentation() {
+        return [
+            'family-lawyer' => ['label' => 'وکیل خانواده', 'icon' => 'heart', 'order' => 10],
+            'property-lawyer' => ['label' => 'وکیل ملکی', 'icon' => 'building', 'order' => 20],
+            'criminal-defense-lawyer' => ['label' => 'وکیل کیفری', 'icon' => 'gavel', 'order' => 30],
+            'legal-consultation' => ['label' => 'مشاوره حقوقی', 'icon' => 'chat', 'order' => 40],
+            'administrative-lawyer' => ['label' => 'وکیل اداری', 'icon' => 'scale', 'order' => 50],
+        ];
+    }
+
+    private static function menu_label($post) {
+        $label = trim((string) get_post_meta($post->ID, MAJD_LANDING_META_MENU_LABEL, true));
+        if ($label !== '') {
+            return $label;
+        }
+        $defaults = self::default_presentation();
+        if (isset($defaults[$post->post_name])) {
+            return $defaults[$post->post_name]['label'];
+        }
+        return get_the_title($post);
+    }
+
+    private static function hub_icon($post) {
+        $icon = trim((string) get_post_meta($post->ID, MAJD_LANDING_META_ICON, true));
+        if ($icon !== '') {
+            return self::sanitize_icon($icon);
+        }
+        $defaults = self::default_presentation();
+        if (isset($defaults[$post->post_name])) {
+            return $defaults[$post->post_name]['icon'];
+        }
+        return 'scale';
+    }
+
+    private static function landing_card($post) {
+        return [
+            'id' => (int) $post->ID,
+            'slug' => $post->post_name,
+            'title' => get_the_title($post),
+            'excerpt' => self::excerpt($post),
+            'icon' => self::sanitize_icon(get_post_meta($post->ID, MAJD_SUBLANDING_META_ICON, true)),
+            'image' => self::image_url($post->ID),
+        ];
+    }
+
+    private static function hub_payload($post, $with_content) {
+        $hero = (string) get_post_meta($post->ID, MAJD_LANDING_META_HERO, true);
+        $landings = [];
+        foreach (self::landings_for_hub($post->ID) as $landing) {
+            $landings[] = self::landing_card($landing);
+        }
+        $payload = [
+            'id' => (int) $post->ID,
+            'slug' => $post->post_name,
+            'title' => get_the_title($post),
+            'menuLabel' => self::menu_label($post),
+            'excerpt' => self::excerpt($post),
+            'icon' => self::hub_icon($post),
+            'image' => self::image_url($post->ID),
+            'heroDescription' => $hero,
+            'keywords' => self::keywords($post->ID),
+            'landings' => $landings,
+        ];
+        if ($with_content) {
+            $payload['content'] = apply_filters('the_content', $post->post_content);
+        }
+        return $payload;
+    }
+
+    public static function maybe_prepare_content() {
+        if (get_option('majd_service_landings_prepared_v1')) {
+            return;
+        }
+        self::fill_hub_presentation();
+        self::ensure_consultation_hub();
+        self::seed_sublandings();
+        update_option('majd_service_landings_prepared_v1', '1');
+    }
+
+    private static function fill_hub_presentation() {
+        foreach (self::default_presentation() as $slug => $meta) {
+            $posts = get_posts([
+                'post_type' => MAJD_LANDING_POST_TYPE,
+                'name' => $slug,
+                'post_status' => 'any',
+                'numberposts' => 1,
+            ]);
+            if (!$posts) {
+                continue;
+            }
+            $post = $posts[0];
+            if (!get_post_meta($post->ID, MAJD_LANDING_META_MENU_LABEL, true)) {
+                update_post_meta($post->ID, MAJD_LANDING_META_MENU_LABEL, $meta['label']);
+            }
+            if (!get_post_meta($post->ID, MAJD_LANDING_META_ICON, true)) {
+                update_post_meta($post->ID, MAJD_LANDING_META_ICON, $meta['icon']);
+            }
+            if ((int) $post->menu_order === 0) {
+                wp_update_post([
+                    'ID' => $post->ID,
+                    'menu_order' => $meta['order'],
+                ]);
+            }
+        }
+    }
+
+    private static function ensure_consultation_hub() {
+        $exists = get_posts([
+            'post_type' => MAJD_LANDING_POST_TYPE,
+            'name' => 'legal-consultation',
+            'post_status' => 'any',
+            'numberposts' => 1,
+            'fields' => 'ids',
+        ]);
+        if ($exists) {
+            return;
+        }
+        $id = wp_insert_post([
+            'post_type' => MAJD_LANDING_POST_TYPE,
+            'post_status' => 'publish',
+            'post_title' => 'مشاوره حقوقی',
+            'post_name' => 'legal-consultation',
+            'post_excerpt' => 'مشاوره تخصصی حضوری و تلفنی پیش از هر اقدام قضایی؛ مسیر درست را قبل از طرح دعوا مشخص کنید.',
+            'menu_order' => 40,
+            'post_content' =>
+                '<h2>خدمات تخصصی مشاوره حقوقی</h2>'
+                . '<p>بسیاری از پرونده‌ها با یک مشاوره دقیق در همان ابتدا مسیر کوتاه‌تری پیدا می‌کنند. موسسه مجد مشاوره حقوقی را با بررسی مدارک، ارزیابی ریسک و پیشنهاد مسیر ارائه می‌دهد.</p>'
+                . '<h2>چرا پیش از اقدام قضایی مشاوره بگیریم؟</h2>'
+                . '<p>مشاوره حقوقی موسسه برای اشخاص حقیقی و حقوقی، حضوری و تلفنی برگزار می‌شود. در جلسه اول، موضوع، مهلت‌های قانونی و مدارک لازم روشن می‌شود.</p>'
+                . '<h2>سوالات متداول درباره مشاوره حقوقی</h2>'
+                . '<h3>آیا مشاوره اولیه رایگان است؟</h3>'
+                . '<p>برای موارد خاص، امکان مشاوره اولیه رایگان مطابق شرایط موسسه وجود دارد.</p>'
+                . '<h2>همین حالا برای مشاوره تماس بگیرید</h2>'
+                . '<p>موضوع پرونده را با کارشناسان موسسه حقوقی مجد وکیل الرعایا مطرح کنید.</p>',
+        ], true);
+        if (is_wp_error($id) || !$id) {
+            return;
+        }
+        update_post_meta($id, MAJD_LANDING_META_MENU_LABEL, 'مشاوره حقوقی');
+        update_post_meta($id, MAJD_LANDING_META_ICON, 'chat');
+        update_post_meta($id, MAJD_LANDING_META_HERO, 'مسیر درست را قبل از طرح دعوا مشخص کنید. مشاوره حضوری و تلفنی با بررسی مدارک و مهلت‌های قانونی.');
+        update_post_meta($id, MAJD_LANDING_META_KEYWORDS, 'مشاوره حقوقی، مشاوره وکیل، مشاوره تلفنی');
+    }
+
+    private static function seed_sublandings() {
+        foreach (self::sublanding_seeds() as $group) {
+            $hubs = get_posts([
+                'post_type' => MAJD_LANDING_POST_TYPE,
+                'name' => $group['hub'],
+                'post_status' => 'publish',
+                'numberposts' => 1,
+            ]);
+            if (!$hubs) {
+                continue;
+            }
+            $hub_id = (int) $hubs[0]->ID;
+            if (self::landings_for_hub($hub_id)) {
+                continue;
+            }
+            $order = 10;
+            foreach ($group['items'] as $item) {
+                $id = wp_insert_post([
+                    'post_type' => MAJD_SUBLANDING_POST_TYPE,
+                    'post_status' => 'publish',
+                    'post_title' => $item['title'],
+                    'post_name' => $item['slug'],
+                    'post_excerpt' => $item['excerpt'],
+                    'post_content' => '<p>' . esc_html($item['excerpt']) . '</p>',
+                    'menu_order' => $order,
+                ], true);
+                $order += 10;
+                if (is_wp_error($id) || !$id) {
+                    continue;
+                }
+                update_post_meta($id, MAJD_SUBLANDING_META_HUB, $hub_id);
+                update_post_meta($id, MAJD_SUBLANDING_META_ICON, self::sanitize_icon($item['icon']));
+            }
+        }
+    }
+
+    private static function sublanding_seeds() {
+        return [
+            [
+                'hub' => 'family-lawyer',
+                'items' => [
+                    ['slug' => 'divorce-lawyer', 'icon' => 'heart', 'title' => 'وکیل طلاق', 'excerpt' => 'بررسی طلاق توافقی یا یک‌طرفه، حقوق مالی زوجین، مهریه، نفقه و حضانت فرزند.'],
+                    ['slug' => 'mahr-lawyer', 'icon' => 'coins', 'title' => 'وکیل مهریه', 'excerpt' => 'مطالبه و وصول مهریه، نحوه طرح دعوا و بررسی اموال زوج.'],
+                    ['slug' => 'nafaqa-lawyer', 'icon' => 'scale', 'title' => 'وکیل نفقه', 'excerpt' => 'بررسی استحقاق نفقه، میزان آن و نحوه مطالبه یا دفاع در دعاوی مرتبط.'],
+                    ['slug' => 'custody-lawyer', 'icon' => 'heart', 'title' => 'وکیل حضانت و ملاقات فرزند', 'excerpt' => 'دعاوی حضانت و ملاقات با توجه به سن فرزند و مصلحت طفل.'],
+                    ['slug' => 'tamkin-lawyer', 'icon' => 'scale', 'title' => 'وکیل تمکین و نشوز', 'excerpt' => 'بررسی شرایط زندگی مشترک، دلایل طرفین و مستندات دعوای تمکین یا نشوز.'],
+                    ['slug' => 'ojrat-lawyer', 'icon' => 'coins', 'title' => 'وکیل اجرت‌المثل و نحله', 'excerpt' => 'پیگیری اجرت‌المثل ایام زوجیت و نحله بر اساس شرایط پرونده.'],
+                ],
+            ],
+            [
+                'hub' => 'property-lawyer',
+                'items' => [
+                    ['slug' => 'eviction-lawyer', 'icon' => 'building', 'title' => 'وکیل خلع ید و تصرف عدوانی', 'excerpt' => 'انتخاب عنوان صحیح دعوا و اقدام به‌موقع در خلع ید، تصرف عدوانی و رفع مزاحمت.'],
+                    ['slug' => 'lease-lawyer', 'icon' => 'building', 'title' => 'وکیل تخلیه و سرقفلی', 'excerpt' => 'تخلیه عین مستأجره، سرقفلی و حقوق کسب و پیشه با توجه به نوع قرارداد.'],
+                    ['slug' => 'property-contract-lawyer', 'icon' => 'scale', 'title' => 'وکیل اسناد و قرارداد ملکی', 'excerpt' => 'تنظیم و پیگیری اختلاف بیع، اجاره، پیش‌فروش و اسناد ثبتی.'],
+                ],
+            ],
+            [
+                'hub' => 'criminal-defense-lawyer',
+                'items' => [
+                    ['slug' => 'murder-defense', 'icon' => 'gavel', 'title' => 'وکیل قتل', 'excerpt' => 'دفاع در پرونده‌های قتل از دادسرا تا دادگاه کیفری با تکیه بر ادله و نظریه پزشکی قانونی.'],
+                    ['slug' => 'fraud-defense', 'icon' => 'gavel', 'title' => 'وکیل کلاهبرداری', 'excerpt' => 'تفکیک کلاهبرداری از اختلاف مدنی و جمع‌آوری ادله فریب.'],
+                    ['slug' => 'defendant-rights', 'icon' => 'scale', 'title' => 'حقوق متهم', 'excerpt' => 'دفاع از حقوق قانونی متهم از قرار تأمین تا تجدیدنظر.'],
+                ],
+            ],
+            [
+                'hub' => 'administrative-lawyer',
+                'items' => [
+                    ['slug' => 'admin-court-lawyer', 'icon' => 'scale', 'title' => 'وکیل دیوان عدالت اداری', 'excerpt' => 'اعتراض به آراء و تصمیمات اداری در مهلت قانونی و با لایحه مستدل.'],
+                    ['slug' => 'commission-appeal', 'icon' => 'building', 'title' => 'اعتراض به رأی کمیسیون‌ها', 'excerpt' => 'آراء کمیسیون‌های شهرداری، مالیاتی و هیئت‌های اداری.'],
+                    ['slug' => 'company-disputes', 'icon' => 'coins', 'title' => 'دعاوی شرکتی', 'excerpt' => 'اختلاف سهامداران، هیئت‌مدیره و انحلال شرکت در کنار مسائل اداری.'],
+                ],
+            ],
+            [
+                'hub' => 'legal-consultation',
+                'items' => [
+                    ['slug' => 'in-person-consult', 'icon' => 'chat', 'title' => 'مشاوره حضوری', 'excerpt' => 'بررسی مدارک و مهلت‌های قانونی در جلسه حضوری پیش از هر اقدام قضایی.'],
+                    ['slug' => 'phone-consult', 'icon' => 'chat', 'title' => 'مشاوره تلفنی', 'excerpt' => 'ارزیابی اولیه پرونده برای کسانی که امکان مراجعه حضوری ندارند.'],
+                    ['slug' => 'pre-claim-consult', 'icon' => 'scale', 'title' => 'مشاوره پیش از طرح دعوا', 'excerpt' => 'انتخاب مسیر توافق، ثبت یا دادگاه قبل از ثبت دادخواست.'],
+                ],
+            ],
+        ];
+    }
+}
+
+Majd_Service_Landings::init();

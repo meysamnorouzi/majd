@@ -258,64 +258,48 @@ The frontend parses those headings and keeps the same layout: service cards afte
 
 The hub pages fetch this in the browser (same pattern as blog posts). If WordPress is unreachable, the site falls back to the built-in copy.
 
+Sub-landings are **not** headings inside this post and **not** blog posts. Add them under **زیرلندینگ‌ها** (same admin menu). Each one becomes a card on the hub and its own page.
+
+New hub slugs are allowed. The public URL is `/{slug}/`. Avoid `blogs`, `team`, `about`, `contact`, and `services`. A hub added after the last Next build is served by the `/services/hub/` shell until the next static export.
+
 ---
 
-## Legal services (خدمات حقوقی)
+## Legal services (لندینگ خدمات)
 
-Services use the **same WordPress Posts API as the blog** (`/wp-json/wp/v2/posts`), grouped by **categories**.
+Service hubs and their sub-landings are **their own WordPress section**, separate from blog posts.
 
-### Category structure (mega menu + pillar hubs)
+After copying the mu-plugin, WordPress shows **لندینگ خدمات**:
 
-Five public pillar hubs. Each hub lists its sub-pillar service posts as cards.
+| Admin screen | What it is | Public URL |
+|--------------|------------|------------|
+| لندینگ‌های اصلی | Hub page (hero, body, menu label, order) | `/{hub-slug}/` |
+| زیرلندینگ‌ها | Card on that hub, with its own page | `/{hub-slug}/{slug}/` |
 
-| WP category slug | Public hub | Mega menu label | Notes |
-|------------------|------------|-----------------|-------|
-| `خانواده` | `/family-lawyer/` | وکیل خانواده | Merges with `خانواده-fa` / `khanavade-fa` |
-| `ملکی` | `/property-lawyer/` | وکیل ملکی | |
-| `کیفری` | `/criminal-defense-lawyer/` | وکیل کیفری | |
-| `مشاوره-حقوقی` | `/legal-consultation/` | مشاوره حقوقی | Merges with `مشاوره` / `moshavere` |
-| `اداری` | `/administrative-lawyer/` | وکیل اداری | Merges with `وکیل-اداری` / `دیوان-عدالت` |
+### Add a hub
 
-Service **posts** (sub-pillars) are public at `/{prefix}/{post-slug}/`, e.g. `/family-lawyer/talagh-mehrieh/`. Child categories are grouping labels in the mega menu; the pillar title links to the hub.
+1. **لندینگ خدمات → افزودن لندینگ**.
+2. Title, excerpt, featured image, and body (Heading 2 / Heading 3, same outline as the family hub).
+3. **برچسب منو** and icon (`scale`, `gavel`, `heart`, `building`, `coins`, `chat`).
+4. **ترتیب** (page attributes) controls the header column order.
+5. Set a latin slug. That slug is the URL.
 
-There is **no** `/services/` listing. Old `/services/` and `/services/{slug}/` URLs 301 to the matching hub or sub-pillar.
+### Add a sub-landing
 
-Create categories in **Posts → Categories** with the slugs above. Assign each service post to the appropriate pillar (or a child of it).
+1. **زیرلندینگ‌ها → افزودن**.
+2. Choose the parent hub. Title and excerpt are the card. Featured image is the card photo. Body is the page.
+3. Order controls the card order on the hub.
 
-### Service post content
+Blog categories are no longer the services menu. Posts stay on `/blogs/`.
 
-Each service is a normal **Post** with title, slug, excerpt, featured image, and content.
+### REST API
 
-Structured UI blocks (highlights, features, FAQs, process steps, etc.) are stored in a JSON block inside the post content:
+- `GET /wp-json/majd/v1/service-hubs` — every published hub, with its sub-landings (menu and cards)
+- `GET /wp-json/majd/v1/service-hubs/{slug}` — one hub, including rendered HTML
+- `GET /wp-json/majd/v1/service-landings/{hub}/{slug}` — one sub-landing
 
-```html
-<!-- majd:service
-{
-  "icon": "building",
-  "highlights": ["نکته ۱", "نکته ۲"],
-  "features": [{ "title": "...", "description": "..." }],
-  "processSteps": [{ "step": 1, "title": "...", "description": "..." }],
-  "cases": ["..."],
-  "faqs": [{ "q": "...", "a": "..." }],
-  "whyNeed": { "title": "...", "paragraphs": ["..."] },
-  "longDescription": ["پارagraph ۱", "پارagraph ۲"]
-}
--->
+The header, homepage service grid, hub cards, and sub-landing pages read these routes in the browser. Until the plugin is installed, the header still falls back to the previous category menu.
 
-<p>Additional HTML content rendered below the structured sections.</p>
-```
-
-The frontend parses this block and renders the same UI components as before (features grid, FAQ accordion, timeline, etc.). Remaining HTML is shown via `WpRichContent`.
-
-### REST API (same as blog)
-
-- `GET /wp-json/wp/v2/categories?per_page=100` — category tree
-- `GET /wp-json/wp/v2/posts?categories={ids}&per_page=100&_embed` — service posts
-- `GET /wp-json/wp/v2/posts?slug={slug}&_embed` — single service
-
-Build-time fetch uses `WP_API_KEY`. Mega menu and home section fetch live in the browser. Fallback: [`src/data/site.ts`](../src/data/site.ts).
-
-**New post slugs** need a static rebuild for detail pages. Mega menu and home update live.
+**New hub slugs** work without a rebuild via the host rewrite to `/services/hub/`. **New sub-landing slugs** under an existing hub rewrite to `/services/detail/` the same way blog posts do. A rebuild gives them their own static files.
 
 ---
 
@@ -325,9 +309,13 @@ Build-time fetch uses `WP_API_KEY`. Mega menu and home section fetch live in the
 
 - `GET /wp-json/wp/v2/team?per_page=100&_embed&orderby=menu_order&order=asc`
 
-### WordPress — Pillar landings
+### WordPress — Service hubs and sub-landings
 
-- `GET /wp-json/wp/v2/landings?slug={family-lawyer|property-lawyer|criminal-defense-lawyer|administrative-lawyer}&_embed`
+- `GET /wp-json/majd/v1/service-hubs`
+- `GET /wp-json/majd/v1/service-hubs/{slug}`
+- `GET /wp-json/majd/v1/service-landings/{hub}/{slug}`
+
+Hub HTML is also available at `GET /wp-json/wp/v2/landings?slug={slug}&_embed`.
 
 ### WordPress — Blog
 
@@ -376,7 +364,7 @@ NEXT_PUBLIC_WC_PAYMENT_METHOD=zarinpal
 7. Enter license on order → visible in account panel after login.
 8. Submit contact form on `/contact/` → toast success; message appears under **پیام‌های تماس** in WP admin.
 9. Add a team member in **اعضای تیم** → visible on `/team/` without redeploying Next.
-10. Edit a post in **لندینگ پیلارها** → the matching hub (`/family-lawyer/` …) updates without redeploying Next.
+10. Edit a hub in **لندینگ خدمات** → `/family-lawyer/` (and any new `/{slug}/`) updates without redeploying Next. A new **زیرلندینگ** shows as a card on that hub and opens its own page.
 
 ---
 

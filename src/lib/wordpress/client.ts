@@ -91,6 +91,12 @@ export {
   toLawyerOptions,
 } from "@/lib/wordpress/team";
 export { fetchLandingByPrefixClient } from "@/lib/wordpress/landings";
+export {
+  fetchServiceHubClient,
+  fetchServiceLandingClient,
+  fetchServiceMenuClient,
+  serviceHubApiInstalled,
+} from "@/lib/wordpress/service-landings";
 export type { BlogCategory } from "@/types";
 
 export async function fetchPostBySlugClient(
