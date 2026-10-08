@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { ServiceDetailView } from "@/components/services/ServiceDetailView";
+import { familySublandingService } from "@/data/family-sublandings";
 import { fetchServiceBySlugClient } from "@/lib/wordpress/client";
 import {
   fetchServiceLandingClient,
@@ -53,13 +54,13 @@ export function ServiceDetailContent({ slug: slugProp }: { slug?: string }) {
           data = await fetchServiceBySlugClient(slug);
         }
       } catch {
-        if (!cancelled) {
-          setError("بارگذاری خدمت انجام نشد.");
-          setLoading(false);
-        }
-        return;
+        data = null;
       }
       if (cancelled) return;
+
+      if (!data && hub === "family-lawyer") {
+        data = familySublandingService(slug);
+      }
 
       if (!data) {
         setNotFound(true);
@@ -84,7 +85,7 @@ export function ServiceDetailContent({ slug: slugProp }: { slug?: string }) {
         }
 
         setService(resolved);
-        document.title = `${resolved.title} | موسسه حقوقی مجد`;
+        document.title = `${resolved.pageTitle || resolved.title} | موسسه حقوقی مجد`;
       }
       setLoading(false);
     })();

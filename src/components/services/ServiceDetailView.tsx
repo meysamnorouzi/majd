@@ -30,19 +30,21 @@ export function ServiceDetailView({ service }: { service: Service }) {
     hubSlug && isServiceCategoryPrefix(hubSlug) ? getPillar(hubSlug) : undefined;
   const hubLabel = service.parentTitle || pillar?.title;
   const hubHref = hubSlug && hubLabel ? hubPath(hubSlug) : undefined;
+  const pageTitle = service.pageTitle || service.title;
   const richHtml = buildServiceRichHtml(service);
   const [first, second, third] = splitHtmlIntoParts(richHtml, 3);
+  const ctaSubject = service.title.split("|")[0]?.trim() || pageTitle;
 
   return (
     <>
       <PageHero
-        title={service.title}
-        description={service.excerpt}
+        title={pageTitle}
+        description={service.description || service.excerpt}
         breadcrumb={[
           ...(hubLabel && hubHref
             ? [{ label: hubLabel, href: hubHref }]
             : []),
-          { label: service.title },
+          { label: pageTitle },
         ]}
         image={service.image}
         imagePosition={
@@ -65,7 +67,8 @@ export function ServiceDetailView({ service }: { service: Service }) {
 
             <ServiceCallCta
               title="تماس با وکیل این پرونده"
-              description={`برای ${service.title} همین حالا تماس بگیرید.`}
+              description={`برای ${ctaSubject} همین حالا تماس بگیرید.`}
+              phone={service.ctaPhone}
             />
 
             {second ? (

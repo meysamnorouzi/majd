@@ -19,6 +19,12 @@ import {
   getServicesFromWp,
   megaTreesToMenuItems,
 } from "@/lib/wordpress/services";
+import { plainText } from "@/lib/plain-text";
+import {
+  familySublandingCopy,
+  familySublandingService,
+  plainContentLength,
+} from "@/data/family-sublandings";
 import type { Service } from "@/types";
 
 export interface ServiceLandingCard {
@@ -26,11 +32,18 @@ export interface ServiceLandingCard {
   slug: string;
   title: string;
   excerpt: string;
+  /** Hero text from the WordPress «توضیحات هیرو» box. */
+  description?: string;
   icon: string;
   image?: string;
   content?: string;
   hubSlug?: string;
   hubTitle?: string;
+  /** Resolved call button number: this landing, otherwise its hub. */
+  ctaPhone?: string;
+  /** Detail-page H1 when the card title stays short. */
+  headline?: string;
+  keywords?: string[];
 }
 
 export interface ServiceHub {
@@ -44,6 +57,8 @@ export interface ServiceHub {
   heroDescription: string;
   keywords: string[];
   content?: string;
+  /** Call button number for this hub and for landings without their own. */
+  ctaPhone?: string;
   landings: ServiceLandingCard[];
 }
 
@@ -58,17 +73,48 @@ function cleanImage(url: string | undefined): string | undefined {
   return trimmed || undefined;
 }
 
+function cleanPhone(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed || undefined;
+}
+
+function uniqueLandings(landings: ServiceLandingCard[]): ServiceLandingCard[] {
+  const seen = new Set<string>();
+  return landings.filter((landing) => {
+    if (seen.has(landing.slug)) return false;
+    seen.add(landing.slug);
+    return true;
+  });
+}
+
+function withCardExcerpt(landing: ServiceLandingCard): ServiceLandingCard {
+  const copy = familySublandingCopy(landing.slug);
+  if (!copy) return landing;
+  if (!copy.seedExcerpts.includes(landing.excerpt)) return landing;
+  return { ...landing, excerpt: copy.cardExcerpt };
+}
+
 function normalizeHub(raw: ServiceHub): ServiceHub {
   return {
     ...raw,
     image: cleanImage(raw.image),
-    heroDescription: raw.heroDescription?.trim() ?? "",
+    excerpt: plainText(raw.excerpt),
+    heroDescription: plainText(raw.heroDescription || raw.excerpt),
     keywords: raw.keywords?.filter(Boolean) ?? [],
-    landings: (raw.landings ?? []).map((landing) => ({
-      ...landing,
-      image: cleanImage(landing.image),
-      icon: landing.icon || "scale",
-    })),
+    ctaPhone: cleanPhone(raw.ctaPhone),
+    landings: uniqueLandings(raw.landings ?? []).map((landing) => {
+      const card = {
+        ...landing,
+        excerpt: plainText(landing.excerpt),
+        description: plainText(landing.description || landing.excerpt),
+        image: cleanImage(landing.image),
+        icon: landing.icon || "scale",
+        ctaPhone: cleanPhone(landing.ctaPhone),
+        headline: landing.headline?.trim() || undefined,
+        keywords: landing.keywords?.map((keyword) => keyword.trim()).filter(Boolean),
+      };
+      return raw.slug === "family-lawyer" ? withCardExcerpt(card) : card;
+    }),
   };
 }
 
@@ -155,19 +201,35 @@ export function landingToService(
   landing: ServiceLandingCard,
 ): Service {
   const prefix = isServiceCategoryPrefix(hub.slug) ? hub.slug : undefined;
+  const copy =
+    hub.slug === "family-lawyer" ? familySublandingCopy(landing.slug) : undefined;
+  const hasBody = landing.content != null;
+  const useCopy = Boolean(copy && hasBody && plainContentLength(landing.content) < 400);
+  const pageTitle = useCopy
+    ? copy?.headline
+    : hasBody
+      ? landing.headline?.trim()
+      : undefined;
   return {
     id: String(landing.id),
     slug: landing.slug,
     title: landing.title,
-    excerpt: landing.excerpt,
-    description: landing.excerpt,
+    pageTitle: pageTitle || undefined,
+    excerpt: plainText(landing.excerpt),
+    description: plainText(
+      (useCopy ? copy?.hero : undefined) ||
+        landing.description ||
+        landing.excerpt,
+    ),
     icon: landing.icon || "scale",
     image: landing.image,
     hubSlug: hub.slug,
     categoryPrefix: prefix,
     parentSlug: hub.slug,
     parentTitle: hub.menuLabel || hub.title,
-    contentHtml: landing.content,
+    contentHtml: useCopy ? copy?.html : landing.content,
+    ctaPhone: cleanPhone(landing.ctaPhone),
+    keywords: (useCopy ? copy?.keywords : landing.keywords)?.filter(Boolean),
   };
 }
 
@@ -181,9 +243,9 @@ export async function fetchServiceLandingClient(
     ),
     clientInit(),
   );
-  if (!res) throw new Error("Service landing request failed");
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error("Service landing request failed");
+  if (!res || res.status === 404 || !res.ok) {
+    return hubSlug === "family-lawyer" ? familySublandingService(slug) : null;
+  }
   const landing = (await res.json()) as ServiceLandingCard;
   return landingToService(
     {
@@ -302,6 +364,10 @@ export function landingFromServiceHub(hub: ServiceHub): PillarLanding {
     seoDescription: hub.excerpt || landing.seoDescription,
     keywords: hub.keywords.length ? hub.keywords : landing.keywords,
     image: hub.image || landing.image,
+    cta: {
+      ...landing.cta,
+      phone: cleanPhone(hub.ctaPhone),
+    },
   };
 }
 

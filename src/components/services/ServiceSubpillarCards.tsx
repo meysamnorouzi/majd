@@ -36,7 +36,7 @@ export function ServiceSubpillarCards({
               href={servicePath(service)}
               className="card-shine group flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-md transition hover:-translate-y-0.5 hover:shadow-xl"
             >
-              <div className="relative h-40 overflow-hidden bg-navy-950">
+              <div className="relative h-56 overflow-hidden bg-navy-950 sm:h-72">
                 {service.image ? (
                   <Image
                     src={service.image}
@@ -51,11 +51,11 @@ export function ServiceSubpillarCards({
                   <ServiceIcon name={service.icon} />
                 </div>
               </div>
-              <div className="flex flex-1 flex-col p-5">
+              <div className="flex min-h-44 flex-1 flex-col p-6">
                 <h3 className="text-lg font-bold text-navy-900 group-hover:text-gold-600">
                   {service.title}
                 </h3>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
+                <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-600 sm:text-base">
                   {service.excerpt}
                 </p>
                 <span className="mt-4 text-sm font-semibold text-gold-600">

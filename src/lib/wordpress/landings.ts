@@ -18,6 +18,7 @@ import type { WpPost } from "@/types";
 export interface WpLandingMeta {
   keywords?: string[];
   heroDescription?: string;
+  ctaPhone?: string;
 }
 
 export interface WpLandingPost extends WpPost {
@@ -79,6 +80,10 @@ function mapWpLanding(
     seoDescription: excerpt || landing.seoDescription,
     keywords: keywords.length ? keywords : landing.keywords,
     image: image || landing.image,
+    cta: {
+      ...landing.cta,
+      phone: post.majd_landing?.ctaPhone?.trim() || undefined,
+    },
   };
 }
 

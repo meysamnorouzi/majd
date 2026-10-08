@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { ServiceDetailContent } from "@/components/services/ServiceDetailContent";
-import { generateServicePageMetadata } from "@/components/services/ServicePage";
 import { createPageMetadata } from "@/lib/seo";
 import {
   generateCategoryStaticParams,
@@ -20,7 +19,15 @@ export async function categoryServiceMetadata(
   const path = `/${prefix}/${slug}/`;
   const service = await resolveCategoryService(prefix, slug);
   if (service) {
-    return generateServicePageMetadata(service.slug, path);
+    return createPageMetadata({
+      title: service.pageTitle || service.title,
+      description: service.description || service.excerpt,
+      path,
+      image: service.image,
+      keywords: service.keywords?.length
+        ? service.keywords
+        : [service.title, "خدمات حقوقی", "موسسه حقوقی مجد"],
+    });
   }
   if (isRedirectTargetSlug(prefix, slug)) {
     return createPageMetadata({

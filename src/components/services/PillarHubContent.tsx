@@ -5,6 +5,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { ConsultationSection } from "@/components/contact/ConsultationSection";
 import { PillarLandingBody } from "@/components/services/PillarLandingBody";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { familyHubFallbackCards } from "@/data/family-sublandings";
 import { portraitObjectPosition } from "@/data/site";
 import { getPillar, landingFromPillar } from "@/data/pillars";
 import {
@@ -54,7 +55,14 @@ export function PillarHubContent({ prefix }: { prefix: string }) {
           if (hub) {
             const nextLanding = landingFromServiceHub(hub);
             setLanding(nextLanding);
-            setCards(hub.landings.map((item) => landingToService(hub, item)));
+            const nextCards = hub.landings.map((item) =>
+              landingToService(hub, item),
+            );
+            setCards(
+              nextCards.length || prefix !== "family-lawyer"
+                ? nextCards
+                : familyHubFallbackCards(),
+            );
             document.title = `${nextLanding.seoTitle} | موسسه حقوقی مجد`;
             setLoading(false);
             return;
@@ -62,7 +70,7 @@ export function PillarHubContent({ prefix }: { prefix: string }) {
           if (pillar && isServiceCategoryPrefix(prefix)) {
             const fallback = getPillarLanding(prefix) ?? landingFromPillar(pillar);
             setLanding(fallback);
-            setCards([]);
+            setCards(prefix === "family-lawyer" ? familyHubFallbackCards() : []);
             setLoading(false);
             return;
           }
@@ -100,7 +108,9 @@ export function PillarHubContent({ prefix }: { prefix: string }) {
           ).map((service) => ({ ...service, hubSlug: prefix }));
           setCards(applyPillarLandingCards(leaves, nextLanding));
         } catch {
-          if (!cancelled) setCards([]);
+          if (!cancelled) {
+            setCards(prefix === "family-lawyer" ? familyHubFallbackCards() : []);
+          }
         }
       } catch {
         if (cancelled) return;
@@ -108,7 +118,7 @@ export function PillarHubContent({ prefix }: { prefix: string }) {
           const fallback =
             getPillarLanding(prefix) ?? landingFromPillar(pillar);
           setLanding(fallback);
-          setCards([]);
+          setCards(prefix === "family-lawyer" ? familyHubFallbackCards() : []);
           document.title = `${fallback.seoTitle} | موسسه حقوقی مجد`;
         } else {
           setLandingError("بارگذاری این صفحه انجام نشد.");

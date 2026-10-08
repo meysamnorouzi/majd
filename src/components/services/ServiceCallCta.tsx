@@ -1,16 +1,21 @@
 import { siteConfig } from "@/data/site";
+import { formatCallPhone } from "@/lib/phone";
 
 export function ServiceCallCta({
   title = "نیاز به مشاوره فوری دارید؟",
   description = "همین حالا با موسسه حقوقی مجد تماس بگیرید؛ وکیل متخصص پرونده شما را بررسی می‌کند.",
   titleAs = "h2",
+  phone: phoneProp,
 }: {
   title?: string;
   description?: string;
   titleAs?: "h2" | "p";
+  /** Admin-set number. The site phone is used when this is empty. */
+  phone?: string;
 }) {
-  const phone = siteConfig.phones[0];
-  const tel = siteConfig.phonesTel[0];
+  const custom = phoneProp?.trim() ? formatCallPhone(phoneProp) : null;
+  const phone = custom?.label ?? siteConfig.phones[0];
+  const tel = custom?.tel ?? siteConfig.phonesTel[0];
   const Title = titleAs;
 
   return (

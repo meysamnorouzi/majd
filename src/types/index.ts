@@ -207,6 +207,11 @@ export interface Service {
   faqs?: ServiceFAQ[];
   /** Remaining WordPress HTML body after majd:service meta block */
   contentHtml?: string;
+  /** Phone on «تماس با وکیل این پرونده». Site number is used when unset. */
+  ctaPhone?: string;
+  keywords?: string[];
+  /** Long H1. `title` stays the short card label. */
+  pageTitle?: string;
 }
 
 export type CourseFormatSlug =

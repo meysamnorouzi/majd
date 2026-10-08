@@ -14,9 +14,14 @@ define('MAJD_LANDING_META_KEYWORDS', '_majd_landing_keywords');
 define('MAJD_LANDING_META_HERO', '_majd_landing_hero');
 define('MAJD_LANDING_META_MENU_LABEL', '_majd_landing_menu_label');
 define('MAJD_LANDING_META_ICON', '_majd_landing_icon');
+define('MAJD_LANDING_META_CTA_PHONE', '_majd_landing_cta_phone');
 define('MAJD_SUBLANDING_POST_TYPE', 'majd_sublanding');
 define('MAJD_SUBLANDING_META_HUB', '_majd_sublanding_hub_id');
 define('MAJD_SUBLANDING_META_ICON', '_majd_sublanding_icon');
+define('MAJD_SUBLANDING_META_DESCRIPTION', '_majd_sublanding_description');
+define('MAJD_SUBLANDING_META_CTA_PHONE', '_majd_sublanding_cta_phone');
+define('MAJD_SUBLANDING_META_HEADLINE', '_majd_sublanding_headline');
+define('MAJD_SUBLANDING_META_KEYWORDS', '_majd_sublanding_keywords');
 
 class Majd_Landing_API {
     public static function init() {
@@ -99,6 +104,12 @@ class Majd_Landing_API {
             'show_in_rest' => true,
             'auth_callback' => '__return_true',
         ]);
+        register_post_meta(MAJD_LANDING_POST_TYPE, MAJD_LANDING_META_CTA_PHONE, [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => true,
+            'auth_callback' => '__return_true',
+        ]);
     }
 
     public static function register_rest_fields() {
@@ -106,10 +117,12 @@ class Majd_Landing_API {
             'get_callback' => function ($post) {
                 $keywords = get_post_meta($post['id'], MAJD_LANDING_META_KEYWORDS, true);
                 $hero = get_post_meta($post['id'], MAJD_LANDING_META_HERO, true);
+                $phone = get_post_meta($post['id'], MAJD_LANDING_META_CTA_PHONE, true);
                 $parts = array_values(array_filter(array_map('trim', preg_split('/[,،]+/u', (string) $keywords) ?: [])));
                 return [
                     'keywords' => $parts,
                     'heroDescription' => is_string($hero) ? $hero : '',
+                    'ctaPhone' => Majd_Service_Landings::sanitize_phone(is_string($phone) ? $phone : ''),
                 ];
             },
             'schema' => [
@@ -129,12 +142,28 @@ class Majd_Landing_API {
             'high'
         );
         add_meta_box(
+            'majd_landing_description',
+            'توضیحات هیرو',
+            [__CLASS__, 'render_description_box'],
+            MAJD_LANDING_POST_TYPE,
+            'normal',
+            'high'
+        );
+        add_meta_box(
+            'majd_landing_cta_phone',
+            'تماس با وکیل این پرونده',
+            [__CLASS__, 'render_cta_phone_box'],
+            MAJD_LANDING_POST_TYPE,
+            'normal',
+            'high'
+        );
+        add_meta_box(
             'majd_landing_seo',
             'سئو لندینگ',
             [__CLASS__, 'render_seo_box'],
             MAJD_LANDING_POST_TYPE,
             'normal',
-            'high'
+            'default'
         );
     }
 
@@ -161,18 +190,33 @@ class Majd_Landing_API {
         echo '</ol>';
     }
 
+    public static function render_description_box($post) {
+        $hero = (string) get_post_meta($post->ID, MAJD_LANDING_META_HERO, true);
+        echo '<p class="description">این متن زیر عنوان، در هیروی صفحه لندینگ نشان داده می‌شود.</p>';
+        echo '<textarea name="majd_landing_hero" rows="5" class="large-text">' . esc_textarea($hero) . '</textarea>';
+    }
+
+    public static function render_cta_phone_box($post) {
+        $phone = (string) get_post_meta($post->ID, MAJD_LANDING_META_CTA_PHONE, true);
+        echo '<p class="description">شماره دکمه‌های تماس همین لندینگ. زیرلندینگی که شماره جدا ندارد همین شماره را روی دکمه «تماس با وکیل این پرونده» نشان می‌دهد.</p>';
+        echo '<p><label for="majd_landing_cta_phone"><strong>شماره تماس</strong></label></p>';
+        echo '<input type="text" name="majd_landing_cta_phone" id="majd_landing_cta_phone" class="widefat" dir="ltr" value="' . esc_attr($phone) . '" placeholder="02177886437" />';
+        echo '<p class="description">خالی = شماره پیش‌فرض سایت. مثال: <code>02177886437</code> یا <code>09121234567</code>.</p>';
+    }
+
     public static function render_seo_box($post) {
         wp_nonce_field('majd_landing_save', 'majd_landing_nonce');
         $keywords = get_post_meta($post->ID, MAJD_LANDING_META_KEYWORDS, true);
-        $hero = get_post_meta($post->ID, MAJD_LANDING_META_HERO, true);
         $menu_label = get_post_meta($post->ID, MAJD_LANDING_META_MENU_LABEL, true);
         $icon = get_post_meta($post->ID, MAJD_LANDING_META_ICON, true);
+        $slug = (string) $post->post_name;
+        echo '<p><label for="majd_landing_slug"><strong>نامک (slug)</strong></label></p>';
+        echo '<input type="text" name="majd_landing_slug" id="majd_landing_slug" class="large-text" dir="ltr" value="' . esc_attr($slug) . '" placeholder="family-lawyer" />';
+        echo '<p class="description">آدرس صفحه: <code>/' . esc_html($slug !== '' ? $slug : 'slug') . '/</code> — فقط حروف انگلیسی، عدد و خط تیره.</p>';
         echo '<p><label>برچسب منوی خدمات (کوتاه)</label></p>';
         echo '<input type="text" name="majd_landing_menu_label" class="large-text" value="' . esc_attr((string) $menu_label) . '" />';
         echo '<p><label>آیکون (<code>scale</code>، <code>gavel</code>، <code>heart</code>، <code>building</code>، <code>coins</code>، <code>chat</code>)</label></p>';
         echo '<input type="text" name="majd_landing_icon" class="large-text" value="' . esc_attr((string) $icon) . '" />';
-        echo '<p><label>توضیح کوتاه هیرو (اختیاری؛ در غیر این صورت چکیده استفاده می‌شود)</label></p>';
-        echo '<textarea name="majd_landing_hero" rows="3" class="large-text">' . esc_textarea((string) $hero) . '</textarea>';
         echo '<p><label>کلمات کلیدی (با ویرگول جدا کنید)</label></p>';
         echo '<textarea name="majd_landing_keywords" rows="3" class="large-text">' . esc_textarea((string) $keywords) . '</textarea>';
     }
@@ -191,13 +235,23 @@ class Majd_Landing_API {
             update_post_meta($post_id, MAJD_LANDING_META_KEYWORDS, sanitize_textarea_field(wp_unslash($_POST['majd_landing_keywords'])));
         }
         if (isset($_POST['majd_landing_hero'])) {
-            update_post_meta($post_id, MAJD_LANDING_META_HERO, sanitize_textarea_field(wp_unslash($_POST['majd_landing_hero'])));
+            update_post_meta($post_id, MAJD_LANDING_META_HERO, Majd_Service_Landings::plain_text(wp_unslash($_POST['majd_landing_hero'])));
         }
         if (isset($_POST['majd_landing_menu_label'])) {
             update_post_meta($post_id, MAJD_LANDING_META_MENU_LABEL, sanitize_text_field(wp_unslash($_POST['majd_landing_menu_label'])));
         }
         if (isset($_POST['majd_landing_icon'])) {
             update_post_meta($post_id, MAJD_LANDING_META_ICON, Majd_Service_Landings::sanitize_icon(wp_unslash($_POST['majd_landing_icon'])));
+        }
+        if (isset($_POST['majd_landing_cta_phone'])) {
+            update_post_meta(
+                $post_id,
+                MAJD_LANDING_META_CTA_PHONE,
+                Majd_Service_Landings::sanitize_phone(wp_unslash($_POST['majd_landing_cta_phone']))
+            );
+        }
+        if (isset($_POST['majd_landing_slug'])) {
+            Majd_Service_Landings::assign_slug($post_id, wp_unslash($_POST['majd_landing_slug']), [__CLASS__, 'save_meta']);
         }
     }
 
@@ -458,6 +512,7 @@ class Majd_Service_Landings {
         add_action('init', [__CLASS__, 'register_post_type']);
         add_action('init', [__CLASS__, 'register_meta']);
         add_action('init', [__CLASS__, 'maybe_prepare_content'], 40);
+        add_action('init', [__CLASS__, 'maybe_sync_family_copy'], 50);
         add_action('rest_api_init', [__CLASS__, 'register_routes']);
         add_action('add_meta_boxes', [__CLASS__, 'add_meta_boxes']);
         add_action('save_post_' . MAJD_SUBLANDING_POST_TYPE, [__CLASS__, 'save_meta'], 10, 2);
@@ -529,6 +584,48 @@ class Majd_Service_Landings {
                 return current_user_can('edit_posts');
             },
         ]);
+        register_post_meta(MAJD_SUBLANDING_POST_TYPE, MAJD_SUBLANDING_META_DESCRIPTION, [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => false,
+            'auth_callback' => function () {
+                return current_user_can('edit_posts');
+            },
+        ]);
+        register_post_meta(MAJD_SUBLANDING_POST_TYPE, MAJD_SUBLANDING_META_CTA_PHONE, [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => false,
+            'auth_callback' => function () {
+                return current_user_can('edit_posts');
+            },
+        ]);
+        register_post_meta(MAJD_SUBLANDING_POST_TYPE, MAJD_SUBLANDING_META_HEADLINE, [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => false,
+            'auth_callback' => function () {
+                return current_user_can('edit_posts');
+            },
+        ]);
+        register_post_meta(MAJD_SUBLANDING_POST_TYPE, MAJD_SUBLANDING_META_KEYWORDS, [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => false,
+            'auth_callback' => function () {
+                return current_user_can('edit_posts');
+            },
+        ]);
+    }
+
+    public static function sanitize_phone($value) {
+        $phone = wp_strip_all_tags((string) $value);
+        $phone = preg_replace('/[^\d۰-۹٠-٩+\s().\-–—]/u', '', $phone);
+        $phone = trim((string) preg_replace('/\s+/u', ' ', (string) $phone));
+        if (function_exists('mb_substr')) {
+            return mb_substr($phone, 0, 32);
+        }
+        return substr($phone, 0, 32);
     }
 
     public static function register_routes() {
@@ -573,14 +670,32 @@ class Majd_Service_Landings {
         if (!$landing) {
             return new WP_Error('majd_landing_not_found', 'Sub-landing not found', ['status' => 404]);
         }
-        $card = self::landing_card($landing);
+        $card = self::landing_card($landing, self::stored_phone($hub->ID, MAJD_LANDING_META_CTA_PHONE));
         $card['content'] = apply_filters('the_content', $landing->post_content);
+        $card['headline'] = self::plain_text(get_post_meta($landing->ID, MAJD_SUBLANDING_META_HEADLINE, true));
+        $card['keywords'] = self::keyword_list(get_post_meta($landing->ID, MAJD_SUBLANDING_META_KEYWORDS, true));
         $card['hubSlug'] = $hub->post_name;
         $card['hubTitle'] = self::menu_label($hub);
         return rest_ensure_response($card);
     }
 
     public static function add_meta_boxes() {
+        add_meta_box(
+            'majd_sublanding_description',
+            'توضیحات هیرو',
+            [__CLASS__, 'render_description_box'],
+            MAJD_SUBLANDING_POST_TYPE,
+            'normal',
+            'high'
+        );
+        add_meta_box(
+            'majd_sublanding_headline',
+            'عنوان صفحه و کلمات کلیدی',
+            [__CLASS__, 'render_headline_box'],
+            MAJD_SUBLANDING_POST_TYPE,
+            'normal',
+            'high'
+        );
         add_meta_box(
             'majd_sublanding_hub',
             'لندینگ اصلی',
@@ -589,6 +704,39 @@ class Majd_Service_Landings {
             'side',
             'high'
         );
+        add_meta_box(
+            'majd_sublanding_cta_phone',
+            'تماس با وکیل این پرونده',
+            [__CLASS__, 'render_cta_phone_box'],
+            MAJD_SUBLANDING_POST_TYPE,
+            'side',
+            'default'
+        );
+    }
+
+    public static function render_cta_phone_box($post) {
+        $phone = (string) get_post_meta($post->ID, MAJD_SUBLANDING_META_CTA_PHONE, true);
+        echo '<p class="description">شماره دکمه «تماس با وکیل این پرونده» در صفحه همین زیرلندینگ.</p>';
+        echo '<p><label for="majd_sublanding_cta_phone"><strong>شماره تماس</strong></label></p>';
+        echo '<input type="text" name="majd_sublanding_cta_phone" id="majd_sublanding_cta_phone" class="widefat" dir="ltr" value="' . esc_attr($phone) . '" placeholder="02177886437" />';
+        echo '<p class="description">خالی = شماره لندینگ اصلی، و اگر آن هم خالی بود شماره پیش‌فرض سایت.</p>';
+    }
+
+    public static function render_description_box($post) {
+        $description = (string) get_post_meta($post->ID, MAJD_SUBLANDING_META_DESCRIPTION, true);
+        echo '<p class="description">این متن زیر عنوان، در هیروی صفحه زیرلندینگ نشان داده می‌شود. اگر خالی باشد، چکیده استفاده می‌شود.</p>';
+        echo '<textarea name="majd_sublanding_description" rows="5" class="large-text">' . esc_textarea($description) . '</textarea>';
+    }
+
+    public static function render_headline_box($post) {
+        $headline = (string) get_post_meta($post->ID, MAJD_SUBLANDING_META_HEADLINE, true);
+        $keywords = (string) get_post_meta($post->ID, MAJD_SUBLANDING_META_KEYWORDS, true);
+        echo '<p class="description">عنوان برگه در وردپرس روی کارت لندینگ می‌ماند. این عنوان، H1 صفحه زیرلندینگ است.</p>';
+        echo '<p><label for="majd_sublanding_headline"><strong>عنوان صفحه</strong></label></p>';
+        echo '<input type="text" name="majd_sublanding_headline" id="majd_sublanding_headline" class="large-text" value="' . esc_attr($headline) . '" />';
+        echo '<p><label for="majd_sublanding_keywords"><strong>کلمات کلیدی</strong></label></p>';
+        echo '<textarea name="majd_sublanding_keywords" id="majd_sublanding_keywords" rows="3" class="large-text">' . esc_textarea($keywords) . '</textarea>';
+        echo '<p class="description">با ویرگول جدا کنید. متن صفحه را با تیتر ۲ و تیتر ۳ بنویسید تا بخش‌ها، سوالات و دعوت به تماس جدا بمانند.</p>';
     }
 
     public static function render_hub_box($post) {
@@ -614,9 +762,12 @@ class Majd_Service_Landings {
             );
         }
         echo '</select>';
+        $slug = (string) $post->post_name;
+        echo '<p><label for="majd_sublanding_slug"><strong>نامک (slug)</strong></label></p>';
+        echo '<input type="text" name="majd_sublanding_slug" id="majd_sublanding_slug" class="widefat" dir="ltr" value="' . esc_attr($slug) . '" placeholder="divorce-lawyer" />';
         echo '<p><label>آیکون کارت</label></p>';
         echo '<input type="text" name="majd_sublanding_icon" class="widefat" value="' . esc_attr($icon) . '" />';
-        echo '<p style="color:#555">آدرس صفحه: <code>/{نامک لندینگ}/{نامک همین زیرلندینگ}/</code></p>';
+        echo '<p style="color:#555">آدرس صفحه: <code>/{نامک لندینگ}/' . esc_html($slug !== '' ? $slug : 'slug') . '/</code></p>';
         echo '<p style="color:#555">این‌ها نوشته وبلاگ نیستند. عنوان و چکیده روی کارت لندینگ اصلی دیده می‌شود.</p>';
     }
 
@@ -638,6 +789,61 @@ class Majd_Service_Landings {
         if (isset($_POST['majd_sublanding_icon'])) {
             update_post_meta($post_id, MAJD_SUBLANDING_META_ICON, self::sanitize_icon(wp_unslash($_POST['majd_sublanding_icon'])));
         }
+        if (isset($_POST['majd_sublanding_description'])) {
+            update_post_meta(
+                $post_id,
+                MAJD_SUBLANDING_META_DESCRIPTION,
+                self::plain_text(wp_unslash($_POST['majd_sublanding_description']))
+            );
+        }
+        if (isset($_POST['majd_sublanding_cta_phone'])) {
+            update_post_meta(
+                $post_id,
+                MAJD_SUBLANDING_META_CTA_PHONE,
+                self::sanitize_phone(wp_unslash($_POST['majd_sublanding_cta_phone']))
+            );
+        }
+        if (isset($_POST['majd_sublanding_headline'])) {
+            update_post_meta(
+                $post_id,
+                MAJD_SUBLANDING_META_HEADLINE,
+                self::plain_text(wp_unslash($_POST['majd_sublanding_headline']))
+            );
+        }
+        if (isset($_POST['majd_sublanding_keywords'])) {
+            update_post_meta(
+                $post_id,
+                MAJD_SUBLANDING_META_KEYWORDS,
+                sanitize_textarea_field(wp_unslash($_POST['majd_sublanding_keywords']))
+            );
+        }
+        if (isset($_POST['majd_sublanding_slug'])) {
+            self::assign_slug($post_id, wp_unslash($_POST['majd_sublanding_slug']), [__CLASS__, 'save_meta']);
+        }
+    }
+
+    public static function assign_slug($post_id, $raw, $callback) {
+        $slug = sanitize_title((string) $raw);
+        if ($slug === '') {
+            return;
+        }
+        $post = get_post($post_id);
+        if (!$post || $post->post_name === $slug) {
+            return;
+        }
+        if ($post->post_type === MAJD_LANDING_POST_TYPE) {
+            $reserved = ['about', 'account', 'blog', 'blogs', 'cart', 'checkout', 'contact', 'courses', 'services', 'shop', 'team'];
+            if (in_array($slug, $reserved, true)) {
+                return;
+            }
+        }
+        $unique = wp_unique_post_slug($slug, $post_id, $post->post_status, $post->post_type, (int) $post->post_parent);
+        remove_action('save_post_' . $post->post_type, $callback, 10);
+        wp_update_post([
+            'ID' => $post_id,
+            'post_name' => $unique,
+        ]);
+        add_action('save_post_' . $post->post_type, $callback, 10, 2);
     }
 
     public static function list_columns($columns) {
@@ -680,7 +886,7 @@ class Majd_Service_Landings {
     }
 
     private static function landings_for_hub($hub_id) {
-        return get_posts([
+        $posts = get_posts([
             'post_type' => MAJD_SUBLANDING_POST_TYPE,
             'post_status' => 'publish',
             'numberposts' => 100,
@@ -688,6 +894,16 @@ class Majd_Service_Landings {
             'meta_value' => (int) $hub_id,
             'orderby' => ['menu_order' => 'ASC', 'title' => 'ASC'],
         ]);
+        $seen = [];
+        $unique = [];
+        foreach ($posts as $post) {
+            if (isset($seen[$post->post_name])) {
+                continue;
+            }
+            $seen[$post->post_name] = true;
+            $unique[] = $post;
+        }
+        return $unique;
     }
 
     private static function landing_by_slug($hub_id, $slug) {
@@ -704,17 +920,44 @@ class Majd_Service_Landings {
         return $parent === (int) $hub_id ? $posts[0] : null;
     }
 
+    public static function plain_text($value) {
+        $text = (string) $value;
+        $text = preg_replace('/<\s*br\s*\/?>/i', ' ', $text);
+        $text = wp_strip_all_tags($text);
+        for ($i = 0; $i < 3; $i++) {
+            $decoded = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $decoded = str_replace(["\xc2\xa0", '&nbsp;', '&#160;', '&#xa0;', '&#xA0;'], ' ', $decoded);
+            if ($decoded === $text) {
+                break;
+            }
+            $text = $decoded;
+        }
+        $text = preg_replace('/\s+/u', ' ', $text);
+        return trim((string) $text);
+    }
+
     private static function excerpt($post) {
         $text = trim((string) $post->post_excerpt);
+        if ($text === '') {
+            $text = wp_trim_words(wp_strip_all_tags($post->post_content), 32, '…');
+        }
+        return self::plain_text($text);
+    }
+
+    private static function landing_description($post) {
+        $text = self::plain_text(get_post_meta($post->ID, MAJD_SUBLANDING_META_DESCRIPTION, true));
         if ($text !== '') {
             return $text;
         }
-        return wp_trim_words(wp_strip_all_tags($post->post_content), 32, '…');
+        return self::excerpt($post);
     }
 
     private static function keywords($post_id) {
-        $raw = (string) get_post_meta($post_id, MAJD_LANDING_META_KEYWORDS, true);
-        $parts = preg_split('/[,،]+/u', $raw) ?: [];
+        return self::keyword_list(get_post_meta($post_id, MAJD_LANDING_META_KEYWORDS, true));
+    }
+
+    private static function keyword_list($raw) {
+        $parts = preg_split('/[,،]+/u', (string) $raw) ?: [];
         return array_values(array_filter(array_map('trim', $parts)));
     }
 
@@ -757,22 +1000,36 @@ class Majd_Service_Landings {
         return 'scale';
     }
 
-    private static function landing_card($post) {
+    private static function stored_phone($post_id, $meta_key) {
+        return self::sanitize_phone((string) get_post_meta($post_id, $meta_key, true));
+    }
+
+    private static function landing_card($post, $fallback_phone = '') {
+        $phone = self::stored_phone($post->ID, MAJD_SUBLANDING_META_CTA_PHONE);
+        if ($phone === '') {
+            $phone = self::sanitize_phone($fallback_phone);
+        }
         return [
             'id' => (int) $post->ID,
             'slug' => $post->post_name,
             'title' => get_the_title($post),
             'excerpt' => self::excerpt($post),
+            'description' => self::landing_description($post),
             'icon' => self::sanitize_icon(get_post_meta($post->ID, MAJD_SUBLANDING_META_ICON, true)),
             'image' => self::image_url($post->ID),
+            'ctaPhone' => $phone,
         ];
     }
 
     private static function hub_payload($post, $with_content) {
-        $hero = (string) get_post_meta($post->ID, MAJD_LANDING_META_HERO, true);
+        $hero = self::plain_text(get_post_meta($post->ID, MAJD_LANDING_META_HERO, true));
+        if ($hero === '') {
+            $hero = self::excerpt($post);
+        }
+        $hub_phone = self::stored_phone($post->ID, MAJD_LANDING_META_CTA_PHONE);
         $landings = [];
         foreach (self::landings_for_hub($post->ID) as $landing) {
-            $landings[] = self::landing_card($landing);
+            $landings[] = self::landing_card($landing, $hub_phone);
         }
         $payload = [
             'id' => (int) $post->ID,
@@ -784,12 +1041,67 @@ class Majd_Service_Landings {
             'image' => self::image_url($post->ID),
             'heroDescription' => $hero,
             'keywords' => self::keywords($post->ID),
+            'ctaPhone' => $hub_phone,
             'landings' => $landings,
         ];
         if ($with_content) {
             $payload['content'] = apply_filters('the_content', $post->post_content);
         }
         return $payload;
+    }
+
+    public static function maybe_sync_family_copy() {
+        if (get_option('majd_family_sublanding_copy_v1')) {
+            return;
+        }
+        if (!class_exists('Majd_Family_Landing_Copy')) {
+            return;
+        }
+        $hubs = get_posts([
+            'post_type' => MAJD_LANDING_POST_TYPE,
+            'name' => 'family-lawyer',
+            'post_status' => 'any',
+            'numberposts' => 1,
+        ]);
+        if (!$hubs) {
+            return;
+        }
+        $hub_id = (int) $hubs[0]->ID;
+        $updated = 0;
+        foreach (Majd_Family_Landing_Copy::items() as $item) {
+            if (empty($item['slug']) || empty($item['html'])) {
+                continue;
+            }
+            $posts = get_posts([
+                'post_type' => MAJD_SUBLANDING_POST_TYPE,
+                'name' => $item['slug'],
+                'post_status' => 'any',
+                'numberposts' => 20,
+            ]);
+            foreach ($posts as $post) {
+                $parent = (int) get_post_meta($post->ID, MAJD_SUBLANDING_META_HUB, true);
+                if ($parent !== $hub_id) {
+                    continue;
+                }
+                wp_update_post([
+                    'ID' => $post->ID,
+                    'post_content' => $item['html'],
+                    'post_excerpt' => isset($item['cardExcerpt']) ? $item['cardExcerpt'] : '',
+                ]);
+                update_post_meta($post->ID, MAJD_SUBLANDING_META_DESCRIPTION, self::plain_text($item['hero'] ?? ''));
+                update_post_meta($post->ID, MAJD_SUBLANDING_META_HEADLINE, self::plain_text($item['headline'] ?? ''));
+                $keywords = isset($item['keywords']) && is_array($item['keywords']) ? $item['keywords'] : [];
+                update_post_meta(
+                    $post->ID,
+                    MAJD_SUBLANDING_META_KEYWORDS,
+                    implode('، ', array_map('strval', $keywords))
+                );
+                $updated++;
+            }
+        }
+        if ($updated) {
+            update_option('majd_family_sublanding_copy_v1', '1');
+        }
     }
 
     public static function maybe_prepare_content() {
@@ -950,6 +1262,11 @@ class Majd_Service_Landings {
             ],
         ];
     }
+}
+
+$majd_family_copy = __DIR__ . '/wordpress-majd-family-copy.php';
+if (is_readable($majd_family_copy)) {
+    require_once $majd_family_copy;
 }
 
 Majd_Service_Landings::init();

@@ -79,6 +79,7 @@ export function PillarLandingBody({
             title={`مشاوره ${defaultSubject}`}
             description="برای بررسی پرونده با وکیل متخصص این حوزه تماس بگیرید."
             titleAs="p"
+            phone={landing.cta.phone}
           />
         </Container>
       </section>
@@ -166,6 +167,7 @@ export function PillarLandingBody({
             title={landing.cta.callTitle}
             description={landing.cta.callDescription}
             titleAs="p"
+            phone={landing.cta.phone}
           />
         </Container>
       </section>

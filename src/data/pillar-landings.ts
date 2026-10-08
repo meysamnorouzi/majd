@@ -46,6 +46,8 @@ export interface PillarLanding {
     callDescription: string;
     formTitle: string;
     formDescription: string;
+    /** Phone on the hub call buttons. Site number is used when unset. */
+    phone?: string;
   };
 }
 

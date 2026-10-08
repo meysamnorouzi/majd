@@ -1,3 +1,4 @@
+import { familySublandings, familySublandingService } from "@/data/family-sublandings";
 import { slugsRedirectedToPrefix } from "@/data/legacy-redirects";
 import { getServiceBySlug, getServiceMegaTrees } from "@/lib/wordpress";
 import {
@@ -28,6 +29,9 @@ export async function generateCategoryStaticParams(
       .filter((route) => route.category === prefix)
       .map((route) => route.slug),
     ...slugsRedirectedToPrefix(prefix),
+    ...(prefix === "family-lawyer"
+      ? familySublandings.map((item) => item.slug)
+      : []),
   ]);
   const params = [...slugs].filter(Boolean).map((slug) => ({ slug }));
   // output: "export" treats an empty list as a missing generateStaticParams().
@@ -60,7 +64,8 @@ export async function resolveCategoryService(
   const decoded = decodeSlug(slug);
   const apiHubs = await getServiceHubsFromWp();
   if (apiHubs) {
-    return getServiceLandingAsService(prefix, decoded);
+    const service = await getServiceLandingAsService(prefix, decoded);
+    if (service) return service;
   }
 
   const trees = await getServiceMegaTrees();
@@ -77,5 +82,6 @@ export async function resolveCategoryService(
     return { ...service, categoryPrefix: service.categoryPrefix ?? prefix };
   }
 
+  if (prefix === "family-lawyer") return familySublandingService(decoded);
   return null;
 }
