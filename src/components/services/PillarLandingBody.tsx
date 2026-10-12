@@ -1,8 +1,11 @@
 import { Container } from "@/components/ui/Container";
 import { ServiceCallCta } from "@/components/services/ServiceCallCta";
 import { ServiceFAQ } from "@/components/services/ServiceFAQ";
-import { ServiceSubpillarCards } from "@/components/services/ServiceSubpillarCards";
-import type { PillarLanding } from "@/data/pillar-landings";
+import { ServiceOutlineGrid } from "@/components/services/ServiceSubpillarCards";
+import {
+  outlineLandingServices,
+  type PillarLanding,
+} from "@/data/pillar-landings";
 import type { Service } from "@/types";
 
 function LandingHeading({
@@ -53,6 +56,48 @@ function Paragraphs({
   );
 }
 
+function BulletList({
+  items,
+  light = false,
+}: {
+  items: string[];
+  light?: boolean;
+}) {
+  return (
+    <ul className="mt-6 space-y-4">
+      {items.map((item) => {
+        const labeled = item.match(/^([^:]{2,80}):\s*(.+)$/);
+        return (
+          <li
+            key={item}
+            className={`flex gap-3 text-base leading-[1.9] ${
+              light ? "text-white/80" : "text-slate-700"
+            }`}
+          >
+            <span
+              className={`mt-3 h-2 w-2 shrink-0 rounded-full ${
+                light ? "bg-gold-400" : "bg-gold-500"
+              }`}
+            />
+            <span>
+              {labeled ? (
+                <>
+                  <strong className={light ? "text-white" : "text-navy-900"}>
+                    {labeled[1]}:
+                  </strong>{" "}
+                  {labeled[2]}
+                </>
+              ) : (
+                item
+              )}
+            </span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 export function PillarLandingBody({
   landing,
   cards,
@@ -62,17 +107,27 @@ export function PillarLandingBody({
   cards: Service[];
   defaultSubject: string;
 }) {
+  const outline = outlineLandingServices(cards, landing);
+  const wideSteps = (steps: { description: string }[]) =>
+    steps.length > 4 || steps.some((step) => step.description.length > 140);
+
   return (
     <>
       <section className="py-12 lg:py-16">
         <Container>
-          <div className="max-w-3xl">
+          {landing.introParagraphs?.length ? (
+            <div className="mb-12">
+              <Paragraphs paragraphs={landing.introParagraphs} />
+            </div>
+          ) : null}
+
+          <div>
             <LandingHeading title={landing.servicesHeading} />
             <Paragraphs paragraphs={landing.servicesIntro} />
           </div>
 
           <div className="mt-10">
-            <ServiceSubpillarCards services={cards} />
+            <ServiceOutlineGrid items={outline} />
           </div>
 
           <ServiceCallCta
@@ -100,13 +155,20 @@ export function PillarLandingBody({
             }
           >
             <Container>
-              <div className="max-w-3xl">
+              <div>
                 <LandingHeading title={section.heading} light={navy} />
                 <Paragraphs paragraphs={section.paragraphs} light={navy} />
+                {section.bullets?.length ? (
+                  <BulletList items={section.bullets} light={navy} />
+                ) : null}
               </div>
 
               {section.steps?.length ? (
-                <ol className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <ol
+                  className={`mt-10 grid gap-4 sm:grid-cols-2 ${
+                    wideSteps(section.steps) ? "" : "lg:grid-cols-4"
+                  }`}
+                >
                   {section.steps.map((step, index) => (
                     <li
                       key={step.title}
@@ -150,7 +212,7 @@ export function PillarLandingBody({
 
       {landing.faqs.length ? (
         <section className="border-t border-slate-100 py-16 lg:py-20">
-          <Container className="max-w-3xl">
+          <Container>
             <LandingHeading title={landing.faqsHeading} />
             <ServiceFAQ items={landing.faqs} />
           </Container>
@@ -159,7 +221,7 @@ export function PillarLandingBody({
 
       <section className="pb-4">
         <Container>
-          <div className="max-w-3xl">
+          <div>
             <LandingHeading title={landing.cta.heading} />
             <Paragraphs paragraphs={landing.cta.paragraphs} />
           </div>

@@ -21,6 +21,8 @@ export interface PillarLandingProcessStep {
 export interface PillarLandingSection {
   heading: string;
   paragraphs: string[];
+  /** Plain list items from the WordPress article, such as competent authorities. */
+  bullets?: string[];
   subsections?: PillarLandingSubsection[];
   steps?: PillarLandingProcessStep[];
   variant?: "default" | "navy" | "muted";
@@ -35,6 +37,8 @@ export interface PillarLanding {
   image?: string;
   servicesHeading: string;
   servicesIntro: string[];
+  /** Paragraphs that sit above the first heading in the WordPress article. */
+  introParagraphs?: string[];
   cardCopy: PillarLandingCardCopy[];
   sections: PillarLandingSection[];
   faqsHeading: string;
@@ -337,4 +341,64 @@ export function applyPillarLandingCards(
   }
 
   return ordered.length ? ordered : cards.slice(0, 6);
+}
+
+export type LandingServiceOutlineItem =
+  | { type: "service"; service: Service }
+  | { type: "copy"; key: string; title: string; excerpt: string };
+
+/**
+ * Walk the article's service blurbs in order. A blurb that matches a real
+ * child landing becomes that linked card (with the article excerpt). Blurbs
+ * without a page stay as text so the hub still shows the full outline.
+ */
+export function outlineLandingServices(
+  cards: Service[],
+  landing: PillarLanding,
+): LandingServiceOutlineItem[] {
+  if (!landing.cardCopy.length) {
+    return cards.map((service) => ({ type: "service", service }));
+  }
+
+  const remaining = [...cards];
+  const items: LandingServiceOutlineItem[] = [];
+
+  for (const copy of landing.cardCopy) {
+    let bestIndex = -1;
+    let bestScore = 0;
+    remaining.forEach((card, index) => {
+      const score = cardMatchScore(card, copy);
+      if (score > bestScore) {
+        bestScore = score;
+        bestIndex = index;
+      }
+    });
+
+    if (bestIndex === -1) {
+      items.push({
+        type: "copy",
+        key: copy.title,
+        title: copy.title,
+        excerpt: copy.excerpt,
+      });
+      continue;
+    }
+
+    const [matched] = remaining.splice(bestIndex, 1);
+    if (!matched) continue;
+    items.push({
+      type: "service",
+      service: {
+        ...matched,
+        title: copy.title,
+        excerpt: copy.excerpt,
+      },
+    });
+  }
+
+  for (const service of remaining) {
+    items.push({ type: "service", service });
+  }
+
+  return items;
 }

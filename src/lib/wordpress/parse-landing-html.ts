@@ -97,14 +97,35 @@ function parseFaqs(chunks: LandingChunk[]): ServiceFAQ[] {
 }
 
 function parseSteps(chunks: LandingChunk[]): PillarLandingProcessStep[] {
-  const items = chunks.filter((chunk) => chunk.tag === "li" || chunk.tag === "h3");
-  return items.map((item) => {
-    const [title, ...rest] = item.text.split(/\s*[—–:\-]\s*/);
-    return {
-      title: (title || item.text).trim(),
-      description: rest.join(" ").trim() || item.text,
-    };
-  });
+  const steps: PillarLandingProcessStep[] = [];
+
+  for (let i = 0; i < chunks.length; i += 1) {
+    const chunk = chunks[i];
+    if (!chunk || (chunk.tag !== "h3" && chunk.tag !== "li")) continue;
+
+    const following: string[] = [];
+    let next = i + 1;
+    while (next < chunks.length && chunks[next]?.tag === "p") {
+      following.push(chunks[next]!.text);
+      next += 1;
+    }
+
+    if (following.length) {
+      steps.push({
+        title: chunk.text,
+        description: following.join(" "),
+      });
+      continue;
+    }
+
+    const [title, ...rest] = chunk.text.split(/\s*[—–:\-]\s*/);
+    steps.push({
+      title: (title || chunk.text).trim(),
+      description: rest.join(" ").trim() || chunk.text,
+    });
+  }
+
+  return steps;
 }
 
 function groupByH2(chunks: LandingChunk[]): {
@@ -144,6 +165,12 @@ export function parseLandingHtml(
   const chunks = tokenizeLandingHtml(html);
   if (!chunks.some((chunk) => chunk.tag === "h2")) return null;
 
+  const firstHeading = chunks.findIndex((chunk) => chunk.tag === "h2");
+  const introParagraphs = chunks
+    .slice(0, firstHeading)
+    .filter((chunk) => chunk.tag === "p")
+    .map((chunk) => chunk.text);
+
   const groups = groupByH2(chunks);
   if (!groups.length) return null;
 
@@ -159,7 +186,6 @@ export function parseLandingHtml(
     const paragraphs = group.body
       .filter((chunk) => chunk.tag === "p")
       .map((chunk) => chunk.text);
-    const h3s = group.body.filter((chunk) => chunk.tag === "h3");
 
     if (isFaqHeading(group.heading)) {
       faqsHeading = group.heading;
@@ -208,11 +234,17 @@ export function parseLandingHtml(
     const subsections: PillarLandingSubsection[] = [];
     let currentSub: PillarLandingSubsection | null = null;
     const lead: string[] = [];
+    const bullets: string[] = [];
 
     for (const chunk of group.body) {
       if (chunk.tag === "h3") {
         currentSub = { heading: chunk.text, paragraphs: [] };
         subsections.push(currentSub);
+        continue;
+      }
+      if (chunk.tag === "li") {
+        if (currentSub) currentSub.paragraphs.push(chunk.text);
+        else bullets.push(chunk.text);
         continue;
       }
       if (chunk.tag === "p") {
@@ -226,7 +258,7 @@ export function parseLandingHtml(
 
     const section: PillarLandingSection = {
       heading: group.heading,
-      paragraphs: lead.length ? lead : paragraphs.filter((_, i) => i < 4),
+      paragraphs: lead,
       variant: isWhyLawyerHeading(group.heading)
         ? "navy"
         : process
@@ -236,6 +268,8 @@ export function parseLandingHtml(
 
     if (steps.length >= 2) section.steps = steps;
     else if (subsections.length) section.subsections = subsections;
+
+    if (steps.length < 2 && bullets.length) section.bullets = bullets;
 
     sections.push(section);
   });
@@ -250,6 +284,7 @@ export function parseLandingHtml(
     servicesIntro: servicesIntro.length
       ? servicesIntro
       : [defaults.heroDescription],
+    introParagraphs: introParagraphs.length ? introParagraphs : undefined,
     cardCopy,
     sections,
     faqsHeading,
