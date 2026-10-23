@@ -46,28 +46,12 @@ function isCtaHeading(heading: string): boolean {
   return /همین حالا|مشورت کنید|تماس بگیرید/.test(heading);
 }
 
-function isServicesHeading(heading: string, isFirst: boolean): boolean {
-  return isFirst || /خدمات تخصصی|خدمات ما|خدمات .*حوزه/.test(heading);
-}
-
 function isProcessHeading(heading: string): boolean {
   return /مراحل/.test(heading);
 }
 
 function isWhyLawyerHeading(heading: string): boolean {
   return /چرا/.test(heading) && /وکیل/.test(heading) && /نیاز/.test(heading);
-}
-
-function needlesFromTitle(title: string): string[] {
-  const parts = title
-    .split(/[\s،,()]+/)
-    .map((part) => part.trim())
-    .filter(
-      (part) =>
-        part.length >= 3 &&
-        !["وکیل", "شامل", "حوزه", "دعاوی"].includes(part),
-    );
-  return parts.length ? parts : [title];
 }
 
 function parseFaqs(chunks: LandingChunk[]): ServiceFAQ[] {
@@ -182,7 +166,7 @@ export function parseLandingHtml(
   let faqs: ServiceFAQ[] = [];
   const cta = { ...defaults.cta };
 
-  groups.forEach((group, index) => {
+  groups.forEach((group) => {
     const paragraphs = group.body
       .filter((chunk) => chunk.tag === "p")
       .map((chunk) => chunk.text);
@@ -196,38 +180,6 @@ export function parseLandingHtml(
     if (isCtaHeading(group.heading)) {
       cta.heading = group.heading;
       if (paragraphs.length) cta.paragraphs = paragraphs;
-      return;
-    }
-
-    if (isServicesHeading(group.heading, index === 0) && !cardCopy.length) {
-      servicesHeading = group.heading;
-      const firstH3 = group.body.findIndex((chunk) => chunk.tag === "h3");
-      servicesIntro = group.body
-        .filter((chunk, i) => chunk.tag === "p" && (firstH3 === -1 || i < firstH3))
-        .map((chunk) => chunk.text);
-
-      let currentTitle = "";
-      let currentParas: string[] = [];
-      const flushCard = () => {
-        if (!currentTitle || !currentParas.length) return;
-        cardCopy.push({
-          slugs: [],
-          titleIncludes: needlesFromTitle(currentTitle),
-          title: currentTitle,
-          excerpt: currentParas.join(" "),
-        });
-      };
-
-      for (const chunk of group.body) {
-        if (chunk.tag === "h3") {
-          flushCard();
-          currentTitle = chunk.text;
-          currentParas = [];
-          continue;
-        }
-        if (chunk.tag === "p" && currentTitle) currentParas.push(chunk.text);
-      }
-      flushCard();
       return;
     }
 

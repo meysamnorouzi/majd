@@ -1,7 +1,10 @@
 import { Container } from "@/components/ui/Container";
 import { ServiceCallCta } from "@/components/services/ServiceCallCta";
 import { ServiceFAQ } from "@/components/services/ServiceFAQ";
-import { ServiceOutlineGrid } from "@/components/services/ServiceSubpillarCards";
+import {
+  ServiceOutlineGrid,
+  ServiceSubpillarCards,
+} from "@/components/services/ServiceSubpillarCards";
 import {
   outlineLandingServices,
   type PillarLanding,
@@ -107,7 +110,8 @@ export function PillarLandingBody({
   cards: Service[];
   defaultSubject: string;
 }) {
-  const outline = outlineLandingServices(cards, landing);
+  const articleCards = landing.cardCopy.length > 0;
+  const outline = articleCards ? outlineLandingServices(cards, landing) : [];
   const wideSteps = (steps: { description: string }[]) =>
     steps.length > 4 || steps.some((step) => step.description.length > 140);
 
@@ -121,14 +125,19 @@ export function PillarLandingBody({
             </div>
           ) : null}
 
-          <div>
-            <LandingHeading title={landing.servicesHeading} />
-            <Paragraphs paragraphs={landing.servicesIntro} />
-          </div>
-
-          <div className="mt-10">
-            <ServiceOutlineGrid items={outline} />
-          </div>
+          {articleCards ? (
+            <>
+              <div>
+                <LandingHeading title={landing.servicesHeading} />
+                <Paragraphs paragraphs={landing.servicesIntro} />
+              </div>
+              <div className="mt-10">
+                <ServiceOutlineGrid items={outline} />
+              </div>
+            </>
+          ) : (
+            <ServiceSubpillarCards services={cards} />
+          )}
 
           <ServiceCallCta
             title={`مشاوره ${defaultSubject}`}
@@ -161,6 +170,27 @@ export function PillarLandingBody({
                 {section.bullets?.length ? (
                   <BulletList items={section.bullets} light={navy} />
                 ) : null}
+                {section.subsections?.length ? (
+                  <div className="mt-10 space-y-10">
+                    {section.subsections.map((subsection) => (
+                      <div key={subsection.heading}>
+                        <h3
+                          className={`text-xl font-bold sm:text-2xl ${
+                            navy ? "text-white" : "text-navy-900"
+                          }`}
+                        >
+                          {subsection.heading}
+                        </h3>
+                        <div className="mt-4">
+                          <Paragraphs
+                            paragraphs={subsection.paragraphs}
+                            light={navy}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
 
               {section.steps?.length ? (
@@ -186,24 +216,6 @@ export function PillarLandingBody({
                     </li>
                   ))}
                 </ol>
-              ) : null}
-
-              {section.subsections?.length ? (
-                <div className="mt-10 grid gap-6 lg:grid-cols-2">
-                  {section.subsections.map((subsection) => (
-                    <article
-                      key={subsection.heading}
-                      className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
-                    >
-                      <h3 className="text-xl font-bold text-navy-900">
-                        {subsection.heading}
-                      </h3>
-                      <div className="mt-4">
-                        <Paragraphs paragraphs={subsection.paragraphs} />
-                      </div>
-                    </article>
-                  ))}
-                </div>
               ) : null}
             </Container>
           </section>
